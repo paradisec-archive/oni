@@ -1,0 +1,94 @@
+<template>
+  <el-row :offset="1" :gutter="10" :align="'bottom'" class="flex flex-wrap content-around">
+    <el-col :xs="24" class="h-auto">
+      <el-row :justify="'center'" :gutter="10" :align="'middle'" class="">
+        <label for="searchInput" class="h-14 my-1">
+          <input @keyup.enter="searchInputField" type="text" class="px-4 w-60 h-full border rounded"
+                 placeholder="Search..."
+                 v-model="searchQuery"
+                 v-on:change="searchInputField"
+                 name="searchInput" id="searchInput" ref="searchInput"/>
+        </label>
+        <button @click="resetBar()" class="flex items-center justify-center px-2 rounded hover:text-red-600 my-1">
+          <svg class="svg-icon"
+               style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;"
+               viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M810.65984 170.65984q18.3296 0 30.49472 12.16512t12.16512 30.49472q0 18.00192-12.32896 30.33088l-268.67712 268.32896 268.67712 268.32896q12.32896 12.32896 12.32896 30.33088 0 18.3296-12.16512 30.49472t-30.49472 12.16512q-18.00192 0-30.33088-12.32896l-268.32896-268.67712-268.32896 268.67712q-12.32896 12.32896-30.33088 12.32896-18.3296 0-30.49472-12.16512t-12.16512-30.49472q0-18.00192 12.32896-30.33088l268.67712-268.32896-268.67712-268.32896q-12.32896-12.32896-12.32896-30.33088 0-18.3296 12.16512-30.49472t30.49472-12.16512q18.00192 0 30.33088 12.32896l268.32896 268.67712 268.32896-268.67712q12.32896-12.32896 30.33088-12.32896z"/>
+          </svg>
+        </button>
+        <button @click="doSearch()" class="flex items-center justify-center px-2 rounded hover:text-red-600 my-1">
+          <svg class="w-6 h-6 text-gray-600" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24">
+            <path
+                d="M16.32 14.9l5.39 5.4a1 1 0 0 1-1.42 1.4l-5.38-5.38a8 8 0 1 1 1.41-1.41zM10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"/>
+          </svg>
+        </button>
+      </el-row>
+    </el-col>
+  </el-row>
+</template>
+
+<script>
+
+import {defineAsyncComponent} from 'vue';
+
+export default {
+  props: ['searchInput', 'clearSearch', 'filters', 'search'],
+  components: {},
+  updated() {
+    // console.log('updated')
+    // console.log(this.searchInput)
+    //this.searchQuery = this.searchInput;
+  },
+  async mounted() {
+    if (this.$route.query.q) {
+      this.searchQuery = this.$route.query.q;
+    }
+  },
+  watch: {
+    '$route.query.q'() {
+      this.searchQuery = this.$route.query.q;
+    },
+    clearSearch() {
+      this.reset();
+    }
+  },
+  methods: {
+
+    async reset() {
+      this.searchQuery = '';
+      await this.$router.push({path: 'search'});
+    },
+    async resetBar() {
+      this.searchQuery = '';
+      let query = {q: this.searchQuery};
+      if (this.$route.query.f) {
+        console.log(this.$route.query.f);
+        query = {...query, f: this.$route.query.f};
+      }
+      await this.$router.push({path: 'search', query});
+    },
+    async searchInputField(e) {
+      this.searchQuery = e.target.value;
+      await this.doSearch();
+    },
+    async doSearch() {
+      let query = {q: this.searchQuery};
+      if (this.$route.query.f) {
+        query = {...query, f: this.$route.query.f};
+      }
+      await this.$router.push({path: 'search', query});
+    }
+  },
+  data() {
+    return {
+      siteName: this.$store.state.configuration.ui.siteName,
+      siteNameX: this.$store.state.configuration.ui.siteNameX || '',
+      searchQuery: '',
+      items: [],
+      scrollId: ''
+    }
+  }
+}
+</script>

@@ -1,0 +1,59 @@
+version: "3.8"
+
+networks:
+  oni:
+    name: oni
+    driver: bridge
+
+services:
+  db:
+    restart: always
+    image: postgres:13-alpine
+    hostname: db
+    tty: true
+    environment:
+      TERM: "xterm-256color"
+      NODE_ENV: "production"
+      POSTGRES_DB: "oni"
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: ""
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+      PGDATA: /postgresql/data
+    volumes:
+      - ./postgresql:/postgresql
+    ports:
+      - "5432:5432"
+
+  api:
+    restart: always
+    image: arkisto/oni-api:1.1.7
+    hostname: api
+    tty: true
+    environment:
+      TERM: "xterm-256color"
+      NODE_ENV: "production"
+      LOG_LEVEL: "debug"
+      DB_HOST: "db"
+      DB_PORT: "5432"
+      DB_USER: "root"
+      DB_PASSWORD: ""
+      DB_DATABASE: "oni"
+    volumes:
+      - ./configuration.json:/srv/configuration.json
+      - ./wait-for-it.sh:/wait-for-it.sh
+      - /opt/storage/oni:/opt/storage/oni
+    ports:
+      - "8080:8080"
+    command: ["/wait-for-it.sh", "db:5432", "-t", "20", "elasticsearch:9200", "-t", "20", "--", "node", "./server.bundle.js"]
+
+  elasticsearch:
+    restart: always
+    image: elasticsearch:7.14.2
+    hostname: elasticsearch
+    tty: true
+    environment:
+      TERM: "xterm-256color"
+      discovery.type: "single-node"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
