@@ -48,17 +48,15 @@ export default {
       let id;
       if (this.meta.id) {
         id = `https://purl.archive.org/language-data-commons/terms#${this.meta.id}`;
-        const response = await this.$http.get({route: `/search/vocabs?_id=${encodeURIComponent(id)}`});
-        const content = await response.json();
-        if (content['_source']) {
+        const content = await this.$elasticService.single({index: 'vocabs', id});
+        if (content && content['_source']) {
           const source = content['_source'];
           this.definition = first(source?.['rdfs:comment']);
           this.url = id;
         } else {
           id = `schema:${this.meta.id}`;
-          const response = await this.$http.get({route: `/search/vocabs?_id=${encodeURIComponent(id)}`});
-          const content = await response.json();
-          if (content['_source']) {
+          const content = await this.$elasticService.single({index: 'vocabs', _id: id});
+          if (content && content['_source']) {
             const source = content['_source'];
             this.definition = source?.['rdfs:comment'];
             this.url = `http://schema.org/${this.meta.id}`;

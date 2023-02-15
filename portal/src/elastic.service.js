@@ -1,9 +1,9 @@
 import HTTPService from "./http.service";
 import * as esb from 'elastic-builder';
-import { isEmpty, first } from 'lodash';
+import {isEmpty, first} from 'lodash';
 
 export default class ElasticService {
-  constructor({ router, configuration }) {
+  constructor({router, configuration}) {
     this.router = router;
     this.searchRoute = '/search/index-post';
     this.indexRoute = '/items';
@@ -12,21 +12,23 @@ export default class ElasticService {
     this.highlightFields = configuration.ui.searchHighlights;
     this.fields = configuration.ui.searchFields;
   }
+
   prepareAggregations(aggregations) {
     const a = {};
     for (let agg of aggregations) {
-      a[agg['name']] = { "terms": { "field": agg['field'], "size": 1000 } };
+      a[agg['name']] = {"terms": {"field": agg['field'], "size": 1000}};
     }
     return a;
   }
+
   async scroll(scrollId) {
     try {
-      const httpService = new HTTPService({ router: this.router, loginPath: '/login' });
+      const httpService = new HTTPService({router: this.router, loginPath: '/login'});
       let route = `${this.scrollRoute}?id=${scrollId}`;
-      let response = await httpService.get({ route });
+      let response = await httpService.get({route});
       if (response.status !== 200) {
         //httpService.checkAuthorised({status: response.status});
-        return { error: response.statusText };
+        return {error: response.statusText};
       } else {
         const results = await response.json();
         console.log(results);
@@ -37,8 +39,8 @@ export default class ElasticService {
     }
   }
 
-  async multi({ multi, filters, scroll, aggs }) {
-    const httpService = new HTTPService({ router: this.router, loginPath: '/login' });
+  async multi({multi, filters, scroll, aggs}) {
+    const httpService = new HTTPService({router: this.router, loginPath: '/login'});
     let route = this.searchRoute + this.indexRoute;
     if (scroll) {
       route += '?withScroll=true';
@@ -47,16 +49,16 @@ export default class ElasticService {
       query: {},
       "sort": {
         "_script": {
-            "type": "number",
-            "order": "desc",
-            "script": {
-                "lang": "painless",
-                "source": "doc['@type.keyword'].contains('RepositoryCollection') ? 1 : 0"
-            }
+          "type": "number",
+          "order": "desc",
+          "script": {
+            "lang": "painless",
+            "source": "doc['@type.keyword'].contains('RepositoryCollection') ? 1 : 0"
+          }
         }
+      }
     }
-    }
-    const query = this.boolQuery({ searchQuery: multi, fields: this.fields, filters });
+    const query = this.boolQuery({searchQuery: multi, fields: this.fields, filters});
     //console.log(query);
     body.highlight = this.highlights(this.highlightFields);
     body.query = query;
@@ -66,11 +68,11 @@ export default class ElasticService {
       body.aggs = this.aggs
     }
     // console.log('multi query')
-    // console.log(JSON.stringify(body));
-    let response = await httpService.post({ route, body });
+    console.log(JSON.stringify(body.query));
+    let response = await httpService.post({route, body});
     if (response.status !== 200) {
       //httpService.checkAuthorised({status: response.status});
-      return { error: response.statusText };
+      return {error: response.statusText};
     } else {
       const results = await response.json();
       //console.log(results);
@@ -78,9 +80,12 @@ export default class ElasticService {
     }
   }
 
-  async single({ id, _crateId, _id }) {
-    const httpService = new HTTPService({ router: this.router, loginPath: '/login' });
+  async single({index, id, _crateId, _id}) {
+    const httpService = new HTTPService({router: this.router, loginPath: '/login'});
     let route = this.searchRoute + this.indexRoute;
+    if (index) {
+      route = this.searchRoute + '/' + index;
+    }
     let body = {
       aggs: this.aggs, // maybe we dont need to send aggregations
       query: {}
@@ -95,22 +100,22 @@ export default class ElasticService {
       body.query = {
         dis_max: {
           queries: [
-            { match: { '@id': decodeURIComponent(id) } },
-            { match: { '_crateId': decodeURIComponent(_crateId) } }
+            {match: {'@id': decodeURIComponent(id)}},
+            {match: {'_crateId': decodeURIComponent(_crateId)}}
           ]
         }
       }
     }
 
     // const query = this.boolQuery({ fields: this.fields, filters:[] });
-    // console.log(query);
+    console.log(JSON.stringify(body.query));
     // body.highlight = this.highlights(this.highlightFields);
     // body.query.bool.must.push(query);
 
-    let response = await httpService.post({ route, body });
+    let response = await httpService.post({route, body});
     if (response.status !== 200) {
       //httpService.checkAuthorised({status: response.status});
-      return { error: response.statusText };
+      return {error: response.statusText};
     } else {
       const results = await response.json();
       console.log(first(results?.hits?.hits));
@@ -118,21 +123,21 @@ export default class ElasticService {
     }
   }
 
-  async requestNewSearch({ scrollId, collectionScrollId }) {
+  async requestNewSearch({scrollId, collectionScrollId}) {
     try {
-      const httpService = new HTTPService({ router: this.router, loginPath: '/login' });
+      const httpService = new HTTPService({router: this.router, loginPath: '/login'});
       if (this.scrollId) {
-        await httpService.delete({ route: this.scrollRoute + '?id=' + scrollId });
+        await httpService.delete({route: this.scrollRoute + '?id=' + scrollId});
       }
       if (this.collectionScrollId) {
-        await httpService.delete({ route: this.scrollRoute + '?id=' + collectionScrollId });
+        await httpService.delete({route: this.scrollRoute + '?id=' + collectionScrollId});
       }
     } catch (e) {
       //Swallow if there is no scroll to delete
     }
   }
 
-  boolQuery({ searchQuery, fields, filters }) {
+  boolQuery({searchQuery, fields, filters}) {
     //console.log('bool query');
     const filterTerms = [];
     let boolQueryObj;
