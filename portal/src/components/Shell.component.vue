@@ -29,11 +29,11 @@ export default {
   beforeMount() {
   },
   mounted() {
-    if (this.$route.path === "/") this.$router.push("/main?view=collections");
+    if (this.$route.path === "/") this.$router.push("/search");
   },
   watch: {
     async '$route.path'() {
-      if (this.$route.path === "/") this.$router.push("/main?view=collections");
+      if (this.$route.path === "/") this.$router.push("/search");
     },
   },
   data() {
