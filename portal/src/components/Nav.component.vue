@@ -91,7 +91,7 @@ export default {
       showLogo: this.$store.state.configuration.ui?.showLogo,
       showNotebooks: this.$store.state.configuration.ui?.showNotebooks,
       navHeight: this.$store.state.configuration.ui?.navHeight || '50px',
-      topNavHome: this.$store.state.configuration.ui?.topNavHome || 'search',
+      topNavHome: this.$store.state.configuration.ui?.topNavHome || '/search',
       topNavItems: this.$store.state.configuration.ui?.topNavItems || [],
       logo,
       active: '',

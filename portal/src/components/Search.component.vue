@@ -41,7 +41,7 @@
                   </el-icon>
                 </el-button>
               </el-button-group>
-              <span class="my-1 mr-2">Total: {{ this.totals['value'] || 0 }} things</span>
+              <span class="my-1 mr-2">Total: {{ this.totals['value'] || 0 }} Index entries (Collections, Objects, Files and Notebooks)</span>
             </el-row>
             <el-row class="pt-2">
               <el-button-group v-if="(!isEmpty(this.$route.query.f) || !isEmpty(this.$route.query.q)) && !isStart">
