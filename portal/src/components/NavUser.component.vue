@@ -1,5 +1,5 @@
 <template>
-  <el-menu-item index="login" v-show="!this.isLoggedIn" :router="'/login'">
+  <el-menu-item index="login" v-show="!this.isLoggedIn" :route="'/login'">
     <router-link to="/login">
       <div class="flex flex-col justify-center items-center" :style="{'height': navHeight}">
         <span>Login</span>
@@ -11,12 +11,12 @@
       <font-awesome-icon icon="fa-solid fa-1x fa-user"/>&nbsp;
       <span class="items-center text-base">{{ this.userName }}&nbsp;</span>
     </template>
-    <el-menu-item index="login-sub-user" :router="'/user'">
+    <el-menu-item index="login-sub-user" :route="'/user'">
       <router-link to="/user">
         User Information
       </router-link>
     </el-menu-item>
-    <el-menu-item index="logout" :router="'/logout'">
+    <el-menu-item index="logout" :route="'/logout'">
       <router-link to="/logout">
         Logout
       </router-link>
