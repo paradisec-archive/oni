@@ -390,7 +390,8 @@ export default {
           url = `/object?id=${id}&_crateId=${crateId}&fileId=${fileId}`
         }
       } else {
-        url = `/view?id=${id}&_crateId=${crateId}`
+        //Defaults to object if it doesnt know what it is
+        url = `/object?id=${id}&_crateId=${crateId}`
       }
       return url;
     }

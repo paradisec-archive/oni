@@ -3,7 +3,7 @@
       mode="horizontal"
       :ellipsis="false"
       :default-active="active"
-      :router="false"
+      :router="true"
   >
     <el-menu-item index="home" :route="topNavHome">
       <router-link :to="topNavHome">
@@ -24,12 +24,12 @@
       </router-link>
     </el-menu-item>
     <div class="flex-grow"/>
-    <el-menu-item index="searchBar" v-if="$route.name!='search'" :route="null">
+    <div index="searchBar" v-if="$route.name!='search'" :route="'false'">
       <div class="py-2">
       <search-bar ref='searchBar' @populate='populate' v-bind:searchInput="searchInput" @input="onInputChange"
                   @search="search" :clearSearch="clear" :filters="this.filters"/>
       </div>
-    </el-menu-item>
+    </div>
     <el-menu-item v-for="topNavItem of topNavItems" :index="topNavItem.route" :router="topNavItem.route">
       <router-link :to="topNavItem.route">
         <el-row :gutter="10" class="flex items-center justify-center">
@@ -41,7 +41,7 @@
         </el-row>
       </router-link>
     </el-menu-item>
-    <el-menu-item index="search" :route="active">
+    <el-menu-item index="search" :route="'/search'">
       <router-link to="/search">
         <el-row :gutter="10" class="flex items-center justify-center">
           <el-col :span="24">
