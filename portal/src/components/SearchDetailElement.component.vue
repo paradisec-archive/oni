@@ -77,16 +77,16 @@
         <SummariesCard :aggregations="aggregations"
           :fields="[{ 'name': 'license.name.@value', 'display': 'Data licenses for access' }]" :name="'licenses'"
           :id="id" :root="root" />
-        <div class="ml-4 pl-2">
+        <div class="py-2">
           <div v-if="!isEmpty(subCollections)">
-            Collections: {{ subCollections?.total }}
+            <span class="font-semibold">Collections: </span>{{ subCollections?.total }}
           </div>
         </div>
         <div class="py-2">
-          <span class=" font-semibold">Objects: </span>{{ total }}
+          <span class="font-semibold">Objects: </span>{{ total }}
         </div>
         <div class="py-2" v-if="typeFile">
-          <span class=" font-semibold">Files: </span>{{ typeFile['doc_count'] }}
+          <span class="font-semibold">Files: </span>{{ typeFile['doc_count'] }}
         </div>
         <div class="py-2">
           <el-link :underline="false"

@@ -11,12 +11,12 @@
       <font-awesome-icon icon="fa-solid fa-1x fa-user"/>&nbsp;
       <span class="items-center text-base">{{ this.userName }}&nbsp;</span>
     </template>
-    <el-menu-item index="login-sub-user" :router="true">
+    <el-menu-item index="login-sub-user" :router="'/user'">
       <router-link to="/user">
         User Information
       </router-link>
     </el-menu-item>
-    <el-menu-item index="logout" :router="true">
+    <el-menu-item index="logout" :router="'/logout'">
       <router-link to="/logout">
         Logout
       </router-link>
