@@ -116,7 +116,7 @@ export default {
       flush: 'post',
       immediate: true
     },
-    '$route.query.path': {
+    '$route.query': {
       handler() {
         this.activate();
       },
@@ -128,10 +128,13 @@ export default {
   },
   methods: {
     activate: function () {
+      console.log("!@#!@#!@#")
+      console.log(this.$route.name)
       if (this.$route.name === this.topNavHome) {
         this.active = this.topNavHome;
       } else {
         this.active = this.$route.name;
+        console.log(this.active)
       }
     }
   }
