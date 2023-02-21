@@ -10,7 +10,7 @@
                     name="searchInput" id="searchInput" ref="searchInput">
             <template #append>
               <button v-if="searchInput || $route.query.q" @click="resetBar()"
-                      class="flex items-center justify-center pr-3 rounded hover:text-red-600 mr-3 border-0 border-r-[1px] border-solid border-gray-300">
+                      class="flex items-center justify-center pr-3 hover:text-red-600 mr-3 border-0 border-r-[1px] border-solid border-gray-300">
                 <svg class="svg-icon"
                      style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;"
                      viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">

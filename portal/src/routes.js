@@ -7,6 +7,7 @@ import CollectionComponent from "@/components/Collection.component.vue";
 import ObjectComponent from "@/components/Object.component.vue";
 import ObjectOpenComponent from "@/components/ObjectOpen.component.vue";
 import HelpComponent from "@/components/Help.component.vue";
+import TermsComponent from "@/components/Terms.component.vue";
 import CallbackOauthLogin from "@/components/authentication/OauthCallback.component.vue";
 import NotFoundPage from "@/components/NotFoundPage.vue";
 import HTTPService from "./http.service";
@@ -45,6 +46,10 @@ const routes = [
       path: "help",
       name: "help",
       component: HelpComponent
+    }, {
+      path: "terms",
+      name: "terms",
+      component: TermsComponent
     }, {
       path: "user",
       name: "user",

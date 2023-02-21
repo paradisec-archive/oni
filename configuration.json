@@ -11,6 +11,11 @@
     "help": {
       "mainText": "For access please email help@example.com"
     },
+    "terms": {
+      "text": "Example terms of service",
+      "href":"/terms",
+      "title": "Terms of Service"
+    },
     "email": {
       "help": "help@example.com"
     },
