@@ -51,7 +51,7 @@
         <ul>
           <li v-for="(part, index) of parts">
             <a :id="'part-' + encodeURIComponent(part?.['@id'])"></a>
-            <object-part :part="part" :title="first(part?.name)?.['@value']"
+            <object-part :part="part" :title="first(part?.name)?.['@value'] || part?.['@id']"
               :active="isPartActive(part?.['@id'], index)" :id="encodeURIComponent(part?.['@id'])"
               :encoding="first(part?.['encodingFormat'])" :crateId="this.crateId" :rootId="this.rootId"
               :parentName="first(this.name)?.['@value']" :parentId="this.$route.query.id" :license="license"

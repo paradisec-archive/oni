@@ -186,7 +186,7 @@ export default {
       }
       //TODO: Ask for MIME types
       //TODO: craete some file widgets
-      if (this.path && (this.path.endsWith(".txt") || this.path.endsWith(".csv") || this.path.endsWith(".eaf"))) {
+      if (this.path && (this.path.endsWith(".txt") || this.path.endsWith(".csv") || this.path.endsWith(".eaf") || this.path.endsWith(".html") || this.path.endsWith(".xml"))) {
         this.type = 'txt';
         this.data = await this.responseBlob.text();
         if (this.path.endsWith(".csv")) {

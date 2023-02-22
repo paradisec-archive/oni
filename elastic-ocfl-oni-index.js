@@ -41,7 +41,14 @@ const assert = require("assert");
   console.log(JSON.stringify(config));
   // Connect to an ocfl-repo
   const ocflConf = configuration.api.ocfl;
-  const repository = ocfl.storage({root: ocflConf.ocflPath, workspace: ocflConf.ocflScratch, ocflVersion: '1.0'});
+  const repository = ocfl.storage({
+    root: ocflConf.ocflPath,
+    workspace: ocflConf.ocflScratch,
+    ocflVersion: '1.1',
+    layout: {
+      extensionName: '000N-path-direct-storage-layout'
+    }
+  });
   console.log(repository.root)
   await repository.load();
   // Do we need to skip some collections/objects?
@@ -54,5 +61,4 @@ const assert = require("assert");
   // Create an Indexer and index collections
   const indexer = new Indexer({configuration, repository, client});
   await indexer.findOcflObjects({memberOf: null, conformsTo: indexer.conformsToCollection, skip: skipCollections});
-
 })();

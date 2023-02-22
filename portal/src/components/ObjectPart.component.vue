@@ -20,13 +20,13 @@
     <el-col :xs="24" :sm="24" :md="24" :lg="10" :xl="10">
       <ul>
         <li v-for="meta of this.meta">
-          <meta-field :meta="meta" :routePath="'item'" :filePath="id" :crateId="crateId" :parentId="parentId" />
+          <meta-field :meta="meta" :routePath="'object'" :filePath="id" :crateId="crateId" :parentId="parentId" />
         </li>
       </ul>
     </el-col>
     <el-col :xs="24" :sm="24" :md="24" :lg="14" :xl="14">
       <file-resolve class="flex justify-center" :id="id" :resolve="resolve" :encoding="encoding" :crateId="crateId"
-        :rootId="rootId" :pdfPages="1" :name="title" :parentName="parentName" previewText="Click Open To See More"
+        :rootId="rootId" :pdfPages="1" :name="title" :parentName="parentName" previewText="Click 'View File' to see more"
         isPreview="true" :access="access" :license="license" />
     </el-col>
   </el-row>
