@@ -1,6 +1,17 @@
 <template>
   <el-row :gutter="10" class="py-2">
-    <el-col :xs="24" :sm="24" :md="7" :lg="7" :xl="7">
+    <template v-if="isExpand">
+      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+        <el-row v-for="(value, key) in meta.data">
+          <el-col :xs="24" :sm="24" :md="7" :lg="7" :xl="7">{{ clean(key) }}</el-col>
+          <el-col :xs="24" :sm="24" :md="17" :lg="17" :xl="17">
+            <elastic-field :field="value" :title="key"/>
+          </el-col>
+        </el-row>
+      </el-col>
+    </template>
+    <template v-else>
+    <el-col :xs="24" :sm="24" :md="7" :lg="7" :xl="7" class="mt-1">
       <span class="font-bold break-words break-all">{{ clean(meta?.name) }}</span>
       <span v-if="meta?.help"><FieldHelperCard :meta="meta?.help"/></span>
     </el-col>
@@ -16,6 +27,7 @@
         <elastic-resolve-field :name="meta?.name" :field="meta?.data" :routePath="routePath" :filePath="filePath" :parentId="parentId" :crateId="crateId"/>
       </template>
     </el-col>
+    </template>
   </el-row>
 </template>
 <script>
@@ -30,7 +42,7 @@ export default {
     ElasticField,
     ElasticResolveField
   },
-  props: ['meta', 'routePath', 'filePath', 'parentId', 'crateId'],
+  props: ['meta', 'routePath', 'filePath', 'parentId', 'crateId', 'isExpand'],
   data() {
     return {}
   },
