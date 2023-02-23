@@ -33,9 +33,10 @@
               <span class="my-1 mr-1" v-if="!isEmpty(this.filters)">Filtering by:</span>
               <el-button-group class="my-1 mr-2" v-for="(filter, filterKey) of this.filters" :key="filterKey"
                                v-model="this.filters">
+                <el-button>{{ clean(filterKey) }}</el-button>
                 <el-button v-if="filter && filter.length > 0" v-for="f of filter" :key="f" color="#626aef" plain
                            @click="this.clearFilterX({ f, filterKey })" class="text-2xl">
-                  {{ f }}
+                  {{ clean(f) }}
                   <el-icon class="el-icon--right">
                     <CloseBold/>
                   </el-icon>
@@ -394,6 +395,16 @@ export default {
         url = `/object?id=${id}&_crateId=${crateId}`
       }
       return url;
+    },
+    clean(string) {
+      if (string === 'true') {
+        return 'Yes';
+      } else if (string === 'false') {
+        return 'No';
+      } else {
+        string = string.replace(/@|_|(\..*)/g, "")
+        return string;
+      }
     }
   }
 };
