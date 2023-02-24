@@ -12,7 +12,7 @@
         <MetaTopCard :tops="this.tops" :className="'py-5'" />
         <el-row class="">
           <el-col v-for="meta of this.meta">
-            <meta-field :meta="meta" :routePath="'item'" :crateId="this.crateId" />
+            <meta-field :meta="meta" :routePath="'object'" :crateId="this.crateId" />
           </el-col>
         </el-row>
       </div>

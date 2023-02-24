@@ -33,9 +33,9 @@
               <span class="my-1 mr-1" v-if="!isEmpty(this.filters)">Filtering by:</span>
               <el-button-group class="my-1 mr-2" v-for="(filter, filterKey) of this.filters" :key="filterKey"
                                v-model="this.filters">
-                <el-button>{{ clean(filterKey) }}</el-button>
+                <el-button plain>{{ clean(filterKey) }}</el-button>
                 <el-button v-if="filter && filter.length > 0" v-for="f of filter" :key="f" color="#626aef" plain
-                           @click="this.clearFilterX({ f, filterKey })" class="text-2xl">
+                           @click="this.updateFilters({clear: {f, filterKey }})" class="text-2xl">
                   {{ clean(f) }}
                   <el-icon class="el-icon--right">
                     <CloseBold/>
@@ -153,22 +153,17 @@ export default {
       noMoreResults: false
     };
   },
-  updated() {
-    if (isEmpty(this.$route.query.f)) {
-      this.filters = {};
-    }
-  },
   watch: {
     async '$route.query'() {
       this.loading = true;
-      if (this.$route.query.f) {
-        await this.updateFilters();
-      } else {
-        await this.search();
-      }
+      await this.updateFilters({});
       this.onInputChange(this.$route.query.q);
+      await this.search();
       this.loading = false;
     }
+  },
+  async updated() {
+    await this.updateRoutes();
   },
   async mounted() {
     this.loading = true;
@@ -176,14 +171,8 @@ export default {
       //await this.resetSearch();
       console.log('not sure!')
     }
-    if (this.$route.query.f) {
-      await this.updateFilters();
-      //not await maybe all the routes can be not awaited?
-      await this.updateRoutes();
-    } else {
-      await this.updateFilters();
-      await this.search(this.$route.query.q);
-    }
+    await this.updateFilters({});
+    await this.search(this.$route.query.q);
     this.loading = false;
   },
   methods: {
@@ -191,33 +180,38 @@ export default {
     first,
     isEmpty,
     isUndefined,
-    async updateFilters() {
+    async updateFilters({clear, empty}) {
       try {
-        if (this.$route.query.f) {
-          const filters = decodeURIComponent(this.$route.query.f);
-          const filterQuery = JSON.parse(filters);
-          for (let [key, val] of Object.entries(filterQuery)) {
-            this.filters[key] = val;
-            if (this.filters[key].length === 0) {
-              delete this.filters[key];
+        // updating filters from command
+        if (clear?.f && clear?.filterKey) {
+          if (this.filters[clear.filterKey]) {
+            this.filters[clear.filterKey].splice(this.filters[clear.filterKey].indexOf(clear.f), 1);
+            if (isEmpty(this.filters[clear.filterKey])) {
+              delete this.filters[clear.filterKey];
+            }
+            //if there is an update on the filter the site will do another search.
+            await this.updateRoutes();
+          }
+        } else {
+          // or updating filters from routes
+          if (isEmpty(this.$route.query.f)) {
+            this.filters = {};
+          } else {
+            let filterQuery;
+            const filters = decodeURIComponent(this.$route.query.f);
+            filterQuery = JSON.parse(filters);
+            this.filters = {};
+            for (let [key, val] of Object.entries(filterQuery)) {
+              this.filters[key] = val;
+              if (this.filters[key].length === 0) {
+                delete this.filters[key];
+              }
             }
           }
-          await this.search();
-          await this.updateRoutes();
         }
       } catch (e) {
         console.error(e);
       }
-    },
-    async clearFilterX({f, filterKey}) {
-      if (this.filters[filterKey]) {
-        this.filters[filterKey].splice(this.filters[filterKey].indexOf(f), 1);
-      }
-      // if (this.filters[filterKey].length === 0) {
-      //   delete this.filters[filterKey];
-      // }
-      await this.updateRoutes();
-      await this.updateFilters();
     },
     async updateRoutes() {
       let filters;
@@ -236,7 +230,7 @@ export default {
       this.filters[id] = checkedBuckets;
       await this.updateRoutes();
     },
-    populate({items, scrollId, newSearch}) {
+    populate({items, newSearch}) {
       if (newSearch) {
         this.items = [];
         this.newSearch = true;
