@@ -53,7 +53,7 @@ export default class ElasticService {
           "order": "desc",
           "script": {
             "lang": "painless",
-            "source": "doc['@type.keyword'].contains('RepositoryCollection') ? 1 : 0"
+            "source": "doc['_isTopLevel.@value.keyword'].size() > 0 ? 1 : 0" // Sorting first by _isTopLevel //doc['@type.keyword'].contains('RepositoryCollection') ? 1 : 0"
           }
         }
       }
