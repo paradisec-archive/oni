@@ -117,7 +117,9 @@
           "_isSubLevel",
           "memberOf",
           "_access",
-          "_collectionStack"
+          "_collectionStack",
+          "_metadataIsPublic",
+          "_metadataLicense"
         ],
         "displayHasMember": false,
         "displayHasPart": true
@@ -159,7 +161,9 @@
           "_access",
           "indexableText",
           "_access",
-          "_collectionStack"
+          "_collectionStack",
+          "_metadataIsPublic",
+          "_metadataLicense"
         ]
       }
     },
@@ -174,7 +178,9 @@
           "_memberOf",
           "_root",
           "_text",
-          "_collectionStack"
+          "_collectionStack",
+          "_metadataIsPublic",
+          "_metadataLicense"
         ]
       }
     },
@@ -204,7 +210,9 @@
           "url",
           "binderLink",
           "base64",
-          "_access"
+          "_access",
+          "_metadataIsPublic",
+          "_metadataLicense"
         ],
         "displayHasMember": false,
         "displayHasPart": false
@@ -379,6 +387,12 @@
         "allowTextIndex": true,
         "name": "Default LDaCA No License",
         "description": "No License"
+      },
+      "defaultMetadata": {
+        "isPublic": true,
+        "name": "Attribution 4.0 International (CC BY 4.0)",
+        "id": "https://creativecommons.org/licenses/by/4.0/",
+        "description": "You are free to:\nShare — copy and redistribute the material in any medium or format\nAdapt — remix, transform, and build upon the material\nfor any purpose, even commercially.\nThis license is acceptable for Free Cultural Works.\nThe licensor cannot revoke these freedoms as long as you follow the license terms."
       }
     },
     "identifier": {
