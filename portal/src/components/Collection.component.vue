@@ -34,6 +34,9 @@
           <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
             <h5 class="text-2xl font-medium">Access</h5>
             <hr class="divider divider-gray pt-2"/>
+            <h4 class="text-1xl font-medium">
+              Content in this collection is licensed as:
+            </h4>
             <PropertySummaryCard
                 :aggregations="{ 'license.name.@value': { 'terms': { 'field': 'license.name.@value.keyword', 'size': '1000' } } }"
                 :fields="[{'name':'license.@id', 'display': 'Licenses'}]" :name="'license.@id'"

@@ -186,7 +186,7 @@ export default {
       if (buckets) {
         this.typeFile = find(buckets, (obj) => obj.key === 'File');
       }
-      this.total = summaries.total;
+      this.total = this.members.total;
       this.loading = false;
     },
     //TODO: refactor this integrate to multi
