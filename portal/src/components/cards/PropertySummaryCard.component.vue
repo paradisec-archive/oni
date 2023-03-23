@@ -1,17 +1,10 @@
 <template>
   <template v-for="(f, index) of buckets" :key="f.field+'_'+index" v-loading="loading">
-    <ul>
-      <li v-if="f?.buckets.length > 0">
-        <ul>
-          <li><span class="font-semibold">{{ f.field }}</span></li>
-          <template v-for="bucket of f?.buckets" :key="bucket.key">
-            <li v-if="bucket.doc_count > 0" class="py-2">
-              <PropertyValue :external="external" :id="bucket.id" :field="name" :value="bucket.key"
-                             :fieldName="fieldName"/>
-            </li>
-          </template>
-        </ul>
-      </li>
+    <h5><span class="font-semibold">{{ f.field }}</span></h5>
+    <ul class="list-disc my-2 mx-3 pl-2" v-if="f?.buckets.length > 0">
+      <template v-for="bucket of f?.buckets" :key="bucket.key">
+        <li>{{ bucket.key }}</li>
+      </template>
     </ul>
   </template>
 </template>
