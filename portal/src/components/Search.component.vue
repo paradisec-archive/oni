@@ -320,13 +320,15 @@ export default {
       }, 100);
     },
     async clearAggregations() {
-      for (let agg of this.aggregations) {
-        //TODO: ask cos this may be silly?!?
-        //this.$refs[agg][0].clear();
-        const name = agg?.name;
-        if (this.$refs[name]) {
-          for (let r of this.$refs[name]) {
-            r.clear();
+      if (this.aggregations) {
+        for (let agg of this.aggregations) {
+          //TODO: ask cos this may be silly?!?
+          //this.$refs[agg][0].clear();
+          const name = agg?.name;
+          if (this.$refs[name]) {
+            for (let r of this.$refs[name]) {
+              r.clear();
+            }
           }
         }
       }
