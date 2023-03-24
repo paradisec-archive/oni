@@ -34,7 +34,7 @@ const assert = require("assert");
   // Put Settings
   await client.indices.putSettings({
     index: elastic['index'],
-    body: {mapping: {total_fields: {limit: elastic['mappingFieldLimit'] || 1000}}}
+    body: elastic['indexConfiguration']
   })
   //Cluster settings
   const settings = {

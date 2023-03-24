@@ -405,6 +405,16 @@
       "maxScroll": 5000,
       "scrollTimeout": "10m",
       "index": "items",
+      "indexConfiguration": {
+        "mapping": {
+          "total_fields": {
+            "limit": 1000
+          }
+        },
+        "highlight": {
+          "max_analyzed_offset":1000
+        }
+      },
       "fields": [
         "@id",
         "name.@value",
