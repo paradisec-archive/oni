@@ -9,7 +9,7 @@
   "author": "Moises Sacal Bonequi",
   "license": "MIT",
   "dependencies": {
-    "@elastic/elasticsearch": "^7.16.0",
+    "@elastic/elasticsearch": "^8.6.0",
     "@ocfl/ocfl-fs": "^0.2.0",
     "@octokit/rest": "^19.0.3",
     "fs-extra": "^10.0.0",

@@ -2,7 +2,7 @@
   "ui": {
     "siteName": "Oni",
     "siteNameX": "Discovery",
-    "publicPath": "http://localhost:10000/",
+    "publicPath": "http://localhost:11000/",
     "title": "Oni Discovery Portal",
     "shortTitle": "Oni",
     "showLogo": true,
@@ -307,7 +307,7 @@
       "cilogon": {
         "clientID": "cilogon:/client_id/XXXXXXXXXXXX",
         "clientSecret": "XXXXXXXXXXXX",
-        "redirect_uri": "http://localhost:10000/auth/cilogon/callback",
+        "redirect_uri": "http://localhost:11000/auth/cilogon/callback",
         "authorizeHost": "https://test.cilogon.org",
         "authorizePath": "/authorize",
         "tokenHost": "https://test.cilogon.org",
@@ -326,7 +326,7 @@
       "github": {
         "clientID": "XXXXXXXXXXXX",
         "clientSecret": "XXXXXXXXXXXX",
-        "redirect_uri": "http://localhost:10000/auth/github/callback",
+        "redirect_uri": "http://localhost:11000/auth/github/callback",
         "authorizeHost": "https://github.com",
         "authorizePath": "/login/oauth/authorize",
         "tokenHost": "https://github.com",

@@ -12,12 +12,21 @@ const assert = require("assert");
     node: 'http://localhost:9200', //This is different from Oni since we are talking to it directly
   });
   // Bootstrap index
-  // Delete
-  await client.indices.delete({
-    index: '*'
-  });
-  // Configure mappings
   const elastic = configuration['api']['elastic'];
+  // Delete
+  try {
+    const index = await client.indices.exists({
+      index: elastic['index'] || 'items'
+    });
+    if (index) {
+      await client.indices.delete({
+        index: elastic['index'] || 'items'
+      });
+    }
+  } catch (e) {
+    throw new Error(e);
+  }
+  // Configure mappings
   await client.indices.create({
     index: elastic['index'],
     body: {mappings: elastic['mappings']}
