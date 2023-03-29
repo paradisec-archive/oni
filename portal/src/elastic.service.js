@@ -161,12 +161,17 @@ export default class ElasticService {
     if (isEmpty(searchQuery) && filterTerms.length > 0) {
       boolQueryObj = esb.boolQuery().must(filterTerms);
     } else if (!isEmpty(searchQuery) && filterTerms.length > 0) {
-      //const phrase = esb.matchPhraseQuery(fields, searchQuery);
-      boolQueryObj = esb.boolQuery().must(esb.multiMatchQuery(fields, searchQuery)).filter(filterTerms);
+      let phraseQuery = [];
+      for(let f of fields) {
+        phraseQuery.push(esb.matchPhraseQuery(f, searchQuery));
+      }
+      boolQueryObj = esb.boolQuery().should(phraseQuery).must(filterTerms);
     } else if (!isEmpty(searchQuery) && filterTerms.length <= 0) {
-      // const phrase = esb.matchPhraseQuery(fields, searchQuery);
-      // debugger
-      boolQueryObj = esb.multiMatchQuery(fields, searchQuery);
+      let phraseQuery = [];
+      for(let f of fields) {
+        phraseQuery.push(esb.matchPhraseQuery(f, searchQuery));
+      }
+      boolQueryObj = esb.boolQuery().should(phraseQuery);
     } else if (isEmpty(searchQuery) && filterTerms.length <= 0) {
       boolQueryObj = esb.matchAllQuery();
     }
@@ -174,7 +179,7 @@ export default class ElasticService {
     const esbQuery = esb.requestBodySearch().query(boolQueryObj);
 
     const query = esbQuery.toJSON().query;
-    //console.log(JSON.stringify(query));
+    console.log(JSON.stringify(query));
     return query;
   }
 

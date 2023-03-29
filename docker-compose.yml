@@ -26,7 +26,7 @@ services:
 
   api:
     restart: always
-    image: arkisto/oni-api:1.5.0
+    image: arkisto/oni-api:1.5.1
     hostname: api
     tty: true
     environment:
