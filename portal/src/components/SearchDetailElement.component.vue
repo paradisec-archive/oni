@@ -180,13 +180,13 @@ export default {
       const summaries = await this.filter({
         '_collectionStack.@id': [this.id]
       });
-      this.aggregations = summaries.aggregations;
+      this.aggregations = summaries?.aggregations;
       // Get the buckets to extract one value: File counts
-      const buckets = summaries.aggregations?.['@type']?.buckets;
+      const buckets = summaries?.aggregations?.['@type']?.buckets;
       if (buckets) {
         this.typeFile = find(buckets, (obj) => obj.key === 'File');
       }
-      this.total = this.members.total;
+      this.total = this.members?.total;
       this.loading = false;
     },
     //TODO: refactor this integrate to multi

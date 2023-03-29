@@ -161,8 +161,11 @@ export default class ElasticService {
     if (isEmpty(searchQuery) && filterTerms.length > 0) {
       boolQueryObj = esb.boolQuery().must(filterTerms);
     } else if (!isEmpty(searchQuery) && filterTerms.length > 0) {
+      //const phrase = esb.matchPhraseQuery(fields, searchQuery);
       boolQueryObj = esb.boolQuery().must(esb.multiMatchQuery(fields, searchQuery)).filter(filterTerms);
     } else if (!isEmpty(searchQuery) && filterTerms.length <= 0) {
+      // const phrase = esb.matchPhraseQuery(fields, searchQuery);
+      // debugger
       boolQueryObj = esb.multiMatchQuery(fields, searchQuery);
     } else if (isEmpty(searchQuery) && filterTerms.length <= 0) {
       boolQueryObj = esb.matchAllQuery();

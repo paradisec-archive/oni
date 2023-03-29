@@ -1,6 +1,6 @@
 {
   "name": "oni-ui-vue",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "A Generic Oni Discovery UI",
   "main": "babel.config.js",
   "scripts": {
