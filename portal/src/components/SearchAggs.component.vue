@@ -1,8 +1,9 @@
 <template>
-  <div>
+  <div class="border-t-2">
     <li class="m-2 mt-4 cursor-pointer" v-for="ag of buckets">
       <div class="form-check form-check-inline cursor-pointer">
-        <input :id="aggsName + '_' + ag.key" :name="aggsName + '_' + ag.key" v-model="checkedBuckets" v-on:change="onChange"
+        <input :id="aggsName + '_' + ag.key" :name="aggsName + '_' + ag.key" v-model="checkedBuckets"
+               v-on:change="onChange"
                class="cursor-pointer form-check-input h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
                type="checkbox" :value="ag.key">
         <label class="cursor-pointer form-check-label text-gray-800" :for="aggsName + '_' + ag.key">
@@ -43,6 +44,9 @@ export default {
               this.checkedBuckets = val;
             }
           }
+          if (this.checkedBuckets.length > 0) {
+            this.$emit('is-active');
+          }
         }
       }
     },
@@ -74,6 +78,9 @@ export default {
         }
         const encodedFilters = encodeURIComponent(JSON.stringify(queryFilters));
         query.f = encodedFilters;
+      }
+      if (this.checkedBuckets.length > 0) {
+        this.$emit('is-active');
       }
       await this.$router.push({path: 'search', query});
     }

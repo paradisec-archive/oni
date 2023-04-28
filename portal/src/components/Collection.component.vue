@@ -242,7 +242,7 @@ export default {
     },
     async populateBuckets() {
       const items = await this.$elasticService.multi({
-        filters: {'_memberOf.@id': [this.$route.query.id]}
+        filters: {'_memberOf.@id': [this.$route.query.id]}, sort: 'relevance', order: 'desc'
       });
       const aggregations = items?.aggregations;
       this.buckets = []
@@ -254,7 +254,7 @@ export default {
     },
     //TODO: refactor this integrate to multi
     async filter(filters, scroll) {
-      const items = await this.$elasticService.multi({scroll, filters});
+      const items = await this.$elasticService.multi({scroll, filters, sort: 'relevance', order: 'desc'});
       if (items?.hits?.hits.length > 0) {
         return {
           data: items?.hits?.hits,

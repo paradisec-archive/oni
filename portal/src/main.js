@@ -14,10 +14,10 @@ import {
     faArrowLeft,
     faMaximize,
     faMinimize,
-    faDownload, faLockOpen, faLock, faUserLock, faCircleInfo, faChevronUp, faChevronDown, faChevronRight
+    faDownload, faLockOpen, faLock, faUserLock, faCircleInfo, faChevronUp, faChevronDown, faChevronRight, faAward
 } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faHome, faUser, faUserSecret, faArrowAltCircleDown, faQuestion, faCircleQuestion, faInfo, faArrowLeft, faMaximize, faMinimize, faDownload, faUserLock, faLock, faLockOpen, faCircleInfo, faChevronUp, faChevronDown, faChevronRight)
+library.add(faHome, faUser, faUserSecret, faArrowAltCircleDown, faQuestion, faCircleQuestion, faInfo, faArrowLeft, faMaximize, faMinimize, faDownload, faUserLock, faLock, faLockOpen, faCircleInfo, faChevronUp, faChevronDown, faChevronRight, faAward)
 
 import {createApp} from "vue";
 import App from "./App.vue";

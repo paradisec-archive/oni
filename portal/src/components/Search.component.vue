@@ -2,34 +2,43 @@
   <div class="min-w-full pb-4 pt-0 px-2 pl-4">
     <div class="bg-white z-10">
     </div>
-    <el-row :gutter="40" :offset="1" style="margin-right: 0">
-      <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="5" :span="4" class="max-w-0 h-auto">
+    <el-row :gutter="40" :offset="1" style="margin-right: 0" class="flex flex-row h-screen">
+      <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="5" :span="4"
+              class="h-full max-h-screen overflow-y-auto flex flex-col flex-grow ">
         <div class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
           <search-bar ref='searchBar' @populate='populate' v-bind:searchInput="searchInput" @input="onInputChange"
-                      @search="search" :clearSearch="clear" :filters="this.filters"
-                      class="grid grid-row-2 justify-items-center items-center h-20 m-4"/>
+                      @search="search" :clearSearch="clear" :filters="this.filters" :fields="searchFields"
+                      class="grow justify-items-center items-center m-4" :showFields="true"/>
         </div>
         <div class="pt-2">
           <div class="flex w-full" v-for="aggs of aggregations" :key="aggs.name">
             <ul v-if="aggs?.buckets?.length > 0"
                 class="flex-1 w-full min-w-full bg-white rounded p-2 mb-4 shadow-md border">
-              <li class="border-b-2">
-                <button class="m-2 text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
+              <li @click="aggs.active = !aggs.active"
+                  class="hover:cursor-pointer py-3 flex md:flex md:flex-grow flex-row justify-between space-x-1">
+                <span class="text-xl text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
                   {{ aggs.display }}
-                </button>
+                </span>
+                <span class="py-1 px-2">
+                    <font-awesome-icon v-if="aggs.active" icon="fa fa-chevron-down"/>
+                    <font-awesome-icon v-else icon="fa fa-chevron-right"/>
+                </span>
               </li>
               <li v-if="aggs?.buckets?.length <= 0" class="w-full min-w-full">&nbsp;</li>
-              <search-aggs :buckets="aggs.buckets" :aggsName="aggs.name" :ref="aggs.name"/>
+              <search-aggs :buckets="aggs.buckets" :aggsName="aggs.name" :ref="aggs.name"
+                           v-show="aggs.active" @is-active="aggs.active = true"/>
             </ul>
           </div>
         </div>
       </el-col>
-      <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :span="20" :offset="0" v-loading="this.loading">
+      <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :span="20" :offset="0" v-loading="this.loading"
+              class="max-h-screen overflow-y-auto">
         <div class="pr-0">
           <div class="top-20 z-10 bg-white pb-5">
             <el-row :align="'middle'" class="mt-4 pb-2 border-0 border-b-[2px] border-solid border-red-700 text-2xl">
-              <span class="my-1 mr-3" v-if="!isEmpty(this.$route.query.q)">Showing searches for: &nbsp;<span
-                  class="px-3 border-dashed border-2 border-indigo-600">{{ this.$route.query.q }}</span></span>
+              <span class="my-1 mr-3" v-if="!isEmpty(this.$route.query.q)">Showing searches for: &nbsp;
+                <span class="px-3 border-dashed border-2 border-indigo-600">{{ this.$route.query.q }}</span>
+              </span>
               <span class="my-1 mr-1" v-if="!isEmpty(this.filters)">Filtering by:</span>
               <el-button-group class="my-1 mr-2" v-for="(filter, filterKey) of this.filters" :key="filterKey"
                                v-model="this.filters">
@@ -45,30 +54,41 @@
               <span class="my-1 mr-2">Total: {{ this.totals['value'] || 0 }} Index entries (Collections, Objects, Files and Notebooks)</span>
             </el-row>
             <el-row class="pt-2">
-              <el-button-group v-if="(!isEmpty(this.$route.query.f) || !isEmpty(this.$route.query.q)) && !isStart">
-                <el-button type="default" v-on:click="this.resetSearch">RESTART SEARCH</el-button>
-              </el-button-group>
+              <el-col :span="24" class="flex space-x-4">
+                <el-button-group v-if="(!isEmpty(this.$route.query.f) || !isEmpty(this.$route.query.q)) && !isStart"
+                                 class="my-1">
+                  <el-button type="default" v-on:click="this.resetSearch">RESTART SEARCH</el-button>
+                </el-button-group>
+                <el-select v-model="selectedSorting" @change="sortResults" class="my-1">
+                  <template #prefix>Sort by:</template>
+                  <el-option
+                      v-for="item in sorting"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                  />
+                </el-select>
+                <el-select v-model="selectedOrder" @change="orderResults" class="my-1">
+                  <template #prefix>Order by:</template>
+                  <el-option
+                      v-for="item in ordering"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                  />
+                </el-select>
+              </el-col>
             </el-row>
           </div>
-          <!--          <div v-if="this.isStart">-->
-          <!--            <div v-if="this.showTopCollections">-->
-          <!--              <top-collections :collections="this.collections"/>-->
-          <!--              <el-row>-->
-          <!--                <el-link v-if="this.collectionTotals > this.collections.length"-->
-          <!--                         @click="getNextCollections(this.collectionScrollId);this.newSearch=false;">more collections-->
-          <!--                </el-link>-->
-          <!--              </el-row>-->
-          <!--            </div>-->
-          <!--          </div>-->
           <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full">
-            <search-detail-element :id="item._source['@id']" :href="getSearchDetailUrl(item)"
+            <search-detail-element v-if="item._source" :id="item._source['@id']" :href="getSearchDetailUrl(item)"
                                    :name="first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value']"
                                    :conformsTo="item.conformsTo" :types="item._source?.['@type']"
                                    :languages="item._source?.['language']"
                                    :_memberOf="item._source?._memberOf" :highlight="item?.highlight"
                                    :root="item._source?._root"
                                    :parent="item._source?._parent" :aggregations="aggregations"
-                                   :details="item._source"/>
+                                   :details="item._source" :score="item._score"/>
           </div>
           <div v-if="!this.items.length > 0">
             <el-row class="pb-4 items-center">
@@ -150,7 +170,19 @@ export default {
       errorDialogVisible: false,
       errorDialogText: '',
       conformsToNotebook: this.$store.state.configuration.ui.conformsTo?.notebook,
-      noMoreResults: false
+      noMoreResults: false,
+      searchFields: this.$store.state.configuration.ui.searchFields,
+      sorting: [
+        {value: 'relevance', label: 'Relevance'},
+        {value: '_isTopLevel', label: 'Collections'},
+        {value: 'name', label: 'Name'}
+      ],
+      selectedSorting: {value: '_isTopLevel', label: 'Collections'},
+      ordering: [
+        {value: 'asc', label: 'Ascending'},
+        {value: 'desc', label: 'Descending'}
+      ],
+      selectedOrder: {value: 'desc', label: 'Descending'}
     };
   },
   watch: {
@@ -158,12 +190,17 @@ export default {
       this.loading = true;
       await this.updateFilters({});
       this.onInputChange(this.$route.query.q);
-      await this.search();
+      //Every new search will force sort relevance:
+      this.selectedSorting = 'relevance';
+      await this.search({sort: this.selectedSorting});
       this.loading = false;
     }
   },
   async updated() {
-    await this.updateRoutes();
+    //await this.updateRoutes(); // I dont remember why this was here!
+    if (this.$route.query.q) {
+      this.selectedSorting = 'relevance';
+    }
   },
   async mounted() {
     this.loading = true;
@@ -172,8 +209,26 @@ export default {
       console.log('not sure!')
     }
     await this.updateFilters({});
-    await this.search(this.$route.query.q);
+    if (this.$route.query.q) {
+      this.selectedSorting = 'relevance';
+    }
+    //await this.search({input: this.$route.query.q});
     this.loading = false;
+  },
+  async created() {
+    if (this.$route.query.q) {
+      this.selectedSorting = 'relevance';
+    }
+    const aggregations = await this.$elasticService.multi({
+      multi: '',
+      filters: {},
+      scroll: false,
+      sort: 'relevance',
+      order: 'desc',
+      operation: 'must'
+    });
+    this.aggregations = this.populateAggregations(aggregations['aggregations']);
+    await this.search({input: this.$route.query.q})
   },
   methods: {
     toArray,
@@ -215,11 +270,12 @@ export default {
     },
     async updateRoutes() {
       let filters;
-      const query = {q: this.$route.query.q}
+      const query = {q: this.$route.query.q, sf: this.$route.query.sf}
       if (this.filters) {
         filters = toRaw(this.filters);
         filters = encodeURIComponent(JSON.stringify(filters));
         query.f = filters;
+        query.o = this.$route.query.o
       }
       await this.$router.push({path: 'search', query, replace: true});
     },
@@ -230,7 +286,7 @@ export default {
       this.filters[id] = checkedBuckets;
       await this.updateRoutes();
     },
-    populate({items, newSearch}) {
+    populate({items, newSearch, aggregations}) {
       if (newSearch) {
         this.items = [];
         this.newSearch = true;
@@ -252,7 +308,6 @@ export default {
         }
       }
       if (items['aggregations']) {
-        this.aggregations = this.populateAggregations(items['aggregations']);
         this.memberOfBuckets = items['aggregations']?.['_memberOf.name.@value'];
       }
     },
@@ -301,6 +356,8 @@ export default {
       this.$route.query.q = '';
       this.$route.query.f = '';
       this.$route.query.t = '';
+      this.$route.query.sf = '';
+      this.$route.query.o = '';
       this.filterButton = [];
       this.isStart = true;
       this.isBrowse = false;
@@ -311,7 +368,7 @@ export default {
     async searchAll() {
       this.isStart = false;
       await this.$router.push({path: 'search'});
-      await this.search();
+      await this.search({});
     },
     scrollToTop() {
       setTimeout(function () {
@@ -334,7 +391,7 @@ export default {
       }
       this.filters = {};
     },
-    async search(input) {
+    async search({input, sort, order}) {
       this.noMoreResults = false;
       await this.$elasticService.requestNewSearch({
         scrollId: this.scrollId,
@@ -351,12 +408,23 @@ export default {
       } else {
         filters = {};
       }
+      if (!isEmpty(this.$route.query.sf)) {
+        try {
+          this.searchFields = JSON.parse(decodeURIComponent(this.$route.query.sf));
+        } catch (e) {
+          this.searchFields = '';
+        }
+      }
       this.items = await this.$elasticService.multi({
         multi: this.searchQuery,
         filters: toRaw(filters),
-        scroll: true
+        scroll: true,
+        searchFields: this.searchFields,
+        sort: sort || this.selectedSorting['value'] || this.selectedSorting,
+        order: order || this.selectedOrder['value'] || this.selectedOrder,
+        operation: this.$route.query.o
       });
-      this.populate({items: this.items, newSearch: true});
+      this.populate({items: this.items, newSearch: true, aggregations: this.aggregations});
     },
     getSearchDetailUrl(item) {
       //console.log(item);
@@ -401,7 +469,16 @@ export default {
         string = string.replace(/@|_|(\..*)/g, "")
         return string;
       }
+    },
+    sortResults(sort) {
+      const order = this.selectedOrder['value'] || this.selectedOrder;
+      this.search({input: this.searchQuery, sort, order});
+    },
+    orderResults(order) {
+      const sort = this.selectedSorting['value'] || this.selectedSorting;
+      this.search({input: this.searchQuery, sort, order});
     }
+
   }
 };
 </script>

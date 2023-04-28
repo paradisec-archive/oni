@@ -37,7 +37,7 @@
       </p>
       <div class="flex flex-wrap">
         <a v-for="mO of _memberOf"
-          :href="'/collection?id=' + mO?.['@id'] + '&_crateId=' + encodeURIComponent(mO?.['@id'])">
+           :href="'/collection?id=' + mO?.['@id'] + '&_crateId=' + encodeURIComponent(mO?.['@id'])">
           <el-button>{{ first(mO?.name)?.['@value'] || mO?.['@id'] }}</el-button>
         </a>
       </div>
@@ -56,7 +56,7 @@
       </p>
       <div class="flex flex-wrap" v-if="!Array.isArray(_memberOf)">
         <a
-          :href="'/collection?id=' + encodeURIComponent(root?.['@id']) + '&_crateId=' + encodeURIComponent(root?.['@id'])">
+            :href="'/collection?id=' + encodeURIComponent(root?.['@id']) + '&_crateId=' + encodeURIComponent(root?.['@id'])">
           <el-button>{{ first(first(root)?.name)?.['@value'] || first(root)?.['@id'] }}</el-button>
         </a>
       </div>
@@ -71,12 +71,13 @@
     </el-row>
     <el-row v-if="types && types.includes('RepositoryCollection')">
       <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-        <SummariesCard :aggregations="aggregations" :fields="fields || []" :name="'summaries'" :id="id" :root="root" />
+        <SummariesCard :aggregations="aggregations" :fields="fields || []" :name="'summaries'" :id="id" :root="root"/>
       </el-col>
       <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
         <SummariesCard :aggregations="aggregations"
-          :fields="[{ 'name': 'license.name.@value', 'display': 'Data licenses for access' }]" :name="'licenses'"
-          :id="id" :root="root" />
+                       :fields="[{ 'name': 'license.name.@value', 'display': 'Data licenses for access' }]"
+                       :name="'licenses'"
+                       :id="id" :root="root"/>
         <div class="py-2">
           <div v-if="!isEmpty(subCollections)">
             <span class="font-semibold">Collections: </span>{{ subCollections?.total }}
@@ -90,25 +91,30 @@
         </div>
         <div class="py-2">
           <el-link :underline="false"
-            :href="href">
+                   :href="href">
             <el-button color="#626aef" size="large">More</el-button>
           </el-link>
         </div>
       </el-col>
     </el-row>
-    <br />
-    <hr class="divide-y divide-gray-500" />
+    <el-row v-if="score" class="pt-2">
+      <div>
+        <font-awesome-icon icon="fa-solid fa-5x fa-award"/> Search Score: {{ score }}
+      </div>
+    </el-row>
+    <br/>
+    <hr class="divide-y divide-gray-500"/>
   </div>
 </template>
 <script>
-import { first, merge, toArray, isEmpty, find } from 'lodash';
+import {first, merge, toArray, isEmpty, find} from 'lodash';
 import SummariesCard from './cards/SummariesCard.component.vue';
 
 export default {
   components: {
     SummariesCard
   },
-  props: ['id', 'href', 'name', 'conformsTo', 'types', 'languages', '_memberOf', 'root', 'highlight', 'parent', 'details'],
+  props: ['id', 'href', 'name', 'conformsTo', 'types', 'languages', '_memberOf', 'root', 'highlight', 'parent', 'details', 'score'],
   data() {
     return {
       fields: this.$store.state.configuration.ui.main.fields || [],
@@ -142,12 +148,12 @@ export default {
     first,
     toArray,
     isEmpty,
-    getFilter({ field, id }) {
+    getFilter({field, id}) {
       const filter = {};
       filter[field] = [id];
       let filterEncoded = encodeURIComponent(JSON.stringify(filter));
       if (this.$route.query.f) {
-        filterEncoded = this.mergeQueryFilters({ filters: this.$route.query.f, filter })
+        filterEncoded = this.mergeQueryFilters({filters: this.$route.query.f, filter})
       }
       if (this.$route.query.q) {
         const searchQuery = `q=${this.$route.query.q}`;
@@ -156,7 +162,7 @@ export default {
         return `/search?f=${filterEncoded}`;
       }
     },
-    mergeQueryFilters({ filters, filter }) {
+    mergeQueryFilters({filters, filter}) {
       let decodedFilters = decodeURIComponent(filters);
       decodedFilters = JSON.parse(decodedFilters);
       const merged = merge(decodedFilters, filter);
@@ -192,7 +198,9 @@ export default {
     //TODO: refactor this integrate to multi
     async filter(filters) {
       const items = await this.$elasticService.multi({
-        filters: filters
+        filters: filters,
+        sort: 'relevance',
+        order: 'desc'
       });
       if (items?.hits?.hits.length > 0) {
         return {

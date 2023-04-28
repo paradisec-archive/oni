@@ -39,7 +39,7 @@ export default {
         filters: {
           'input.@id': [this.id],
           '@type': [this.objectType]
-        }
+        }, sort: 'relevance', order: 'desc'
       });
       this.objectTotals = items?.['hits']?.['total']?.['value'];
       this.objectsScrollId = items?.['_scroll_id'];

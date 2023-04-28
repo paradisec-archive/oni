@@ -2,7 +2,6 @@
   <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
     <h5 class="text-2xl font-medium ">Member Of</h5>
     <hr class="divider divider-gray pt-2"/>
-    <br/>
     <template v-for="(f, index) of _memberOf" :key="index">
       <ul>
         <li class="font-semibold">

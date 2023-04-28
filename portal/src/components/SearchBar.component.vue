@@ -32,6 +32,34 @@
           </el-input>
         </label>
       </el-row>
+      <el-row v-if="showFields" :justify="'center'" :gutter="20" :align="'middle'" class="p-2">
+        <el-button :text="true" link @click="showFieldSearch=!showFieldSearch"
+                   class="cursor-pointer">
+          {{ showFieldSearch ? 'hide fields' : 'show fields included in search' }}
+        </el-button>
+      </el-row>
+      <el-row v-show="showFieldSearch"
+              :justify="'center'" :gutter="20" :align="'middle'" class="">
+        <p class="mx-2 px-2 break-all">Selecting a field will limit the search</p>
+      </el-row>
+      <el-row v-show="showFieldSearch"
+              :justify="'start'" :gutter="20" :align="'middle'"
+              v-for="(value, name) of searchFields" :key="name">
+        <div class="mx-2 min-w-300">
+          <el-checkbox class="px-3 mx-2.5 break-all"
+                       @change="fieldSelected(name, $event)"
+                       :label="value.label || value.name" size="large"
+                       :checked="value.selected"/>
+        </div>
+      </el-row>
+      <el-row v-show="showFieldSearch"
+              :justify="'space-around'" :gutter="20" :align="'middle'">
+        <el-radio-group class="mx-2 px-2 break-all" v-model="operator">
+          <el-radio :label="'must'">And</el-radio>
+          <el-radio :label="'should'">Or</el-radio>
+          <el-radio :label="'must_not'">Not</el-radio>
+        </el-radio-group>
+      </el-row>
     </el-col>
   </el-row>
 </template>
@@ -40,36 +68,60 @@
 
 import {defineAsyncComponent} from 'vue';
 import {Close} from '@element-plus/icons-vue'
+import {isEmpty} from 'lodash';
 
 export default {
-  props: ['searchInput', 'clearSearch', 'filters', 'search'],
+  props: ['searchInput', 'clearSearch', 'filters', 'search', 'fields' , 'showFields'],
   components: {},
   updated() {
-    // console.log('updated')
-    // console.log(this.searchInput)
-    //this.searchQuery = this.searchInput;
+  },
+  created() {
+    this.searchFields = this.fields;
   },
   async mounted() {
     if (this.$route.query.q) {
       this.searchQuery = this.$route.query.q;
     }
+    if (this.$route.query.sf) {
+      this.showFieldSearch = true;
+    }
+    if (this.$route.query.o) {
+      this.operator = this.$route.query.o;
+    }
   },
   watch: {
+    '$route.query.o'() {
+      this.operator = this.$route.query.o;
+    },
     '$route.query.q'() {
       this.searchQuery = this.$route.query.q;
+    },
+    '$route.query.sf'() {
+      const sf = decodeURIComponent(this.$route.query.sf) || null;
+      if (!isEmpty(sf)) {
+        this.showFieldSearch = true;
+        try {
+          this.searchFields = JSON.parse(sf);
+        } catch (e) {
+          this.searchFields = null;
+        }
+      } else {
+        this.searchFields = null;
+      }
     },
     clearSearch() {
       this.reset();
     }
   },
   methods: {
+    isEmpty,
     async reset() {
       this.searchQuery = '';
       await this.$router.push({path: 'search'});
     },
     async resetBar() {
       this.searchQuery = '';
-      let query = {q: this.searchQuery};
+      let query = {q: this.searchQuery, o: this.operator};
       if (this.$route.query.f) {
         console.log(this.$route.query.f);
         query = {...query, f: this.$route.query.f};
@@ -85,11 +137,24 @@ export default {
       await this.doSearch();
     },
     async doSearch() {
-      let query = {q: this.searchQuery};
+      let query = {
+        q: this.searchQuery,
+        o: this.operator
+      };
+      let sf;
+      if (!isEmpty(this.searchFields)) {
+        sf = encodeURIComponent(JSON.stringify(this.searchFields))
+      }
+      if (sf) {
+        query = {...query, sf}
+      }
       if (this.$route.query.f) {
         query = {...query, f: this.$route.query.f};
       }
       await this.$router.push({path: 'search', query});
+    },
+    async fieldSelected(field, event) {
+      this.searchFields[field]['selected'] = event;
     }
   },
   data() {
@@ -98,7 +163,10 @@ export default {
       siteNameX: this.$store.state.configuration.ui.siteNameX || '',
       searchQuery: '',
       items: [],
-      scrollId: ''
+      scrollId: '',
+      searchFields: [],
+      showFieldSearch: false,
+      operator: 'should'
     }
   }
 }

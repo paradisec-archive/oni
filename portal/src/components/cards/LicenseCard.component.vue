@@ -9,8 +9,14 @@
       <a class="underline" :href="this.license['@id']">
       {{ first(this.license.name)?.['@value'] }}</a>
     </span>
-    <div class="bottom justify-self-center"></div>
   </div>
+  <div class="grid p-4">
+    <div class="justify-self-center">
+      {{ first(this.license.metadataIsPublic)?.['@value'] === false ? 'Private Metadata' : 'Public Metadata' }} and
+      {{ first(this.license.allowTextIndex)?.['@value'] === false ? 'Cannot Search in Text' :'Text is Searchable' }}
+    </div>
+  </div>
+  <div class="bottom justify-self-center"></div>
 </template>
 <script>
 import {first, isEmpty} from "lodash";

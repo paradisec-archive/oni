@@ -3,7 +3,7 @@
     <header>
       <nav-view/>
     </header>
-    <main class="flex-grow">
+    <main class="">
       <router-view/>
     </main>
     <footer>

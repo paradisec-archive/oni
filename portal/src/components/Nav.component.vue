@@ -26,8 +26,8 @@
     <div class="flex-grow"/>
     <div index="searchBar" v-if="$route.name!='search'" :route="'false'">
       <div class="py-2">
-      <search-bar ref='searchBar' @populate='populate' v-bind:searchInput="searchInput" @input="onInputChange"
-                  @search="search" :clearSearch="clear" :filters="this.filters"/>
+        <search-bar ref='searchBar' @populate='populate' v-bind:searchInput="searchInput" @input="onInputChange"
+                    @search="search" :clearSearch="clear" :filters="this.filters"/>
       </div>
     </div>
     <el-menu-item v-for="topNavItem of topNavItems" :index="topNavItem.route" :router="topNavItem.route">
@@ -51,7 +51,7 @@
           </el-col>
         </el-row>
       </router-link>
-    </el-menu-item >
+    </el-menu-item>
     <el-menu-item index="help" :route="'/help'">
       <router-link to="/help">
         <el-row :gutter="10" class="flex items-center justify-center">
@@ -128,13 +128,11 @@ export default {
   },
   methods: {
     activate: function () {
-      console.log("!@#!@#!@#")
-      console.log(this.$route.name)
       if (this.$route.name === this.topNavHome) {
         this.active = this.topNavHome;
       } else {
         this.active = this.$route.name;
-        console.log(this.active)
+        console.log(`Active Route: ${this.active}`);
       }
     }
   }
