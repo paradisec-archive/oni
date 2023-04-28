@@ -416,10 +416,10 @@
         }
       },
       "fields": [
-        "@id",
-        "name.@value",
-        "description.@value",
-        "_text"
+        {"name": "@id", "label": "ID"},
+        {"name": "name.@value", "label": "Name"},
+        {"name": "description.@value", "label": "Description"},
+        {"name": "_text", "label": "Text"}
       ],
       "aggregations": [
         {
