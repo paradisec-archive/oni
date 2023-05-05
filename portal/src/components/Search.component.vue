@@ -19,9 +19,15 @@
                 <span class="text-xl text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
                   {{ aggs.display }}
                 </span>
+
                 <span class="py-1 px-2">
                     <font-awesome-icon v-if="aggs.active" icon="fa fa-chevron-down"/>
-                    <font-awesome-icon v-else icon="fa fa-chevron-right"/>
+                  <span v-else>
+                    <span class="text-xs rounded-full w-32 h-32 text-white bg-red-600 p-1">{{
+                        aggs?.buckets?.length
+                      }}</span>&nbsp;
+                    <font-awesome-icon icon="fa fa-chevron-right"/>
+                    </span>
                 </span>
               </li>
               <li v-if="aggs?.buckets?.length <= 0" class="w-full min-w-full">&nbsp;</li>
@@ -205,7 +211,7 @@ export default {
   async updated() {
     //await this.updateRoutes(); // I dont remember why this was here!
     if (this.$route.query.q) {
-      this.selectedSorting = 'relevance'; //TODO: WHY??
+      this.selectedSorting = 'relevance'; //TODO: WHY?? do we need to update the currentPage?
     }
   },
   async mounted() {
