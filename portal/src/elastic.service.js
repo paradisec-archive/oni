@@ -5,9 +5,8 @@ import {isEmpty, first} from 'lodash';
 export default class ElasticService {
   constructor({router, configuration}) {
     this.router = router;
-    this.searchRoute = '/search/index-post';
+    this.searchRoute = '/search/index';
     this.indexRoute = '/items';
-    this.scrollRoute = '/search/scroll';
     this.aggs = this.prepareAggregations(configuration.ui.aggregations)
     this.highlightFields = configuration.ui.searchHighlights;
     this.fields = configuration.ui.searchFields;
@@ -21,31 +20,11 @@ export default class ElasticService {
     return a;
   }
 
-  async scroll(scrollId) {
-    try {
-      const httpService = new HTTPService({router: this.router, loginPath: '/login'});
-      let route = `${this.scrollRoute}?id=${scrollId}`;
-      let response = await httpService.get({route});
-      if (response.status !== 200) {
-        //httpService.checkAuthorised({status: response.status});
-        return {error: response.statusText};
-      } else {
-        const results = await response.json();
-        console.log(results);
-        return results;
-      }
-    } catch (e) {
-      throw new Error(e)
-    }
-  }
 
-  async multi({multi, filters, scroll, aggs, searchFields, sort, order, operation}) {
+  async multi({multi, filters, aggs, searchFields, sort, order, operation, pageSize, searchFrom}) {
     try {
       const httpService = new HTTPService({router: this.router, loginPath: '/login'});
       let route = this.searchRoute + this.indexRoute;
-      if (scroll) {
-        route += '?withScroll=true';
-      }
       let sorting;
       if (sort === 'relevance') {
         sorting = [{
@@ -54,7 +33,7 @@ export default class ElasticService {
           }
         }]
       } else {
-        sorting = {
+        sorting = [{
           _script: {
             type: "number",
             order: order,
@@ -64,14 +43,23 @@ export default class ElasticService {
             }
           }
         }
+        ];
+        // const sortField = {};
+        // sortField[`${sort}.@value.keyword`] = {order};
+        // sorting.push(sortField);
       }
       let body = {
         query: {},
         sort: sorting
       }
-      console.log('sorting');
-      console.log(JSON.stringify(sorting));
-      const query = this.boolQuery({searchQuery: multi, fields: searchFields, filters, operation});
+      // console.log('sorting');
+      // console.log(JSON.stringify(sorting));
+      const query = this.boolQuery({
+        searchQuery: multi,
+        fields: searchFields,
+        filters,
+        operation
+      });
       //console.log(query);
       body.highlight = this.highlights(this.highlightFields);
       body.query = query;
@@ -80,8 +68,10 @@ export default class ElasticService {
       } else {
         body.aggs = this.aggs
       }
-      console.log('multi query')
-      console.log(JSON.stringify(body.query));
+      body['size'] = pageSize;
+      body['from'] = searchFrom;
+      // console.log('multi query')
+      // console.log(JSON.stringify(body));
       let response = await httpService.post({route, body});
       if (response.status !== 200) {
         //httpService.checkAuthorised({status: response.status});
@@ -139,20 +129,6 @@ export default class ElasticService {
       const results = await response.json();
       console.log(first(results?.hits?.hits));
       return first(results?.hits?.hits);
-    }
-  }
-
-  async requestNewSearch({scrollId, collectionScrollId}) {
-    try {
-      const httpService = new HTTPService({router: this.router, loginPath: '/login'});
-      if (this.scrollId) {
-        await httpService.delete({route: this.scrollRoute + '?id=' + scrollId});
-      }
-      if (this.collectionScrollId) {
-        await httpService.delete({route: this.scrollRoute + '?id=' + collectionScrollId});
-      }
-    } catch (e) {
-      //Swallow if there is no scroll to delete
     }
   }
 
@@ -223,8 +199,7 @@ export default class ElasticService {
       boolQueryObj = esb.matchAllQuery();
     }
 
-    const esbQuery = esb.requestBodySearch().query(boolQueryObj);
-
+    const esbQuery = esb.requestBodySearch().query(boolQueryObj)
     const query = esbQuery.toJSON().query;
     return query;
   }

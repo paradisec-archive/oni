@@ -1,6 +1,21 @@
 <template>
   <div class="border-t-2">
-    <li class="m-2 mt-4 cursor-pointer" v-for="ag of buckets">
+    <el-pagination class="items-center"
+                   v-model:currentPage="currentPage"
+                   v-model:page-size="pageSize"
+                   layout="prev, pager, next"
+                   :total="filteredValues.length"
+                   @current-change="updatePages"
+                   :hide-on-single-page="true"/>
+    <el-input
+        v-model="filter"
+        :placeholder="'Search Filter'"
+        clearable
+        @input="updatePages(1)"
+    />
+    <li class="m-2 mt-4 cursor-pointer"
+        v-for="ag in filteredValues?.slice(this.pageStartIndex, this.pageStartIndex + this.pageSize)"
+>
       <div class="form-check form-check-inline cursor-pointer">
         <input :id="aggsName + '_' + ag.key" :name="aggsName + '_' + ag.key" v-model="checkedBuckets"
                v-on:change="onChange"
@@ -83,11 +98,25 @@ export default {
         this.$emit('is-active');
       }
       await this.$router.push({path: 'search', query});
+    },
+    updatePages(page) {
+      this.pageStartIndex = (page - 1) * this.pageSize;
+    },
+  },
+  computed: {
+    filteredValues() {
+      return this.buckets.filter((v) => {
+        return v.key.match(new RegExp(this.filter, "i"));
+      })
     }
   },
   data() {
     return {
-      checkedBuckets: []
+      checkedBuckets: [],
+      pageStartIndex: 0,
+      filter: undefined,
+      currentPage: 1,
+      pageSize: 5
     }
   }
 }

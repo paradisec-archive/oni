@@ -31,7 +31,7 @@
           </div>
         </div>
       </el-col>
-      <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :span="20" :offset="0" v-loading="this.loading"
+      <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :span="20" :offset="0"
               class="max-h-screen overflow-y-auto">
         <div class="pr-0">
           <div class="top-20 z-10 bg-white pb-5">
@@ -80,7 +80,15 @@
               </el-col>
             </el-row>
           </div>
-          <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full">
+          <div class="py-2 w-full">
+            <el-pagination class="items-center w-full"
+                           background layout="prev, pager, next"
+                           :total="totals['value'] / pageSize || 0 "
+                           v-model:page-size="pageSize"
+                           v-model:currentPage="currentPage"
+                           @current-change="updatePages"/>
+          </div>
+          <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full" v-loading="loading">
             <search-detail-element v-if="item._source" :id="item._source['@id']" :href="getSearchDetailUrl(item)"
                                    :name="first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value']"
                                    :conformsTo="item.conformsTo" :types="item._source?.['@type']"
@@ -102,11 +110,6 @@
               </p>
             </el-row>
           </div>
-          <el-row :gutter="2" v-if="this.more && !noMoreResults" class="flex justify-center p-6">
-            <el-button @click="getNext()">
-              <font-awesome-icon icon="fa-solid fa-arrow-alt-circle-down"/>&nbsp;VIEW MORE
-            </el-button>
-          </el-row>
           <el-row v-if="noMoreResults" class="flex justify-center p-6">
             <h5 class="mb-2 text-1xl tracking-tight dark:text-white">
               No more items found with that filter or search query
@@ -131,7 +134,7 @@
 
 <script>
 
-import {first, isEmpty, orderBy, toArray, find, isUndefined} from 'lodash';
+import {first, last, isEmpty, orderBy, toArray, find, isUndefined} from 'lodash';
 import {CloseBold} from "@element-plus/icons-vue";
 import {defineAsyncComponent, toRaw} from "vue";
 import SearchDetailElement from './SearchDetailElement.component.vue';
@@ -151,6 +154,8 @@ export default {
       searchInput: '',
       items: [],
       totals: {},
+      pageSize: 10,
+      currentPage: 1,
       more: false,
       aggregations: {},
       memberOfBuckets: [],
@@ -163,7 +168,6 @@ export default {
       showRepositoryCollections: false,
       collections: [],
       collectionTotals: 0,
-      collectionScrollId: '',
       isStart: false,
       newSearch: true,
       isBrowse: false,
@@ -182,7 +186,8 @@ export default {
         {value: 'asc', label: 'Ascending'},
         {value: 'desc', label: 'Descending'}
       ],
-      selectedOrder: {value: 'desc', label: 'Descending'}
+      selectedOrder: {value: 'desc', label: 'Descending'},
+      searchFrom: 0
     };
   },
   watch: {
@@ -192,6 +197,7 @@ export default {
       this.onInputChange(this.$route.query.q);
       //Every new search will force sort relevance:
       this.selectedSorting = 'relevance';
+      this.currentPage = 1;
       await this.search({sort: this.selectedSorting});
       this.loading = false;
     }
@@ -199,7 +205,7 @@ export default {
   async updated() {
     //await this.updateRoutes(); // I dont remember why this was here!
     if (this.$route.query.q) {
-      this.selectedSorting = 'relevance';
+      this.selectedSorting = 'relevance'; //TODO: WHY??
     }
   },
   async mounted() {
@@ -222,10 +228,11 @@ export default {
     const aggregations = await this.$elasticService.multi({
       multi: '',
       filters: {},
-      scroll: false,
       sort: 'relevance',
       order: 'desc',
-      operation: 'must'
+      operation: 'must',
+      pageSize: 10,
+      searchFrom: 0
     });
     this.aggregations = this.populateAggregations(aggregations['aggregations']);
     await this.search({input: this.$route.query.q})
@@ -287,13 +294,10 @@ export default {
       await this.updateRoutes();
     },
     populate({items, newSearch, aggregations}) {
+      this.items = [];
       if (newSearch) {
-        this.items = [];
         this.newSearch = true;
         this.scrollToTop();
-      }
-      if (items['_scroll_id']) {
-        this.scrollId = items['_scroll_id'];
       }
       if (items['hits']) {
         const thisItems = items['hits']['hits'];
@@ -329,24 +333,6 @@ export default {
       }
       return orderBy(a, 'order');
     },
-    async getNext() {
-      try {
-        const items = await this.$elasticService.scroll(this.scrollId);
-        if (items.error) {
-          this.errorDialogVisible = true;
-          this.errorDialogText = 'Your search session has expired, please reload';
-        } else {
-          if (items?.hits?.hits?.length > 0) {
-            this.populate({items});
-          } else {
-            this.noMoreResults = true;
-          }
-        }
-      } catch (e) {
-        this.errorDialogVisible = true;
-        this.errorDialogText = 'Your search session has expired, please reload';
-      }
-    },
     onInputChange(value) {
       this.searchInput = value;
     },
@@ -361,6 +347,7 @@ export default {
       this.filterButton = [];
       this.isStart = true;
       this.isBrowse = false;
+      this.currentPage = 1;
       //this.filters = {};
       await this.clearAggregations()
       await this.searchAll();
@@ -392,11 +379,8 @@ export default {
       this.filters = {};
     },
     async search({input, sort, order}) {
+      this.loading = true;
       this.noMoreResults = false;
-      await this.$elasticService.requestNewSearch({
-        scrollId: this.scrollId,
-        collectionScrollId: this.collectionScrollId
-      });
       if (input) {
         this.searchQuery = input;
       } else {
@@ -418,13 +402,15 @@ export default {
       this.items = await this.$elasticService.multi({
         multi: this.searchQuery,
         filters: toRaw(filters),
-        scroll: true,
         searchFields: this.searchFields,
         sort: sort || this.selectedSorting['value'] || this.selectedSorting,
         order: order || this.selectedOrder['value'] || this.selectedOrder,
-        operation: this.$route.query.o
+        operation: this.$route.query.o,
+        pageSize: this.pageSize,
+        searchFrom: (this.currentPage - 1) * this.pageSize
       });
       this.populate({items: this.items, newSearch: true, aggregations: this.aggregations});
+      this.loading = false;
     },
     getSearchDetailUrl(item) {
       //console.log(item);
@@ -471,14 +457,21 @@ export default {
       }
     },
     sortResults(sort) {
+      this.currentPage = 1;
       const order = this.selectedOrder['value'] || this.selectedOrder;
       this.search({input: this.searchQuery, sort, order});
     },
     orderResults(order) {
+      this.currentPage = 1;
       const sort = this.selectedSorting['value'] || this.selectedSorting;
       this.search({input: this.searchQuery, sort, order});
+    },
+    async updatePages(page) {
+      this.currentPage = page;
+      const order = this.selectedOrder['value'] || this.selectedOrder;
+      const sort = this.selectedSorting['value'] || this.selectedSorting;
+      await this.search({input: this.searchQuery, sort, order})
     }
-
   }
 };
 </script>
