@@ -9,7 +9,7 @@
                    :hide-on-single-page="true"/>
     <el-input
         v-model="filter"
-        :placeholder="'Search Filter'"
+        :placeholder="'Filter'"
         clearable
         @input="updatePages(1)"
     />
