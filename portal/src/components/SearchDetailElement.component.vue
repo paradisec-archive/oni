@@ -1,120 +1,122 @@
 <template>
   <div><!-- Wrapping an empty div because of multiple roots with v-for-->
-    <el-row :align="'middle'">
-      <h5 class="text-2xl font-medium dark:text-white">
-        <a :href="href" class="text-blue-600 hover:text-blue-800 visited:text-purple-600 break-all">
-          {{ this.name || this.id }}</a>
-      </h5>
-    </el-row>
-    <el-row :align="'middle'">
-      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-        {{ conformsTo }}
-      </p>
-    </el-row>
-    <el-row :align="'middle'">
-      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-        Contains:&nbsp;
-      </p>
-      <div class="flex flex-wrap">
-        <button class="text-sm  m-2 text-gray-400 dark:text-gray-300" v-for="type of types">
-          {{ type }}
-        </button>
-      </div>
-    </el-row>
-    <el-row :align="'middle'" v-if="languages">
-      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-        Languages:
-      </p>
-      <div class="flex flex-wrap">
-        <button class="text-sm m-2 text-gray-400 dark:text-gray-300 " v-for="language of languages">
-          {{ first(language.name)?.['@value'] }}
-        </button>
-      </div>
-    </el-row>
-    <el-row :align="'middle'" v-if="Array.isArray(_memberOf) && _memberOf.length > 0" class="pt-2">
-      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-        Member Of:&nbsp;
-      </p>
-      <div class="flex flex-wrap">
-        <a v-for="mO of _memberOf"
-           :href="'/collection?id=' + mO?.['@id'] + '&_crateId=' + encodeURIComponent(mO?.['@id'])">
-          <el-button>{{ first(mO?.name)?.['@value'] || mO?.['@id'] }}</el-button>
-        </a>
-      </div>
-    </el-row>
-    <el-row :align="'middle'" v-if="Array.isArray(parent) && parent.length > 0" class="pt-2">
-      <!--      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">-->
-      <!--        From:&nbsp;-->
-      <!--      </p>-->
-      <!--      <div class="flex flex-wrap">-->
-      <!--        <a v-for="p of parent" :href="'/item?id=' + encodeURIComponent(p?.['@id']) + '&_crateId=' + encodeURIComponent(p?.['@id'])">-->
-      <!--          <el-button>{{ first(p?.name)?.['@value'] || p?.['@id'] }}</el-button>-->
-      <!--        </a>-->
-      <!--      </div>-->
-      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white" v-if="!Array.isArray(_memberOf)">
-        &nbsp;In:&nbsp;
-      </p>
-      <div class="flex flex-wrap" v-if="!Array.isArray(_memberOf)">
-        <a
-            :href="'/collection?id=' + encodeURIComponent(root?.['@id']) + '&_crateId=' + encodeURIComponent(root?.['@id'])">
-          <el-button>{{ first(first(root)?.name)?.['@value'] || first(root)?.['@id'] }}</el-button>
-        </a>
-      </div>
-    </el-row>
-    <el-row :align="'middle'" v-if="highlight">
-      <ul>
-        <li v-for="hl of highlight" v-html="'...' + first(hl) + '...'" class="p-2"></li>
-      </ul>
-    </el-row>
-    <el-row class="py-4" v-if="first(details?.description)">
-      <p>{{ first(details?.description)?.['@value'] }}</p>
-    </el-row>
-    <el-row v-if="types && types.includes('RepositoryCollection')">
-      <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-        <SummariesCard :aggregations="aggregations" :fields="fields || []" :name="'summaries'" :id="id" :root="root"/>
-      </el-col>
-      <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-        <SummariesCard :aggregations="aggregations"
-                       :fields="[{ 'name': 'license.name.@value', 'display': 'Data licenses for access' }]"
-                       :name="'licenses'"
-                       :id="id" :root="root"/>
-        <div class="py-2">
-          <div v-if="!isEmpty(subCollections)">
-            <span class="font-semibold">Collections: </span>{{ subCollections?.total }}
+    <el-row>
+      <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :span="20">
+        <el-row :align="'middle'">
+          <h5 class="text-2xl font-medium dark:text-white">
+            <a :href="href" class="text-blue-600 hover:text-blue-800 visited:text-purple-600 break-all">
+              {{ this.name || this.id }}</a>
+          </h5>
+        </el-row>
+        <el-row :align="'middle'">
+          <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+            Type:&nbsp;
+          </p>
+          <div class="flex flex-wrap">
+            <span class="text-sm m-2 text-gray-700 dark:text-gray-300" v-for="type of types">
+              {{ type }}
+            </span>
           </div>
-        </div>
-        <div class="py-2">
-          <span class="font-semibold">Objects: </span>{{ total }}
-        </div>
-        <div class="py-2" v-if="typeFile">
-          <span class="font-semibold">Files: </span>{{ typeFile['doc_count'] }}
-        </div>
-        <div class="py-2">
-          <el-link :underline="false"
-                   :href="href">
-            <el-button color="#626aef" size="large">More</el-button>
-          </el-link>
-        </div>
+        </el-row>
+        <el-row v-if="types && types.includes('RepositoryCollection')">
+          <AggregationHelper :asIcons=false
+                             :aggregations="aggregations"
+                             :field="{ 'name': 'language.name.@value', 'display': 'Languages' }"/>
+        </el-row>
+        <el-row :align="'middle'" v-if="Array.isArray(_memberOf) && _memberOf.length > 0" class="">
+          <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+            Member of:&nbsp;
+          </p>
+          <div class="flex flex-wrap">
+            <a v-for="mO of _memberOf"
+               class="text-sm m-2 text-gray-700 dark:text-gray-300 underline"
+               :href="'/collection?id=' + mO?.['@id'] + '&_crateId=' + encodeURIComponent(mO?.['@id'])">
+              {{ first(mO?.name)?.['@value'] || mO?.['@id'] }}
+            </a>
+          </div>
+        </el-row>
+        <el-row :align="'middle'" v-if="Array.isArray(parent) && parent.length > 0" class="pt-2">
+          <!--      <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">-->
+          <!--        From:&nbsp;-->
+          <!--      </p>-->
+          <!--      <div class="flex flex-wrap">-->
+          <!--        <a v-for="p of parent" :href="'/item?id=' + encodeURIComponent(p?.['@id']) + '&_crateId=' + encodeURIComponent(p?.['@id'])">-->
+          <!--          <el-button>{{ first(p?.name)?.['@value'] || p?.['@id'] }}</el-button>-->
+          <!--        </a>-->
+          <!--      </div>-->
+          <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white" v-if="!Array.isArray(_memberOf)">
+            &nbsp;In:&nbsp;
+          </p>
+          <div class="flex flex-wrap" v-if="!Array.isArray(_memberOf)">
+            <a
+                :href="'/collection?id=' + encodeURIComponent(root?.['@id']) + '&_crateId=' + encodeURIComponent(root?.['@id'])">
+              <el-button>{{ first(first(root)?.name)?.['@value'] || first(root)?.['@id'] }}</el-button>
+            </a>
+          </div>
+        </el-row>
+        <el-row :align="'middle'">
+          <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+            {{ conformsTo }}
+          </p>
+        </el-row>
+        <el-row class="py-4 pr-4" v-if="first(details?.description)">
+          <p>{{ first(details?.description)?.['@value'] }}</p>
+        </el-row>
+        <el-row v-if="types && types.includes('RepositoryCollection')">
+          <span v-if="!isEmpty(subCollections)">Collections: {{ subCollections?.total }},&nbsp;</span>
+          <span>Objects: {{ total }},&nbsp;</span>
+          <span v-if="typeFile">Files: {{ typeFile?.['doc_count'] }}</span>
+        </el-row>
+        <el-row :align="'middle'" v-if="highlight">
+          <ul>
+            <li v-for="hl of highlight" v-html="'...' + first(hl) + '...'" class="p-2"></li>
+          </ul>
+        </el-row>
+        <el-row v-if="score" class="pt-2">
+          <div>
+            <font-awesome-icon icon="fa-solid fa-5x fa-award"/>
+            Search Score: {{ score }}
+          </div>
+        </el-row>
+        <el-row class="py-2">
+          <el-link type="primary" :underline="false" :href="href">See more</el-link>
+        </el-row>
+      </el-col>
+      <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="5" :span="4" :offset="0">
+        <template v-if="types.includes('RepositoryCollection') || types.includes('RepositoryObject')">
+          <el-row :span="24" class="flex justify-center">
+            <AggregationHelper :asIcons="true"
+                               :aggregations="aggregations"
+                               :field="{ 'name': 'license.@id', 'display': 'Access' }"/>
+          </el-row>
+          <el-row :span="24" class="flex justify-center">
+            <AggregationHelper :asIcons="true"
+                               :aggregations="aggregations"
+                               :field="{ 'name': 'encodingFormat.@value', 'display': 'File Formats' }"/>
+          </el-row>
+        </template>
+        <el-row :span="24" class="flex justify-center" v-else>
+          <AggregationAsIcon class="w-full" :item="findLicense(first(details.license)?.['@value'])"/>
+          <AggregationAsIcon class="w-full" :item="first(details.encodingFormat)?.['@value']"/>
+        </el-row>
       </el-col>
     </el-row>
-    <el-row v-if="score" class="pt-2">
-      <div>
-        <font-awesome-icon icon="fa-solid fa-5x fa-award"/> Search Score: {{ score }}
-      </div>
-    </el-row>
-    <br/>
     <hr class="divide-y divide-gray-500"/>
   </div>
 </template>
 <script>
 import {first, merge, toArray, isEmpty, find} from 'lodash';
 import SummariesCard from './cards/SummariesCard.component.vue';
+import AggregationHelper from './helpers/AggregationHelper.component.vue';
+import AggregationAsIcon from "./widgets/AggregationAsIcon.component.vue";
 
 export default {
   components: {
-    SummariesCard
+    SummariesCard,
+    AggregationHelper,
+    AggregationAsIcon
   },
-  props: ['id', 'href', 'name', 'conformsTo', 'types', 'languages', '_memberOf', 'root', 'highlight', 'parent', 'details', 'score'],
+  props: ['id', 'href', 'name', 'conformsTo', 'types', '_memberOf', 'root', 'highlight', 'parent', 'details', 'score'],
   data() {
     return {
       fields: this.$store.state.configuration.ui.main.fields || [],
@@ -126,7 +128,8 @@ export default {
       total: 0,
       members: [],
       typeFile: null,
-      subCollections: []
+      subCollections: [],
+      licenses: this.$store.state.configuration.ui?.licenses || []
     }
   },
   watch: {
@@ -169,23 +172,27 @@ export default {
       return encodeURIComponent(JSON.stringify(merged));
     },
     async updateSummaries() {
+      let summaries;
       if (this.types && this.types.includes('RepositoryCollection')) {
-        await this.summaries();
+        this.subCollections = await this.filter({
+          '_memberOf.@id': [this.id],
+          'conformsTo.@id': [this.conformsToCollection]
+        });
+        this.members = await this.filter({
+          '_collectionStack.@id': [this.id],
+          'conformsTo.@id': [this.conformsToObject]
+        });
+        summaries = await this.filter({
+          '_collectionStack.@id': [this.id]
+        });
       }
-    },
-    async summaries() {
-      this.loading = true;
-      this.subCollections = await this.filter({
-        '_memberOf.@id': [this.id],
-        'conformsTo.@id': [this.conformsToCollection]
-      });
-      this.members = await this.filter({
-        '_collectionStack.@id': [this.id],
-        'conformsTo.@id': [this.conformsToObject]
-      });
-      const summaries = await this.filter({
-        '_collectionStack.@id': [this.id]
-      });
+      if (this.types && this.types.includes('RepositoryObject')) {
+        if (this.types.includes('RepositoryObject')) {
+          summaries = await this.filter({
+            '_parent.@id': [this.id]
+          });
+        }
+      }
       this.aggregations = summaries?.aggregations;
       // Get the buckets to extract one value: File counts
       const buckets = summaries?.aggregations?.['@type']?.buckets;
@@ -210,6 +217,22 @@ export default {
           scrollId: items?._scroll_id,
           route: null
         }
+      }
+    },
+    findLicense(key) {
+      let licenseType = '';
+      this.licenses.find(l => {
+        if (l.license === key) {
+          licenseType = 'login';
+        } else {
+          licenseType = 'public'
+        }
+      });
+      if (licenseType) {
+        console.log(licenseType)
+        return licenseType;
+      } else {
+        return key;
       }
     }
   }

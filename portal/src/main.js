@@ -3,21 +3,11 @@ import "@/assets/tailwind.css";
 import "element-plus/theme-chalk/index.css";
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
-import {
-    faHome,
-    faUser,
-    faUserSecret,
-    faArrowAltCircleDown,
-    faQuestion,
-    faCircleQuestion,
-    faInfo,
-    faArrowLeft,
-    faMaximize,
-    faMinimize,
-    faDownload, faLockOpen, faLock, faUserLock, faCircleInfo, faChevronUp, faChevronDown, faChevronRight, faAward
-} from '@fortawesome/free-solid-svg-icons'
+import {fas} from "@fortawesome/free-solid-svg-icons";
+import {far} from "@fortawesome/free-regular-svg-icons";
+import {fab} from "@fortawesome/free-brands-svg-icons"
 
-library.add(faHome, faUser, faUserSecret, faArrowAltCircleDown, faQuestion, faCircleQuestion, faInfo, faArrowLeft, faMaximize, faMinimize, faDownload, faUserLock, faLock, faLockOpen, faCircleInfo, faChevronUp, faChevronDown, faChevronRight, faAward)
+library.add(fas, far, fab);
 
 import {createApp} from "vue";
 import App from "./App.vue";
@@ -41,38 +31,37 @@ import ElasticService from "./elastic.service";
 import VueGtag from "vue-gtag";
 
 (async () => {
-    const app = createApp(App);
-    app.use(store);
-    app.use(router);
-    app.use(ElementPlus);
-    app.use(VuePapaParse);
-    app.component('font-awesome-icon', FontAwesomeIcon);
-    app.config.globalProperties.$http = new HTTPService({router, loginPath: "/login"});
-    app.config.globalProperties.$log = log;
-    
-    let response = await fetch("/api/configuration");
-    //Stub configuration if API is down
-    let configuration = {}
-    if (response.status === 200) {
-        configuration = await response.json();
-    } else {
-        configuration.ui = null;
-    }
-    if (configuration.ui && configuration.ui?.analytics?.['gaMeasurementId']) {
-        app.use(VueGtag, {
-            config: {id: configuration.ui.analytics['gaMeasurementId']},
-            router
-        });
-    }
-    store.commit("saveConfiguration", {...configuration});
+  const app = createApp(App);
+  app.use(store);
+  app.use(router);
+  app.use(ElementPlus);
+  app.use(VuePapaParse);
+  app.component('font-awesome-icon', FontAwesomeIcon);
+  app.config.globalProperties.$http = new HTTPService({router, loginPath: "/login"});
+  app.config.globalProperties.$log = log;
 
-    app.config.globalProperties.$membership = new MembershipService({router});
-    app.config.globalProperties.$elasticService = new ElasticService({router, configuration});
+  let response = await fetch("/api/configuration");
+  //Stub configuration if API is down
+  let configuration = {}
+  if (response.status === 200) {
+    configuration = await response.json();
+  } else {
+    configuration.ui = null;
+  }
+  if (configuration.ui && configuration.ui?.analytics?.['gaMeasurementId']) {
+    app.use(VueGtag, {
+      config: {id: configuration.ui.analytics['gaMeasurementId']},
+      router
+    });
+  }
+  store.commit("saveConfiguration", {...configuration});
 
-  
-    app.mount("#app");
+  app.config.globalProperties.$membership = new MembershipService({router});
+  app.config.globalProperties.$elasticService = new ElasticService({router, configuration});
 
-    // app.config.globalProperties.$socket = io();
-    // app.config.productionTip = false;
+  app.mount("#app");
+
+  // app.config.globalProperties.$socket = io();
+  // app.config.productionTip = false;
 
 })();

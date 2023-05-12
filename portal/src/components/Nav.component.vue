@@ -1,5 +1,6 @@
 <template>
   <el-menu
+      id="top_menu"
       mode="horizontal"
       :ellipsis="false"
       :default-active="active"

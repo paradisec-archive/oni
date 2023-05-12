@@ -12,7 +12,7 @@
         </div>
         <div class="pt-2">
           <div class="flex w-full" v-for="aggs of aggregations" :key="aggs.name">
-            <ul v-if="aggs?.buckets?.length > 0"
+            <ul v-if="aggs?.buckets?.length > 0 && !aggs['hide']"
                 class="flex-1 w-full min-w-full bg-white rounded p-2 mb-4 shadow-md border">
               <li @click="aggs.active = !aggs.active"
                   class="hover:cursor-pointer py-3 flex md:flex md:flex-grow flex-row justify-between space-x-1">
@@ -57,7 +57,7 @@
                   </el-icon>
                 </el-button>
               </el-button-group>
-              <span class="my-1 mr-2">Total: {{ this.totals['value'] || 0 }} Index entries (Collections, Objects, Files and Notebooks)</span>
+              <span id="total_results" class="my-1 mr-2">Total: {{ this.totals['value'] || 0 }} Index entries (Collections, Objects, Files and Notebooks)</span>
             </el-row>
             <el-row class="pt-2">
               <el-col :span="24" class="flex space-x-4">
@@ -92,13 +92,12 @@
                            :total="totals['value'] / pageSize || 0 "
                            v-model:page-size="pageSize"
                            v-model:currentPage="currentPage"
-                           @current-change="updatePages"/>
+                           @current-change="updatePages($event, 'top_menu')"/>
           </div>
           <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full" v-loading="loading">
             <search-detail-element v-if="item._source" :id="item._source['@id']" :href="getSearchDetailUrl(item)"
                                    :name="first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value']"
                                    :conformsTo="item.conformsTo" :types="item._source?.['@type']"
-                                   :languages="item._source?.['language']"
                                    :_memberOf="item._source?._memberOf" :highlight="item?.highlight"
                                    :root="item._source?._root"
                                    :parent="item._source?._parent" :aggregations="aggregations"
@@ -121,6 +120,14 @@
               No more items found with that filter or search query
             </h5>
           </el-row>
+          <div class="py-2 w-full">
+            <el-pagination class="items-center w-full"
+                           background layout="prev, pager, next"
+                           :total="totals['value'] / pageSize || 0 "
+                           v-model:page-size="pageSize"
+                           v-model:currentPage="currentPage"
+                           @current-change="updatePages($event, 'total_results')"/>
+          </div>
         </div>
       </el-col>
     </el-row>
@@ -303,7 +310,7 @@ export default {
       this.items = [];
       if (newSearch) {
         this.newSearch = true;
-        this.scrollToTop();
+
       }
       if (items['hits']) {
         const thisItems = items['hits']['hits'];
@@ -330,11 +337,13 @@ export default {
         const display = info?.display;
         const order = info?.order;
         const name = info?.name;
+        const hide = info?.hide;
         a[agg] = {
           buckets: aggregations[agg]?.buckets || aggregations[agg]?.values?.buckets,
           display: display || agg,
           order: order || 0,
-          name: name || agg
+          name: name || agg,
+          hide: hide
         };
       }
       return orderBy(a, 'order');
@@ -349,6 +358,7 @@ export default {
       this.$route.query.f = '';
       this.$route.query.t = '';
       this.$route.query.sf = '';
+      this.searchFields = this.$store.state.configuration.ui.searchFields;
       this.$route.query.o = '';
       this.filterButton = [];
       this.isStart = true;
@@ -363,10 +373,10 @@ export default {
       await this.$router.push({path: 'search'});
       await this.search({});
     },
-    scrollToTop() {
+    scrollToTop(id) {
       setTimeout(function () {
         // window.scroll({top: 0, left:0, behavior: 'smooth'});
-        document.getElementById('app').scrollIntoView({behavior: 'smooth'});
+        document.getElementById(id).scrollIntoView({behavior: 'smooth'});
       }, 100);
     },
     async clearAggregations() {
@@ -402,7 +412,7 @@ export default {
         try {
           this.searchFields = JSON.parse(decodeURIComponent(this.$route.query.sf));
         } catch (e) {
-          this.searchFields = '';
+          this.searchFields = this.$store.state.configuration.ui.searchFields;
         }
       }
       this.items = await this.$elasticService.multi({
@@ -472,11 +482,12 @@ export default {
       const sort = this.selectedSorting['value'] || this.selectedSorting;
       this.search({input: this.searchQuery, sort, order});
     },
-    async updatePages(page) {
+    async updatePages(page, scrollTo) {
       this.currentPage = page;
       const order = this.selectedOrder['value'] || this.selectedOrder;
       const sort = this.selectedSorting['value'] || this.selectedSorting;
-      await this.search({input: this.searchQuery, sort, order})
+      await this.search({input: this.searchQuery, sort, order});
+      this.scrollToTop(scrollTo)
     }
   }
 };

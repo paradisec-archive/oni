@@ -75,8 +75,10 @@ export default {
   components: {},
   updated() {
   },
-  created() {
-    this.searchFields = this.fields;
+  computed: {
+    searchFields() {
+      return this.fields;
+    }
   },
   async mounted() {
     if (this.$route.query.q) {
@@ -164,7 +166,6 @@ export default {
       searchQuery: '',
       items: [],
       scrollId: '',
-      searchFields: [],
       showFieldSearch: false,
       operator: 'should'
     }

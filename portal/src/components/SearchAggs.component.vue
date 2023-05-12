@@ -7,7 +7,7 @@
                    :total="filteredValues.length"
                    @current-change="updatePages"
                    :hide-on-single-page="true"/>
-    <el-input
+    <el-input class="pt-1"
         v-model="filter"
         :placeholder="'Filter'"
         clearable
