@@ -6,6 +6,8 @@
       <ul>
         <li class="font-semibold">
           <el-link
+              :underline="true"
+              type="primary"
               :href="`/${routePath}?id=${encodeURIComponent(f['@id'])}&_crateId=${encodeURIComponent(f['@id'])}`">
             {{ first(f.name)?.['@value'] || f['@id'] }}
           </el-link>

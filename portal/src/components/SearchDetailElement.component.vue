@@ -13,7 +13,7 @@
             Type:&nbsp;
           </p>
           <div class="flex flex-wrap">
-            <span class="text-sm m-2 text-gray-700 dark:text-gray-300" v-for="type of types">
+            <span class="m-2" v-for="type of types">
               {{ type }}
             </span>
           </div>
@@ -24,7 +24,7 @@
                              :field="{ 'name': 'language.name.@value', 'display': 'Languages' }"/>
         </el-row>
         <el-row :align="'middle'" v-if="Array.isArray(_memberOf) && _memberOf.length > 0" class="">
-          <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+          <p class="font-normal">
             Member of:&nbsp;
           </p>
           <div class="flex flex-wrap">

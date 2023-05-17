@@ -3,7 +3,10 @@
     <template v-for="(f, index) of objects" :key="index">
       <ul>
         <li class="font-semibold" v-if="f">
-          <el-link class="ml-2" :href="'/' + objectName + '?id=' + f._id" :underline="true">
+          <el-link class="ml-2"
+                   :underline="true"
+                   type="primary"
+                   :href="'/' + objectName + '?id=' + f._id">
             {{ first(f._source.name)?.['@value'] || f._id }}
           </el-link>
         </li>

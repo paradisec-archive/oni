@@ -73,7 +73,12 @@
               <hr class="divider divider-gray mt-4 pb-2"/>
               <h4 class="text-1xl font-medium">
                 Metadata licensed as:
-                <el-link underline="underline" :href="metadata._metadataLicense?.id" target="_blank" class="mx-1">
+                <el-link underline="underline"
+                         :underline="true"
+                         type="primary"
+                         :href="metadata._metadataLicense?.id"
+                         target="_blank"
+                         class="mx-1">
                   {{ metadata._metadataLicense?.name || metadata._metadataLicense?.id }}
                 </el-link>
               </h4>
