@@ -26,6 +26,7 @@ export default class ElasticService {
       const httpService = new HTTPService({router: this.router, loginPath: '/login'});
       let route = this.searchRoute + this.indexRoute;
       let sorting;
+      let source;
       if (sort === 'relevance') {
         sorting = [{
           _score: {
@@ -42,8 +43,7 @@ export default class ElasticService {
               source: `doc['${sort}.@value.keyword'].size() > 0 ? 1 : 0`
             }
           }
-        }
-        ];
+        }];
         // const sortField = {};
         // sortField[`${sort}.@value.keyword`] = {order};
         // sorting.push(sortField);

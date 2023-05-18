@@ -89,7 +89,7 @@
           <div class="py-2 w-full">
             <el-pagination class="items-center w-full"
                            background layout="prev, pager, next"
-                           :total="totals['value'] / pageSize || 0 "
+                           :total="totals['value']"
                            v-model:page-size="pageSize"
                            v-model:currentPage="currentPage"
                            @current-change="updatePages($event, 'top_menu')"/>
@@ -123,7 +123,7 @@
           <div class="py-2 w-full">
             <el-pagination class="items-center w-full"
                            background layout="prev, pager, next"
-                           :total="totals['value'] / pageSize || 0 "
+                           :total="totals['value']"
                            v-model:page-size="pageSize"
                            v-model:currentPage="currentPage"
                            @current-change="updatePages($event, 'total_results')"/>
