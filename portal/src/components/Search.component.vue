@@ -191,10 +191,9 @@ export default {
       searchFields: this.$store.state.configuration.ui.searchFields,
       sorting: [
         {value: 'relevance', label: 'Relevance'},
-        {value: '_isTopLevel', label: 'Collections'},
-        {value: 'name', label: 'Name'}
+        {value: '_isTopLevel.@value.keyword', label: 'Collections First'}
       ],
-      selectedSorting: {value: '_isTopLevel', label: 'Collections'},
+      selectedSorting: {value: '_isTopLevel.@value.keyword', label: 'Collections First'},
       ordering: [
         {value: 'asc', label: 'Ascending'},
         {value: 'desc', label: 'Descending'}
