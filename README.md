@@ -8,7 +8,7 @@ Pre: To run this first you need an [Arkisto Standard](https://arkisto-platform.g
 
 1. Install docker and docker-compose
 2. Verify your docker-compose points to the right ocfl repository
-   1. Currently, using **Oni** version **0.1.11**
+   1. Currently, using **Oni** version **1.6.0**
 3. Base `configuration.json` is provided, modify as you wish
 4. Start an Oni
    1. `docker-compose up`
@@ -26,8 +26,8 @@ Pre: To run this first you need an [Arkisto Standard](https://arkisto-platform.g
 6. Develop Portal:
    1. `cd portal`
    2. `npm install`
-   3. `npm develop`
-7. Open a browser to [http://localhost:10000](http://localhost:10000)
+   3. `npm run dev`
+7. Open a browser to [http://localhost:11000](http://localhost:11000)
 
 
 ### TODOs

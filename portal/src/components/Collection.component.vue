@@ -18,13 +18,18 @@
       </el-row>
       <el-row v-if="collectionSubCollections">
         <el-col>
-          <collection-members :title="'Sub Collections'" :members="collectionSubCollections"
+          <collection-members :title="'Sub Collections'"
+                              :id="$route.query.id"
+                              :conformsTo="conformsToCollection"
                               :routePath="'collection'"/>
         </el-col>
       </el-row>
       <el-row>
         <el-col v-if="collectionMembers">
-          <collection-members :title="'Objects in Collection'" :members="collectionMembers" :routePath="'object'"/>
+          <collection-members :title="'Objects in Collection'"
+                              :id="$route.query.id"
+                              :conformsTo="conformsToObject"
+                              :routePath="'object'"/>
         </el-col>
       </el-row>
     </el-col>

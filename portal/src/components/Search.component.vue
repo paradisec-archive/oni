@@ -91,6 +91,7 @@
                            background layout="prev, pager, next"
                            :total="totals['value']"
                            v-model:page-size="pageSize"
+                           @update:page-size="pageSize"
                            v-model:currentPage="currentPage"
                            @current-change="updatePages($event, 'top_menu')"/>
           </div>
@@ -106,7 +107,7 @@
           <div v-if="!this.items.length > 0">
             <el-row class="pb-4 items-center">
               <h5 class="mb-2 text-2xl tracking-tight dark:text-white">
-                No items were found with that search input
+                No items found
               </h5>
             </el-row>
             <el-row>
@@ -125,6 +126,7 @@
                            background layout="prev, pager, next"
                            :total="totals['value']"
                            v-model:page-size="pageSize"
+                           @update:page-size="pageSize"
                            v-model:currentPage="currentPage"
                            @current-change="updatePages($event, 'total_results')"/>
           </div>
