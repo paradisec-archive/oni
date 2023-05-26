@@ -30,7 +30,7 @@
       </div>
       <template v-if="Array.isArray(items?.data)">
         <div v-loading="loading">
-          <ul v-for="d of items.data">
+          <ul v-for="d of items.data" :key="d._id">
             <li>
               <collection-item :field="d._source" :routePath="routePath"/>
             </li>

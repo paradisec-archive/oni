@@ -95,7 +95,9 @@
                            v-model:currentPage="currentPage"
                            @current-change="updatePages($event, 'top_menu')"/>
           </div>
-          <div v-for="item of this.items" class="z-0 mt-0 mb-4 w-full" v-loading="loading">
+          <div v-for="item of this.items" :key="item._id"
+               class="z-0 mt-0 mb-4 w-full"
+               v-loading="loading">
             <search-detail-element v-if="item._source" :id="item._source['@id']" :href="getSearchDetailUrl(item)"
                                    :name="first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value']"
                                    :conformsTo="item.conformsTo" :types="item._source?.['@type']"
