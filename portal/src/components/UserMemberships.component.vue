@@ -31,9 +31,6 @@
             <p>Click 'Check Memberships' to refresh your access list</p>
           </div>
         </div>
-
-
-
       </div>
       <div class="h-10 flex rounded items-center">
         <el-link underline="underline" :href="authorizationProvider?.url" target="_blank" class="mx-1"
