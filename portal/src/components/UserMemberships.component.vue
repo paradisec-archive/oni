@@ -10,7 +10,7 @@
       <div class="lg:col-span-2">
         <div class="grid gap-4 gap-y-2 text-sm grid-cols-1 md:grid-cols-5">
           <div class="md:col-span-5">
-            <p class="p-1 m-1 text-center">Member of the following groups:</p>
+            <p class="p-1 m-1 text-center">You have access to the following licenses:</p>
             <br/>
             <ul v-loading="loading" class="divide-y-2 divide-gray-100">
               <li class="p-3" v-for="item in memberships" :key="item">
@@ -28,10 +28,19 @@
                    @click="this.getUserMemberships()"/>
           </div>
           <div class="h-10 flex mt-2">
-            <p>Click 'Check Memberships' to update your group memberships</p>
+            <p>Click 'Check Memberships' to refresh your access list</p>
           </div>
         </div>
 
+
+
+      </div>
+      <div class="h-10 flex rounded items-center">
+        <el-link underline="underline" :href="authorizationProvider?.url" target="_blank" class="mx-1"
+                 title="Will open in a new tab">
+          Verify your access in {{ authorizationProvider?.label }}&nbsp;<font-awesome-icon
+            icon="fa-solid fa-arrow-up-right-from-square"/>
+        </el-link>
       </div>
     </div>
   </div>
@@ -64,7 +73,8 @@ export default {
       loading: false,
       memberships: [],
       noEmrollmentDialogVisible: false,
-      enrollmentUrl: ''
+      enrollmentUrl: '',
+      authorizationProvider: this.$store.state.configuration.ui.authorizationProvider || {}
     };
   },
   mounted() {

@@ -49,6 +49,10 @@
         "buttonStyle": "background: rgba(76 60 185)"
       }
     ],
+    "authorizationProvider": {
+      "label": "REMS",
+      "url": "https://rems-uat.ldaca.edu.au/applications"
+    },
     "enrollment": {
       "enforced": false,
       "URL": "https://registry-test.ldaca.edu.au/registry/co_petitions/start/coef:9"
