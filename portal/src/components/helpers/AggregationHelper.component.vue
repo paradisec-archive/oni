@@ -1,6 +1,6 @@
 <template>
   <template class="w-full" v-for="(b, index) of buckets" :key="b.key+'_'+index">
-    <span v-if="!asIcons" >{{ b.display }}:&nbsp;</span>
+    <span v-if="!asIcons">{{ b.display }}:&nbsp;</span>
     <AggregationAsIcon v-if="asIcons" :item="b.key"/>
     <span v-else>{{ b.key }}</span>
   </template>
@@ -33,7 +33,7 @@ export default {
             key,
             name: this.field.name,
             display: this.field.display
-          })
+          });
         }
       }
       return uniqBy(buckets, 'name');
@@ -41,19 +41,11 @@ export default {
   },
   methods: {
     findLicense(key) {
-      let licenseType = '';
-      this.licenses.find(l => {
-        if (l.license === key) {
-          licenseType = 'login';
-        } else {
-          licenseType = 'public'
-        }
-      });
-      if (licenseType) {
-        console.log(licenseType)
-        return licenseType;
+      let license = this.licenses.find(l => l.license === key);
+      if (license) {
+        return 'login';
       } else {
-        return key;
+        return 'public';
       }
     }
   }

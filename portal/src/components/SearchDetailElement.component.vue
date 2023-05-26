@@ -96,7 +96,7 @@
           </el-row>
         </template>
         <el-row :span="24" class="flex justify-center" v-else>
-          <AggregationAsIcon class="w-full" :item="findLicense(first(details.license)?.['@value'])"/>
+          <AggregationAsIcon class="w-full" :item="findLicense(details.license)"/>
           <AggregationAsIcon class="w-full" :item="first(details.encodingFormat)?.['@value']"/>
         </el-row>
       </el-col>
@@ -219,20 +219,13 @@ export default {
         }
       }
     },
-    findLicense(key) {
-      let licenseType = '';
-      this.licenses.find(l => {
-        if (l.license === key) {
-          licenseType = 'login';
-        } else {
-          licenseType = 'public'
-        }
-      });
-      if (licenseType) {
-        console.log(licenseType)
-        return licenseType;
+    findLicense(detail) {
+      const key = first(detail)?.['@id'];
+      let license = this.licenses.find(l => l.license === key);
+      if (license) {
+        return 'login';
       } else {
-        return key;
+        return 'public';
       }
     }
   }
