@@ -156,6 +156,7 @@ import {CloseBold} from "@element-plus/icons-vue";
 import {defineAsyncComponent, toRaw} from "vue";
 import SearchDetailElement from './SearchDetailElement.component.vue';
 import SearchAggs from './SearchAggs.component.vue';
+import {putLocalStorage} from '@/storage';
 
 export default {
   components: {
@@ -223,6 +224,7 @@ export default {
     if (this.$route.query.q) {
       this.selectedSorting = 'relevance'; //TODO: WHY?? do we need to update the currentPage?
     }
+    putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   async mounted() {
     this.loading = true;
@@ -251,7 +253,8 @@ export default {
       searchFrom: 0
     });
     this.aggregations = this.populateAggregations(aggregations['aggregations']);
-    await this.search({input: this.$route.query.q})
+    await this.search({input: this.$route.query.q});
+    putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   methods: {
     toArray,

@@ -118,6 +118,7 @@ import MemberOfLink from './widgets/MemberOfLink.component.vue';
 import MetaTopCard from './cards/MetaTopCard.component.vue';
 import SummariesCard from './cards/SummariesCard.component.vue';
 import PropertySummaryCard from './cards/PropertySummaryCard.component.vue'
+import {putLocalStorage} from '@/storage';
 
 export default {
   components: {
@@ -185,6 +186,7 @@ export default {
           }, true);
           const summaries = await this.filter({'_collectionStack.@id': [this.$route.query.id]});
           this.aggregations = summaries.aggregations;
+          putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
         } else {
           await this.$router.push({path: '/404'});
         }
@@ -192,6 +194,9 @@ export default {
     } catch (e) {
       console.error(e)
     }
+  },
+  updated() {
+    putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   methods: {
     first,

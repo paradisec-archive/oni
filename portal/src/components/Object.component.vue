@@ -145,6 +145,7 @@ export default {
       '_memberOf.@id': [this.crateId],
       'conformsTo.@id': [this.conformsToObject]
     }, false);
+    putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   async mounted() {
     try {
