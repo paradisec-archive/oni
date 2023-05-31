@@ -1,8 +1,8 @@
 <template>
   <template class="w-full" v-for="(b, index) of buckets" :key="b.key+'_'+index">
-    <span v-if="!asIcons">{{ b.display }}:&nbsp;</span>
+<!--    <span v-if="!asIcons">{{ b.display }}:&nbsp;</span>-->
     <AggregationAsIcon v-if="asIcons" :item="b.key" :id="id" :field="field"/>
-    <span v-else>{{ b.key }}</span>
+    <span v-else>{{ b.key }}&nbsp;</span>
   </template>
 </template>
 <script>

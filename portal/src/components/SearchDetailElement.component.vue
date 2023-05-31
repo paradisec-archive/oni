@@ -19,6 +19,9 @@
           </div>
         </el-row>
         <el-row v-if="types && types.includes('RepositoryCollection')">
+          <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+            Language:&nbsp;
+          </p>
           <AggregationHelper :asIcons=false
                              :aggregations="aggregations"
                              :field="{ 'name': 'language.name.@value', 'display': 'Languages' }"
