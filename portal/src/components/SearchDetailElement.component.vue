@@ -21,7 +21,8 @@
         <el-row v-if="types && types.includes('RepositoryCollection')">
           <AggregationHelper :asIcons=false
                              :aggregations="aggregations"
-                             :field="{ 'name': 'language.name.@value', 'display': 'Languages' }"/>
+                             :field="{ 'name': 'language.name.@value', 'display': 'Languages' }"
+                             :id="id"/>
         </el-row>
         <el-row :align="'middle'" v-if="Array.isArray(_memberOf) && _memberOf.length > 0" class="">
           <p class="font-normal">
@@ -87,12 +88,14 @@
           <el-row :span="24" class="flex justify-center">
             <AggregationHelper :asIcons="true"
                                :aggregations="aggregations"
-                               :field="{ 'name': 'license.@id', 'display': 'Access' }"/>
+                               :field="{ 'name': 'license.@id', 'display': 'Access' }"
+                               :id="id"/>
           </el-row>
           <el-row :span="24" class="flex justify-center">
             <AggregationHelper :asIcons="true"
                                :aggregations="aggregations"
-                               :field="{ 'name': 'encodingFormat.@value', 'display': 'File Formats' }"/>
+                               :field="{ 'name': 'encodingFormat.@value', 'display': 'File Formats' }"
+                               :id="id"/>
           </el-row>
         </template>
         <el-row :span="24" class="flex justify-center" v-else>

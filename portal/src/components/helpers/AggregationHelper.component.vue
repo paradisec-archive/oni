@@ -1,7 +1,7 @@
 <template>
   <template class="w-full" v-for="(b, index) of buckets" :key="b.key+'_'+index">
     <span v-if="!asIcons">{{ b.display }}:&nbsp;</span>
-    <AggregationAsIcon v-if="asIcons" :item="b.key"/>
+    <AggregationAsIcon v-if="asIcons" :item="b.key" :id="id" :field="field"/>
     <span v-else>{{ b.key }}</span>
   </template>
 </template>
@@ -11,7 +11,7 @@ import {uniqBy} from "lodash";
 
 export default {
   components: {AggregationAsIcon},
-  props: ['aggregations', 'field', 'asIcons'],
+  props: ['aggregations', 'field', 'asIcons', 'id'],
   data() {
     return {
       licenses: this.$store.state.configuration.ui?.licenses || []
@@ -36,7 +36,7 @@ export default {
           });
         }
       }
-      return uniqBy(buckets, 'name');
+      return uniqBy(buckets, 'key');
     }
   },
   methods: {
