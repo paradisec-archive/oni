@@ -135,7 +135,7 @@
         </div>
       </el-col>
     </el-row>
-    <el-dialog v-model="errorDialogVisible" width="30%" center>
+    <el-dialog v-model="errorDialogVisible" width="40%" center>
       <el-alert title="Error" type="warning" :closable="false">
         <p class="break-normal">{{ this.errorDialogText }}</p>
       </el-alert>
@@ -318,7 +318,7 @@ export default {
         this.newSearch = true;
 
       }
-      if (items['hits']) {
+      if (items?.['hits']) {
         const thisItems = items['hits']['hits'];
         this.totals = items['hits']['total'];
         if (thisItems.length > 0) {
@@ -330,7 +330,7 @@ export default {
           this.more = false;
         }
       }
-      if (items['aggregations']) {
+      if (items?.['aggregations']) {
         this.memberOfBuckets = items['aggregations']?.['_memberOf.name.@value'];
       }
     },
@@ -421,18 +421,24 @@ export default {
           this.searchFields = this.$store.state.configuration.ui.searchFields;
         }
       }
-      this.items = await this.$elasticService.multi({
-        multi: this.searchQuery,
-        filters: toRaw(filters),
-        searchFields: this.searchFields,
-        sort: sort || this.selectedSorting['value'] || this.selectedSorting,
-        order: order || this.selectedOrder['value'] || this.selectedOrder,
-        operation: this.$route.query.o,
-        pageSize: this.pageSize,
-        searchFrom: (this.currentPage - 1) * this.pageSize
-      });
-      this.populate({items: this.items, newSearch: true, aggregations: this.aggregations});
-      this.loading = false;
+      try {
+        this.items = await this.$elasticService.multi({
+          multi: this.searchQuery,
+          filters: toRaw(filters),
+          searchFields: this.searchFields,
+          sort: sort || this.selectedSorting['value'] || this.selectedSorting,
+          order: order || this.selectedOrder['value'] || this.selectedOrder,
+          operation: this.$route.query.o,
+          pageSize: this.pageSize,
+          searchFrom: (this.currentPage - 1) * this.pageSize
+        });
+        this.populate({items: this.items, newSearch: true, aggregations: this.aggregations});
+        this.loading = false;
+      } catch (e) {
+        this.errorDialogVisible = true;
+        this.errorDialogText = e.message;
+        this.loading = false;
+      }
     },
     getSearchDetailUrl(item) {
       //console.log(item);

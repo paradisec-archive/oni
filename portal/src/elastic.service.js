@@ -9,6 +9,7 @@ export default class ElasticService {
     this.indexRoute = '/items';
     this.aggs = this.prepareAggregations(configuration.ui.aggregations)
     this.highlightFields = configuration.ui.searchHighlights;
+    this.highlighConfig = configuration.ui.hightlight || {};
     this.fields = configuration.ui.searchFields;
   }
 
@@ -71,20 +72,17 @@ export default class ElasticService {
       body['from'] = searchFrom;
       // console.log('multi query')
       // console.log(JSON.stringify(body));
-      let response = await httpService.post({route, body});
+      let response = await httpService.post({route, body})
       if (response.status !== 200) {
         //httpService.checkAuthorised({status: response.status});
-        console.error(JSON.stringify(response))
-        window.alert(response.statusText)
-        return {error: response.statusText};
+        throw new Error(response.statusText);
       } else {
         const results = await response.json();
         //console.log(results);
         return results;
       }
     } catch (e) {
-      console.error(JSON.stringify(e))
-      window.alert(e);
+      throw new Error(e.message);
     }
   }
 
@@ -123,7 +121,7 @@ export default class ElasticService {
     let response = await httpService.post({route, body});
     if (response.status !== 200) {
       //httpService.checkAuthorised({status: response.status});
-      return {error: response.statusText};
+      throw new Error(response.statusText);
     } else {
       const results = await response.json();
       console.log(first(results?.hits?.hits));
@@ -215,7 +213,8 @@ export default class ElasticService {
       );
 
     const query = esbQuery.toJSON().query;
-    const highlight = esbQuery.toJSON().highlight;
+    let highlight = esbQuery.toJSON().highlight;
+    highlight = {...highlight, ...this.highlighConfig};
     return highlight;
   }
 }
