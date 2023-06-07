@@ -21,6 +21,13 @@
                  :underline="false">
           {{ splashLauncher || 'Splash' }}
         </el-link>
+        <el-link v-if="privacy"
+                 class="text-gray-600 font-semibold"
+                 :href="privacy?.href"
+                 :underline="false">{{
+            privacy?.title
+          }}
+        </el-link>
       </el-col>
     </el-row>
   </div>
@@ -38,6 +45,7 @@ export default {
       href: this.$store.state.configuration.ui.footer.link.href,
       hrefText: this.$store.state.configuration.ui.footer.link.text,
       terms: this.$store.state.configuration.ui?.terms || null,
+      privacy: this.$store.state.configuration.ui?.privacy || null,
       splash: false,
       splashLauncher: this.$store.state.configuration.ui?.splashLauncher || null
     }

@@ -2,7 +2,7 @@
   <div class="min-w-full pb-4 pt-0 px-2 pl-4">
     <div class="bg-white z-10">
     </div>
-    <el-row :gutter="40" :offset="1" class="p-4">
+    <el-row :gutter="40" :offset="1" class="flex flex-row h-[calc(100vh-220px)] overflow-auto">
         <p class="text-gray-500 mb-6"></p>
         <div class="p-4 px-4 md:p-8 mb-6">
           <div class="text-sm grid-cols-1 lg:grid-cols-3">

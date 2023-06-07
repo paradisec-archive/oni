@@ -20,6 +20,11 @@
       "href":"/terms",
       "title": "Terms of Service"
     },
+    "privacy": {
+      "text": "Example privacy notice",
+      "href":"/privacy",
+      "title": "Privacy Notice"
+    },
     "email": {
       "help": "help@example.com"
     },
