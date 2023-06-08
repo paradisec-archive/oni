@@ -100,10 +100,17 @@
                                :field="{ 'name': 'encodingFormat.@value', 'display': 'File Formats' }"
                                :id="id"/>
           </el-row>
+          <el-row :span="24" class="flex justify-center">
+            <AggregationHelper :asIcons="true"
+                               :aggregations="aggregations"
+                               :field="{ 'name': 'modality.name.@value', 'display': 'Modality' }"
+                               :id="id"/>
+          </el-row>
         </template>
         <el-row :span="24" class="flex justify-center" v-else>
           <AggregationAsIcon class="w-full" :item="findLicense(details.license)"/>
           <AggregationAsIcon class="w-full" :item="first(details.encodingFormat)?.['@value']"/>
+          <AggregationAsIcon class="w-full" :item="first(first(details.modality)?.['name'])?.['@value']"/>
         </el-row>
       </el-col>
     </el-row>

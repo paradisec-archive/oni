@@ -8,7 +8,7 @@ import ObjectComponent from "@/components/Object.component.vue";
 import ObjectOpenComponent from "@/components/ObjectOpen.component.vue";
 import HelpComponent from "@/components/Help.component.vue";
 import TermsComponent from "@/components/Terms.component.vue";
-import PrivacyComponent from "./Privacy.component.vue";
+import PrivacyComponent from "@/components/Privacy.component.vue";
 import ApiDocsComponent from "@/components/ApiDocsComponent.component.vue";
 import CallbackOauthLogin from "@/components/authentication/OauthCallback.component.vue";
 import NotFoundPage from "@/components/NotFoundPage.vue";

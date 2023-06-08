@@ -10,13 +10,17 @@
     </span>
     <span v-else>
       <span class="flex justify-center">
+        <el-tooltip
+            class="box-item"
+            effect="dark"
+            :content="item"
+            placement="bottom"
+        >
         <font-awesome-icon
             :icon="['fa-solid', iconType]"
             size="2x"
-            style="color: #919191;"/>
-      </span>
-      <span class="flex justify-center">
-        <span class="text-sm">{{ item }}</span>
+            style="color: rgba(0,0,0,0.55);"/>
+      </el-tooltip>
       </span>
     </span>
   </span>
@@ -55,6 +59,18 @@ export default {
       this.iconType = 'file-audio';
     } else if (/application\/x-ipynb+json/.test(this.item)) {
       this.iconType = 'clipboard';
+    } else if (/WrittenLanguage/.test(this.item)) {
+      this.iconType = 'fa-feather';
+    } else if (/SpokenLanguage/.test(this.item)){
+        this.iconType = 'fa-microphone-lines';
+    } else if (/Song/.test(this.item)){
+      this.iconType = 'fa-music';
+    } else if (/Gesture/.test(this.item)){
+      this.iconType = 'fa-hand';
+    } else if (/SignLanguage/.test(this.item)){
+      this.iconType = 'fa-hands-asl-interpreting';
+    } else if (/WhistledLanguage/.test(this.item)){
+      this.iconType = 'fa-face-kiss';
     } else if (/public/.test(this.item)) {
       this.accessIcon = 'public';
       this.noIcon = true;

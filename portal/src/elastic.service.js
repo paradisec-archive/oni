@@ -70,6 +70,7 @@ export default class ElasticService {
       }
       body['size'] = pageSize;
       body['from'] = searchFrom;
+      body['track_total_hits'] = true;
       // console.log('multi query')
       // console.log(JSON.stringify(body));
       let response = await httpService.post({route, body})
