@@ -57,7 +57,8 @@
                   </el-icon>
                 </el-button>
               </el-button-group>
-              <span id="total_results" class="my-1 mr-2">Total: {{ this.totals['value'] || 0 }} Index entries (Collections, Objects, Files and Notebooks)</span>
+              <span id="total_results"
+                    class="my-1 mr-2">Total: <span v-loading="loading">{{ this.totals['value'] || 0 }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
             </el-row>
             <el-row class="pt-2">
               <el-col :span="24" class="flex space-x-4">
@@ -106,10 +107,10 @@
                                    :parent="item._source?._parent" :aggregations="aggregations"
                                    :details="item._source" :score="item._score"/>
           </div>
-          <div v-if="!this.items.length > 0">
+          <div v-loading="loading" v-if="!this.items.length > 0">
             <el-row class="pb-4 items-center">
               <h5 class="mb-2 text-2xl tracking-tight dark:text-white">
-                No items found
+                {{ noItemsFound }}
               </h5>
             </el-row>
             <el-row>
@@ -204,7 +205,8 @@ export default {
         {value: 'desc', label: 'Descending'}
       ],
       selectedOrder: {value: 'desc', label: 'Descending'},
-      searchFrom: 0
+      searchFrom: 0,
+      noItemsFound: 'No items found'
     };
   },
   watch: {
