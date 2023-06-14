@@ -58,7 +58,7 @@
                 </el-button>
               </el-button-group>
               <span id="total_results"
-                    class="my-1 mr-2">Total: <span v-loading="loading">{{ this.totals['value'] || 0 }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
+                    class="my-1 mr-2" v-show="this.totals['value']">Total: <span>{{ this.totals['value'] }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
             </el-row>
             <el-row class="pt-2">
               <el-col :span="24" class="flex space-x-4">
@@ -110,7 +110,7 @@
           <div v-loading="loading" v-if="!this.items.length > 0">
             <el-row class="pb-4 items-center">
               <h5 class="mb-2 text-2xl tracking-tight dark:text-white">
-                {{ noItemsFound }}
+                <span v-if="!loading">No items found</span>
               </h5>
             </el-row>
             <el-row>
@@ -205,8 +205,7 @@ export default {
         {value: 'desc', label: 'Descending'}
       ],
       selectedOrder: {value: 'desc', label: 'Descending'},
-      searchFrom: 0,
-      noItemsFound: 'No items found'
+      searchFrom: 0
     };
   },
   watch: {
