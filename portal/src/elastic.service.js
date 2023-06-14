@@ -156,7 +156,7 @@ export default class ElasticService {
     } else if (!isEmpty(searchQuery) && filterTerms.length > 0) {
       let phraseQuery = [];
       for (let [key, value] of Object.entries(fields)) {
-        if (value.selected) {
+        if (value.checked) {
           phraseQuery.push(esb.matchPhraseQuery(key, searchQuery));
         }
       }
@@ -176,7 +176,7 @@ export default class ElasticService {
     } else if (!isEmpty(searchQuery) && filterTerms.length <= 0) {
       let phraseQuery = [];
       for (let [key, value] of Object.entries(fields)) {
-        if (value.selected) {
+        if (value.checked) {
           phraseQuery.push(esb.matchPhraseQuery(key, searchQuery));
         }
       }

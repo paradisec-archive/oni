@@ -225,6 +225,7 @@ export default {
     if (this.$route.query.q) {
       this.selectedSorting = 'relevance'; //TODO: WHY?? do we need to update the currentPage?
     }
+    await this.updateRoutes();
     putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   async mounted() {
@@ -254,7 +255,8 @@ export default {
       searchFrom: 0
     });
     this.aggregations = this.populateAggregations(aggregations['aggregations']);
-    await this.search({input: this.$route.query.q});
+    // await this.search({input: this.$route.query.q});
+    await this.searchAll();
     putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   methods: {
@@ -298,11 +300,22 @@ export default {
     async updateRoutes() {
       let filters;
       const query = {q: this.$route.query.q, sf: this.$route.query.sf}
+      if (!this.$route.query.sf) {
+        this.searchFields = this.$store.state.configuration.ui.searchFields;
+        query.sf = encodeURIComponent(JSON.stringify(this.searchFields));
+      }
+      if (!this.$route.query.o) {
+        query.o = 'should';
+      }
       if (this.filters) {
         filters = toRaw(this.filters);
         filters = encodeURIComponent(JSON.stringify(filters));
         query.f = filters;
-        query.o = this.$route.query.o
+        if (!this.$route.query.o) {
+          query.o = 'should';
+        } else {
+          query.o = this.$route.query.o
+        }
       }
       await this.$router.push({path: 'search', query, replace: true});
     },
@@ -364,9 +377,9 @@ export default {
       this.$route.query.q = '';
       this.$route.query.f = '';
       this.$route.query.t = '';
-      this.$route.query.sf = '';
       this.searchFields = this.$store.state.configuration.ui.searchFields;
-      this.$route.query.o = '';
+      this.$route.query.sf = encodeURIComponent(this.searchFields);
+      this.$route.query.o = 'should';
       this.filterButton = [];
       this.isStart = true;
       this.isBrowse = false;
@@ -377,7 +390,10 @@ export default {
     },
     async searchAll() {
       this.isStart = false;
-      await this.$router.push({path: 'search'});
+      this.searchFields = this.$store.state.configuration.ui.searchFields;
+      const sf = encodeURIComponent(JSON.stringify(this.searchFields));
+      const query = {o: 'should', sf: sf};
+      await this.$router.push({path: 'search', query});
       await this.search({});
     },
     scrollToTop(id) {

@@ -44,17 +44,19 @@
       </el-row>
       <el-row v-show="showFieldSearch"
               :justify="'start'" :gutter="20" :align="'middle'"
-              v-for="(value, name) of searchFields" :key="name">
+              v-for="(value, name, index) of searchFields" :key="index">
         <div class="mx-2 min-w-300">
           <el-checkbox class="px-3 mx-2.5 break-all"
                        @change="fieldSelected(name, $event)"
                        :label="value.label || value.name" size="large"
-                       :checked="value.selected"/>
+                       :checked="value.checked"/>
         </div>
       </el-row>
       <el-row v-show="showFieldSearch"
               :justify="'space-around'" :gutter="20" :align="'middle'">
-        <el-radio-group class="mx-2 px-2 break-all" v-model="operator">
+        <el-radio-group class="mx-2 px-2 break-all"
+                        v-model="operator"
+                        @change="doSearch">
           <el-radio :label="'must'">And</el-radio>
           <el-radio :label="'should'">Or</el-radio>
           <el-radio :label="'must_not'">Not</el-radio>
@@ -71,21 +73,35 @@ import {Close} from '@element-plus/icons-vue'
 import {isEmpty} from 'lodash';
 
 export default {
-  props: ['searchInput', 'clearSearch', 'filters', 'search', 'fields' , 'showFields'],
+  props: ['searchInput', 'clearSearch', 'filters', 'search', 'fields', 'showFields'],
   components: {},
   updated() {
+    this.updateSearchFields();
   },
-  computed: {
-    searchFields() {
-      return this.fields;
-    }
-  },
+  // computed: {
+  //   searchFields() {
+  //     const sf = decodeURIComponent(this.$route.query.sf) || null;
+  //     if (!isEmpty(sf)) {
+  //       this.showFieldSearch = true;
+  //       try {
+  //         return JSON.parse(sf);
+  //       } catch (e) {
+  //         this.searchFields = null;
+  //       }
+  //     } else {
+  //       this.searchFields = null;
+  //     }
+  //   }
+  // },
   async mounted() {
     if (this.$route.query.q) {
       this.searchQuery = this.$route.query.q;
     }
     if (this.$route.query.sf) {
       this.showFieldSearch = true;
+      this.updateSearchFields();
+    } else {
+      this.searchFields = this.fields;
     }
     if (this.$route.query.o) {
       this.operator = this.$route.query.o;
@@ -99,6 +115,15 @@ export default {
       this.searchQuery = this.$route.query.q;
     },
     '$route.query.sf'() {
+      this.updateSearchFields();
+    },
+    clearSearch() {
+      this.reset();
+    }
+  },
+  methods: {
+    isEmpty,
+    updateSearchFields() {
       const sf = decodeURIComponent(this.$route.query.sf) || null;
       if (!isEmpty(sf)) {
         this.showFieldSearch = true;
@@ -111,19 +136,13 @@ export default {
         this.searchFields = null;
       }
     },
-    clearSearch() {
-      this.reset();
-    }
-  },
-  methods: {
-    isEmpty,
     async reset() {
       this.searchQuery = '';
-      await this.$router.push({path: 'search'});
+      // await this.$router.push({path: 'search'});
     },
     async resetBar() {
       this.searchQuery = '';
-      let query = {q: this.searchQuery, o: this.operator};
+      let query = {q: this.searchQuery, o: this.operator, sf: encodeURIComponent(JSON.stringify(this.searchFields))};
       if (this.$route.query.f) {
         console.log(this.$route.query.f);
         query = {...query, f: this.$route.query.f};
@@ -156,7 +175,8 @@ export default {
       await this.$router.push({path: 'search', query});
     },
     async fieldSelected(field, event) {
-      this.searchFields[field]['selected'] = event;
+      this.searchFields[field]['checked'] = event;
+      this.doSearch();
     }
   },
   data() {
@@ -167,7 +187,8 @@ export default {
       items: [],
       scrollId: '',
       showFieldSearch: false,
-      operator: 'should'
+      operator: 'should',
+      searchFields: {}
     }
   }
 }

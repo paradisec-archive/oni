@@ -8,14 +8,14 @@
                    @current-change="updatePages"
                    :hide-on-single-page="true"/>
     <el-input class="pt-1"
-        v-model="filter"
-        :placeholder="'Filter'"
-        clearable
-        @input="updatePages(1)"
+              v-model="filter"
+              :placeholder="'Filter'"
+              clearable
+              @input="updatePages(1)"
     />
     <li class="m-2 mt-4 cursor-pointer"
         v-for="ag in filteredValues?.slice(this.pageStartIndex, this.pageStartIndex + this.pageSize)"
->
+    >
       <div class="form-check form-check-inline cursor-pointer">
         <input :id="aggsName + '_' + ag.key" :name="aggsName + '_' + ag.key" v-model="checkedBuckets"
                v-on:change="onChange"
@@ -69,6 +69,12 @@ export default {
       const query = {}
       if (this.$route.query.q) {
         query.q = this.$route.query.q
+      }
+      if (this.$route.query.o) {
+        query.o = this.$route.query.o;
+      }
+      if (this.$route.query.sf) {
+        query.sf = this.$route.query.sf;
       }
       if (this.$route.query.f) {
         const filters = this.$route.query.f;
