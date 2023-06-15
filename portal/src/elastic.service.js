@@ -160,19 +160,7 @@ export default class ElasticService {
           phraseQuery.push(esb.matchPhraseQuery(key, searchQuery));
         }
       }
-      switch (operation) {
-        case 'must':
-          boolQueryObj = esb.boolQuery().must(phraseQuery).must(filterTerms);
-          break;
-        case 'should':
-          boolQueryObj = esb.boolQuery().should(phraseQuery).must(filterTerms);
-          break;
-        case 'must_not':
-          boolQueryObj = esb.boolQuery().mustNot(phraseQuery).must(filterTerms);
-          break;
-        default:
-          boolQueryObj = esb.boolQuery().should(phraseQuery).must(filterTerms);
-      }
+      boolQueryObj = switchFilter(operation, boolQueryObj, phraseQuery, filterTerms);
     } else if (!isEmpty(searchQuery) && filterTerms.length <= 0) {
       let phraseQuery = [];
       for (let [key, value] of Object.entries(fields)) {
@@ -180,23 +168,10 @@ export default class ElasticService {
           phraseQuery.push(esb.matchPhraseQuery(key, searchQuery));
         }
       }
-      switch (operation) {
-        case 'must':
-          boolQueryObj = esb.boolQuery().must(phraseQuery);
-          break;
-        case 'should':
-          boolQueryObj = esb.boolQuery().should(phraseQuery);
-          break;
-        case 'must_not':
-          boolQueryObj = esb.boolQuery().mustNot(phraseQuery);
-          break;
-        default:
-          boolQueryObj = esb.boolQuery().should(phraseQuery);
-      }
+      boolQueryObj = switchFilter(operation, boolQueryObj, phraseQuery, filterTerms);
     } else if (isEmpty(searchQuery) && filterTerms.length <= 0) {
       boolQueryObj = esb.matchAllQuery();
     }
-
     const esbQuery = esb.requestBodySearch().query(boolQueryObj)
     const query = esbQuery.toJSON().query;
     return query;
@@ -218,4 +193,21 @@ export default class ElasticService {
     highlight = {...highlight, ...this.highlighConfig};
     return highlight;
   }
+}
+
+function switchFilter(operation, boolQueryObj, phraseQuery, filterTerms){
+  switch (operation) {
+    case 'must':
+      boolQueryObj = esb.boolQuery().must(phraseQuery).must(filterTerms);
+      break;
+    case 'should':
+      boolQueryObj = esb.boolQuery().should(phraseQuery).must(filterTerms);
+      break;
+    case 'must_not':
+      boolQueryObj = esb.boolQuery().mustNot(phraseQuery).must(filterTerms);
+      break;
+    default:
+      boolQueryObj = esb.boolQuery().should(phraseQuery).must(filterTerms);
+  }
+  return boolQueryObj;
 }

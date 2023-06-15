@@ -205,7 +205,8 @@ export default {
         {value: 'desc', label: 'Descending'}
       ],
       selectedOrder: {value: 'desc', label: 'Descending'},
-      searchFrom: 0
+      searchFrom: 0,
+      selectedOperation: 'should'
     };
   },
   watch: {
@@ -214,21 +215,32 @@ export default {
       await this.updateFilters({});
       this.onInputChange(this.$route.query.q);
       //Every new search will force sort relevance:
-      this.selectedSorting = 'relevance';
+      this.selectedSorting = this.sorting[0];
       this.currentPage = 1;
-      await this.search({sort: this.selectedSorting});
+      await this.search({sort: this.selectedSorting.value});
       this.loading = false;
     }
   },
   async updated() {
-    //await this.updateRoutes(); // I dont remember why this was here!
-    if (this.$route.query.q) {
-      this.selectedSorting = 'relevance'; //TODO: WHY?? do we need to update the currentPage?
+    console.log('updated')
+    console.log(this.selectedOperation);
+    // if (this.$route.query.q) {
+    //   this.selectedSorting = 'relevance'; //TODO: WHY?? do we need to update the currentPage?
+    // }
+    if (this.$route.query.o) {
+      this.selectedOperation = this.$route.query.o
     }
-    await this.updateRoutes();
+    if (!this.$route.query.sf) {
+      this.searchFields = this.$store.state.configuration.ui.searchFields;
+      console.log(this.searchFields);
+    }
+    console.log('this.searchFields');
+    console.log(this.searchFields);
+    // await this.updateRoutes();
     putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   async mounted() {
+    console.log('mounted')
     this.loading = true;
     if (isEmpty(this.$route.query.f) && isEmpty(this.$route.query.q)) {
       //await this.resetSearch();
@@ -236,19 +248,32 @@ export default {
     }
     await this.updateFilters({});
     if (this.$route.query.q) {
-      this.selectedSorting = 'relevance';
+      this.selectedSorting = this.sorting[0];
+    }
+    if (this.$route.query.o) {
+      this.selectedSorting = this.$route.query.o;
+    }
+    if (!this.$route.query.sf) {
+      this.searchFields = this.$store.state.configuration.ui.searchFields;
     }
     //await this.search({input: this.$route.query.q});
     this.loading = false;
   },
   async created() {
+    console.log('created');
     if (this.$route.query.q) {
-      this.selectedSorting = 'relevance';
+      this.selectedSorting = this.sorting[0];
+    }
+    if (!this.$route.query.sf) {
+      this.searchFields = this.$store.state.configuration.ui.searchFields;
+    }
+    if (this.$route.query.o) {
+      this.selectedOperation = this.$route.query.o;
     }
     const aggregations = await this.$elasticService.multi({
       multi: '',
       filters: {},
-      sort: 'relevance',
+      sort: this.sorting[0].value,
       order: 'desc',
       operation: 'must',
       pageSize: 10,
@@ -304,18 +329,15 @@ export default {
         this.searchFields = this.$store.state.configuration.ui.searchFields;
         query.sf = encodeURIComponent(JSON.stringify(this.searchFields));
       }
-      if (!this.$route.query.o) {
-        query.o = 'should';
-      }
       if (this.filters) {
         filters = toRaw(this.filters);
         filters = encodeURIComponent(JSON.stringify(filters));
         query.f = filters;
-        if (!this.$route.query.o) {
-          query.o = 'should';
-        } else {
-          query.o = this.$route.query.o
-        }
+      }
+      if (!this.$route.query.o) {
+        query.o = this.selectedOperation;
+      } else {
+        query.o = this.$route.query.o;
       }
       await this.$router.push({path: 'search', query, replace: true});
     },
@@ -358,12 +380,14 @@ export default {
         const order = info?.order;
         const name = info?.name;
         const hide = info?.hide;
+        const active = info?.active;
         a[agg] = {
           buckets: aggregations[agg]?.buckets || aggregations[agg]?.values?.buckets,
           display: display || agg,
           order: order || 0,
           name: name || agg,
-          hide: hide
+          hide: hide,
+          active: active
         };
       }
       return orderBy(a, 'order');
@@ -379,7 +403,9 @@ export default {
       this.$route.query.t = '';
       this.searchFields = this.$store.state.configuration.ui.searchFields;
       this.$route.query.sf = encodeURIComponent(this.searchFields);
-      this.$route.query.o = 'should';
+      this.$route.query.o = this.selectedOperation;
+      this.selectedSorting = this.sorting[0];
+      console.log(this.selectedSorting);
       this.filterButton = [];
       this.isStart = true;
       this.isBrowse = false;
@@ -392,7 +418,10 @@ export default {
       this.isStart = false;
       this.searchFields = this.$store.state.configuration.ui.searchFields;
       const sf = encodeURIComponent(JSON.stringify(this.searchFields));
-      const query = {o: 'should', sf: sf};
+      const query = {o: this.selectedOperation, sf: sf};
+      if (this.$route.query.q) {
+        query.q = this.$route.query.q;
+      }
       await this.$router.push({path: 'search', query});
       await this.search({});
     },
@@ -438,14 +467,17 @@ export default {
           this.searchFields = this.$store.state.configuration.ui.searchFields;
         }
       }
+      if (this.$route.query.o) {
+        this.selectedOperation = this.$route.query.o;
+      }
       try {
         this.items = await this.$elasticService.multi({
           multi: this.searchQuery,
           filters: toRaw(filters),
           searchFields: this.searchFields,
-          sort: sort || this.selectedSorting['value'] || this.selectedSorting,
+          sort: sort || this.selectedSorting['value'] || this.selectedSorting.value,
           order: order || this.selectedOrder['value'] || this.selectedOrder,
-          operation: this.$route.query.o,
+          operation: this.selectedOperation,
           pageSize: this.pageSize,
           searchFrom: (this.currentPage - 1) * this.pageSize
         });
@@ -508,13 +540,13 @@ export default {
     },
     orderResults(order) {
       this.currentPage = 1;
-      const sort = this.selectedSorting['value'] || this.selectedSorting;
+      const sort = this.selectedSorting.value;
       this.search({input: this.searchQuery, sort, order});
     },
     async updatePages(page, scrollTo) {
       this.currentPage = page;
       const order = this.selectedOrder['value'] || this.selectedOrder;
-      const sort = this.selectedSorting['value'] || this.selectedSorting;
+      const sort = this.selectedSorting.value;
       await this.search({input: this.searchQuery, sort, order});
       this.scrollToTop(scrollTo)
     }

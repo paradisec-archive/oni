@@ -40,16 +40,16 @@
       </el-row>
       <el-row v-show="showFieldSearch"
               :justify="'center'" :gutter="20" :align="'middle'" class="">
-        <p class="mx-2 px-2 break-all">Selecting a field will limit the search</p>
+        <p class="mx-2 px-2 break-all text-sm">Search using the following fields:</p>
       </el-row>
       <el-row v-show="showFieldSearch"
               :justify="'start'" :gutter="20" :align="'middle'"
-              v-for="(value, name, index) of searchFields" :key="index">
+              v-for="(value, key, index) of searchFields" :key="index">
         <div class="mx-2 min-w-300">
-          <el-checkbox class="px-3 mx-2.5 break-all"
-                       @change="fieldSelected(name, $event)"
-                       :label="value.label || value.name" size="large"
-                       :checked="value.checked"/>
+          <el-checkbox v-model="searchFields[key].checked" class="px-3 mx-2.5 break-all"
+                       @change="fieldSelected(key, $event)"
+                       :label="value.label || value.name"
+                       size="large"/>
         </div>
       </el-row>
       <el-row v-show="showFieldSearch"
@@ -75,8 +75,17 @@ import {isEmpty} from 'lodash';
 export default {
   props: ['searchInput', 'clearSearch', 'filters', 'search', 'fields', 'showFields'],
   components: {},
+  created() {
+    this.updateSearchFields();
+    if (!this.operator) {
+      this.operator = 'should';
+    }
+  },
   updated() {
     this.updateSearchFields();
+    if (!this.operator) {
+      this.operator = 'should';
+    }
   },
   // computed: {
   //   searchFields() {
@@ -94,17 +103,9 @@ export default {
   //   }
   // },
   async mounted() {
-    if (this.$route.query.q) {
-      this.searchQuery = this.$route.query.q;
-    }
-    if (this.$route.query.sf) {
-      this.showFieldSearch = true;
-      this.updateSearchFields();
-    } else {
-      this.searchFields = this.fields;
-    }
-    if (this.$route.query.o) {
-      this.operator = this.$route.query.o;
+    this.updateSearchFields();
+    if (!this.operator) {
+      this.operator = 'should';
     }
   },
   watch: {
@@ -125,7 +126,7 @@ export default {
     isEmpty,
     updateSearchFields() {
       const sf = decodeURIComponent(this.$route.query.sf) || null;
-      if (!isEmpty(sf)) {
+      if (!isEmpty(sf) && sf !== 'undefined') {
         this.showFieldSearch = true;
         try {
           this.searchFields = JSON.parse(sf);
@@ -133,7 +134,7 @@ export default {
           this.searchFields = null;
         }
       } else {
-        this.searchFields = null;
+        this.searchFields = this.fields;
       }
     },
     async reset() {
@@ -174,8 +175,8 @@ export default {
       }
       await this.$router.push({path: 'search', query});
     },
-    async fieldSelected(field, event) {
-      this.searchFields[field]['checked'] = event;
+    async fieldSelected(key, event) {
+      this.searchFields[key]['checked'] = event;
       this.doSearch();
     }
   },
