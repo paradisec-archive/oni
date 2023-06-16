@@ -6,6 +6,7 @@
           <el-input @keyup.enter="searchInputField" type="text" class="px-2 w-64 h-full w-full"
                     placeholder="Search..."
                     v-model="searchQuery"
+                    @input="updateSearchInput"
                     v-on:change="searchInputField"
                     name="searchInput" id="searchInput" ref="searchInput">
             <template #append>
@@ -157,6 +158,11 @@ export default {
         this.searchQuery = e.target?.value;
       }
       await this.doSearch();
+    },
+    updateSearchInput(e) {
+      if (typeof e === 'string') {
+        this.searchQuery = e;
+      }
     },
     async doSearch() {
       let query = {
