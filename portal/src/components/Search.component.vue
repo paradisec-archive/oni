@@ -475,7 +475,7 @@ export default {
           multi: this.searchQuery,
           filters: toRaw(filters),
           searchFields: this.searchFields,
-          sort: sort || this.selectedSorting['value'] || this.selectedSorting.value,
+          sort: sort || this.sorting[0].value,
           order: order || this.selectedOrder['value'] || this.selectedOrder,
           operation: this.selectedOperation,
           pageSize: this.pageSize,
