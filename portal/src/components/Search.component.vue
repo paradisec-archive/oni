@@ -217,47 +217,9 @@ export default {
       //Every new search will force sort relevance:
       this.selectedSorting = this.sorting[0];
       this.currentPage = 1;
-      await this.search({sort: this.selectedSorting.value});
+      await this.search();
       this.loading = false;
     }
-  },
-  async updated() {
-    console.log('updated')
-    console.log(this.selectedOperation);
-    // if (this.$route.query.q) {
-    //   this.selectedSorting = 'relevance'; //TODO: WHY?? do we need to update the currentPage?
-    // }
-    if (this.$route.query.o) {
-      this.selectedOperation = this.$route.query.o
-    }
-    if (!this.$route.query.sf) {
-      this.searchFields = this.$store.state.configuration.ui.searchFields;
-      console.log(this.searchFields);
-    }
-    console.log('this.searchFields');
-    console.log(this.searchFields);
-    // await this.updateRoutes();
-    putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
-  },
-  async mounted() {
-    console.log('mounted')
-    this.loading = true;
-    if (isEmpty(this.$route.query.f) && isEmpty(this.$route.query.q)) {
-      //await this.resetSearch();
-      console.log('not sure!')
-    }
-    await this.updateFilters({});
-    if (this.$route.query.q) {
-      this.selectedSorting = this.sorting[0];
-    }
-    if (this.$route.query.o) {
-      this.selectedOperation = this.$route.query.o;
-    }
-    if (!this.$route.query.sf) {
-      this.searchFields = this.$store.state.configuration.ui.searchFields;
-    }
-    //await this.search({input: this.$route.query.q});
-    this.loading = false;
   },
   async created() {
     console.log('created');
@@ -270,6 +232,7 @@ export default {
     if (this.$route.query.o) {
       this.selectedOperation = this.$route.query.o;
     }
+    this.loading = true;
     const aggregations = await this.$elasticService.multi({
       multi: '',
       filters: {},
@@ -280,8 +243,32 @@ export default {
       searchFrom: 0
     });
     this.aggregations = this.populateAggregations(aggregations['aggregations']);
-    // await this.search({input: this.$route.query.q});
     await this.searchAll();
+    this.loading = false;
+    putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
+  },
+  async mounted() {
+    await this.updateFilters({});
+    if (this.$route.query.q) {
+      this.selectedSorting = this.sorting[0];
+    }
+    if (this.$route.query.o) {
+      this.selectedOperation = this.$route.query.o;
+    }
+    if (!this.$route.query.sf) {
+      this.searchFields = this.$store.state.configuration.ui.searchFields;
+    }
+  },
+  async updated() {
+    console.log('updated')
+    console.log(this.selectedOperation);
+    if (this.$route.query.o) {
+      this.selectedOperation = this.$route.query.o
+    }
+    if (!this.$route.query.sf) {
+      this.searchFields = this.$store.state.configuration.ui.searchFields;
+      console.log(this.searchFields);
+    }
     putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   methods: {
@@ -405,12 +392,11 @@ export default {
       this.$route.query.sf = encodeURIComponent(this.searchFields);
       this.$route.query.o = this.selectedOperation;
       this.selectedSorting = this.sorting[0];
-      console.log(this.selectedSorting);
+      this.selectedOrder = 'desc';
       this.filterButton = [];
       this.isStart = true;
       this.isBrowse = false;
       this.currentPage = 1;
-      //this.filters = {};
       await this.clearAggregations()
       await this.searchAll();
     },
@@ -423,7 +409,7 @@ export default {
         query.q = this.$route.query.q;
       }
       await this.$router.push({path: 'search', query});
-      await this.search({});
+      await this.search();
     },
     scrollToTop(id) {
       setTimeout(function () {
@@ -446,13 +432,11 @@ export default {
       }
       this.filters = {};
     },
-    async search({input, sort, order}) {
+    async search() {
       this.loading = true;
       this.noMoreResults = false;
-      if (input) {
-        this.searchQuery = input;
-      } else {
-        this.searchQuery = this.$route.query.q || '';
+      if (!isEmpty(this.$route.query.q)) {
+        this.searchInput = this.$route.query.q;
       }
       let filters = {};
       if (!isEmpty(this.filters)) {
@@ -470,13 +454,21 @@ export default {
       if (this.$route.query.o) {
         this.selectedOperation = this.$route.query.o;
       }
+      let sort = this.selectedSorting.value;
+      if (!sort) {
+        sort = this.selectedSorting;
+      }
+      let order = this.selectedOrder.value;
+      if (!order) {
+        order = this.selectedOrder;
+      }
       try {
         this.items = await this.$elasticService.multi({
-          multi: this.searchQuery,
+          multi: this.searchInput,
           filters: toRaw(filters),
           searchFields: this.searchFields,
-          sort: sort || this.sorting[0].value,
-          order: order || this.selectedOrder['value'] || this.selectedOrder,
+          sort: sort,
+          order: order,
           operation: this.selectedOperation,
           pageSize: this.pageSize,
           searchFrom: (this.currentPage - 1) * this.pageSize
@@ -535,19 +527,17 @@ export default {
     },
     sortResults(sort) {
       this.currentPage = 1;
-      const order = this.selectedOrder['value'] || this.selectedOrder;
-      this.search({input: this.searchQuery, sort, order});
+      this.selectedSorting = sort;
+      this.search();
     },
     orderResults(order) {
       this.currentPage = 1;
-      const sort = this.selectedSorting.value;
-      this.search({input: this.searchQuery, sort, order});
+      this.selectedOrder = order;
+      this.search();
     },
     async updatePages(page, scrollTo) {
       this.currentPage = page;
-      const order = this.selectedOrder['value'] || this.selectedOrder;
-      const sort = this.selectedSorting.value;
-      await this.search({input: this.searchQuery, sort, order});
+      await this.search();
       this.scrollToTop(scrollTo)
     }
   }
