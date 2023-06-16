@@ -251,7 +251,7 @@ export default {
       this.selectedSorting = this.sorting[0];
     }
     if (this.$route.query.o) {
-      this.selectedSorting = this.$route.query.o;
+      this.selectedOperation = this.$route.query.o;
     }
     if (!this.$route.query.sf) {
       this.searchFields = this.$store.state.configuration.ui.searchFields;
