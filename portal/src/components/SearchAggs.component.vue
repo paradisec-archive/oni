@@ -46,24 +46,31 @@ export default {
       this.checkedBuckets = [];
     },
     updateFilters() {
+      let queryFilters = {};
       if (this.$route.query.f) {
         const filters = this.$route.query.f;
-        let decodedFilters = decodeURIComponent(filters);
-        const queryFilters = JSON.parse(decodedFilters);
-        const qfFound = Object.keys(queryFilters).find((qF) => qF === this.aggsName);
-        if (!qfFound) {
-          this.checkedBuckets = [];
-        } else {
-          for (let [key, val] of Object.entries(queryFilters)) {
-            if (key === this.aggsName) {
-              this.checkedBuckets = val;
-            }
-          }
-          if (this.checkedBuckets.length > 0) {
-            this.$emit('is-active');
-          }
+        const decodedFilters = decodeURIComponent(filters);
+        try {
+          queryFilters = JSON.parse(decodedFilters);
+        } catch (e) {
+          console.error('updatedFilters error:')
+          console.error(e);
         }
       }
+      const qfFound = Object.keys(queryFilters).find((qF) => qF === this.aggsName);
+      if (!qfFound) {
+        this.checkedBuckets = [];
+      } else {
+        for (let [key, val] of Object.entries(queryFilters)) {
+          if (key === this.aggsName) {
+            this.checkedBuckets = val;
+          }
+        }
+        if (this.checkedBuckets.length > 0) {
+          this.$emit('is-active');
+        }
+      }
+
     },
     async onChange() {
       const query = {}

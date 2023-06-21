@@ -45,19 +45,20 @@ import VueGtag from "vue-gtag";
   let configuration = {}
   if (response.status === 200) {
     configuration = await response.json();
+    if (configuration.ui && configuration.ui?.analytics?.['gaMeasurementId']) {
+      app.use(VueGtag, {
+        config: {id: configuration.ui.analytics['gaMeasurementId']},
+        router
+      });
+    }
+    store.commit("saveConfiguration", {...configuration});
+
+    app.config.globalProperties.$membership = new MembershipService({router});
+    app.config.globalProperties.$elasticService = new ElasticService({router, configuration});
   } else {
     configuration.ui = null;
+    await router.push({path: '/404'});
   }
-  if (configuration.ui && configuration.ui?.analytics?.['gaMeasurementId']) {
-    app.use(VueGtag, {
-      config: {id: configuration.ui.analytics['gaMeasurementId']},
-      router
-    });
-  }
-  store.commit("saveConfiguration", {...configuration});
-
-  app.config.globalProperties.$membership = new MembershipService({router});
-  app.config.globalProperties.$elasticService = new ElasticService({router, configuration});
 
   app.mount("#app");
 

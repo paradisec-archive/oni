@@ -81,6 +81,7 @@ export default {
     if (!this.operator) {
       this.operator = 'should';
     }
+    this.searchQuery = this.searchInput;
   },
   updated() {
     this.updateSearchFields();
@@ -108,6 +109,7 @@ export default {
     if (!this.operator) {
       this.operator = 'should';
     }
+    this.searchQuery = this.searchInput;
   },
   watch: {
     '$route.query.o'() {
@@ -120,7 +122,7 @@ export default {
       this.updateSearchFields();
     },
     clearSearch() {
-      this.reset();
+      this.resetBar();
     }
   },
   methods: {
@@ -137,10 +139,6 @@ export default {
       } else {
         this.searchFields = this.fields;
       }
-    },
-    async reset() {
-      this.searchQuery = '';
-      // await this.$router.push({path: 'search'});
     },
     async resetBar() {
       this.searchQuery = '';

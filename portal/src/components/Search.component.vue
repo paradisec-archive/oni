@@ -223,15 +223,23 @@ export default {
   },
   async created() {
     console.log('created');
+    await this.updateFilters({});
     if (this.$route.query.q) {
-      this.selectedSorting = this.sorting[0];
+      this.searchInput = this.$route.query.q;
     }
     if (!this.$route.query.sf) {
       this.searchFields = this.$store.state.configuration.ui.searchFields;
+    } else {
+      try {
+        this.searchFields = JSON.parse(decodeURIComponent(this.$route.query.sf));
+      } catch (e) {
+        console.error('sf error:')
+        console.error(e);
+      }
     }
     if (this.$route.query.o) {
       this.selectedOperation = this.$route.query.o;
-    }
+    } //else default selectedOperation
     this.loading = true;
     const aggregations = await this.$elasticService.multi({
       multi: '',
@@ -243,11 +251,12 @@ export default {
       searchFrom: 0
     });
     this.aggregations = this.populateAggregations(aggregations['aggregations']);
-    await this.searchAll();
+    await this.search();
     this.loading = false;
     putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   async mounted() {
+    console.log('mounted');
     await this.updateFilters({});
     if (this.$route.query.q) {
       this.selectedSorting = this.sorting[0];
@@ -260,7 +269,8 @@ export default {
     }
   },
   async updated() {
-    console.log('updated')
+    console.log('updated');
+    await this.updateFilters({});
     console.log(this.selectedOperation);
     if (this.$route.query.o) {
       this.selectedOperation = this.$route.query.o
@@ -397,8 +407,9 @@ export default {
       this.isStart = true;
       this.isBrowse = false;
       this.currentPage = 1;
+      this.filters = {};
       await this.clearAggregations()
-      await this.searchAll();
+      await this.search();
     },
     async searchAll() {
       this.isStart = false;
