@@ -10,12 +10,10 @@
         </el-row>
         <el-row :align="'middle'">
           <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-            Type:&nbsp;
+            Type:
           </p>
           <div class="flex flex-wrap">
-            <span class="m-2" v-for="type of types">
-              {{ type }}
-            </span>
+            <span class="m-2" v-for="type of types">{{ type }}</span>
           </div>
         </el-row>
         <el-row v-if="types && types.includes('RepositoryCollection')">
@@ -26,6 +24,13 @@
                              :aggregations="aggregations"
                              :field="{ 'name': 'language.name.@value', 'display': 'Languages' }"
                              :id="id"/>
+        </el-row>
+        <el-row v-else v-if="details?.language">
+          <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+            Language:&nbsp;
+          </p>
+          <span v-for="l of details?.language">{{first(l?.name)?.['@value']}}&nbsp;</span>
+          <p>{{ first(details?.language)?.['@value'] }}</p>
         </el-row>
         <el-row :align="'middle'" v-if="Array.isArray(_memberOf) && _memberOf.length > 0" class="">
           <p class="font-normal">
