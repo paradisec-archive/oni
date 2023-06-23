@@ -35,7 +35,7 @@
           <MemberOfCard :routePath="'collection'" :_memberOf="metadata?._memberOf"/>
         </el-col>
       </el-row>
-      <el-row>
+      <el-row v-if="membersFiltered?.data">
         <el-col>
           <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
             <h5 class="text-2xl font-medium ">Other Objects in this Collection</h5>
@@ -45,8 +45,7 @@
                 <collection-item :field="d._source" :routePath="'object'"/>
               </li>
               <li>
-                <el-link type="primary" :href="`/search?f=${moreObjects()}`">more...
-                </el-link>
+                <el-link type="primary" :href="`/search?f=${moreObjects()}`">more...</el-link>
               </li>
             </ul>
           </el-card>
