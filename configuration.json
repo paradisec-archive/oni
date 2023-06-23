@@ -13,7 +13,8 @@
     "showLogo": true,
     "navHeight": "80px",
     "help": {
-      "mainText": "For access please email help@example.com"
+      "mainText": "For access please email help@example.com",
+      "citationText": "How to add a citation: Language Commons of Australia"
     },
     "terms": {
       "text": "Example terms of service",
