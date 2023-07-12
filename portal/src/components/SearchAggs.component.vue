@@ -77,12 +77,6 @@ export default {
       if (this.$route.query.q) {
         query.q = this.$route.query.q
       }
-      if (this.$route.query.o) {
-        query.o = this.$route.query.o;
-      }
-      if (this.$route.query.sf) {
-        query.sf = this.$route.query.sf;
-      }
       if (this.$route.query.f) {
         const filters = this.$route.query.f;
         let decodedFilters = decodeURIComponent(filters);
@@ -110,7 +104,8 @@ export default {
       if (this.checkedBuckets.length > 0) {
         this.$emit('is-active');
       }
-      await this.$router.push({path: 'search', query});
+      this.$emit('changed-aggs', {query, aggsName: this.aggsName});
+      // await this.$router.push({path: 'search', query});
     },
     updatePages(page) {
       this.pageStartIndex = (page - 1) * this.pageSize;

@@ -15,11 +15,7 @@
         <p :class="textStyles">Welcome to {{
             this.$store.state.configuration.ui.shortTitle || 'Oni'
           }}</p>
-        <p :class="textStyles">
-          {{
-            this.$store.state.configuration.ui.splashText || 'Configure splash text in configuration.ui.splashText'
-          }}
-        </p>
+        <div :class="textStyles" v-html="this.$store.state.configuration.ui.splashText || 'Configure Slash Screen in configuration.ui.splashText'"></div>
       </el-col>
     </el-row>
     <template #footer>

@@ -1,13 +1,12 @@
 <template>
   <el-row :offset="1" :gutter="10" :align="'bottom'" class="flex flex-wrap content-around">
     <el-col :xs="24" class="h-auto">
-      <el-row :justify="'center'" :gutter="10" :align="'middle'" class="">
-        <label for="searchInput" class="h-14 mx-2 my-1 w-full">
+      <el-row :justify="'center'" :gutter="10" :align="'middle'">
+        <label for="searchInput" class="h-14 mx-2 w-full">
           <el-input @keyup.enter="searchInputField" type="text" class="px-2 w-64 h-full w-full"
                     placeholder="Search..."
                     v-model="searchQuery"
                     @input="updateSearchInput"
-                    v-on:change="searchInputField"
                     name="searchInput" id="searchInput" ref="searchInput">
             <template #append>
               <button v-if="searchInput || $route.query.q" @click="resetBar()"
@@ -19,7 +18,7 @@
                       d="M810.65984 170.65984q18.3296 0 30.49472 12.16512t12.16512 30.49472q0 18.00192-12.32896 30.33088l-268.67712 268.32896 268.67712 268.32896q12.32896 12.32896 12.32896 30.33088 0 18.3296-12.16512 30.49472t-30.49472 12.16512q-18.00192 0-30.33088-12.32896l-268.32896-268.67712-268.32896 268.67712q-12.32896 12.32896-30.33088 12.32896-18.3296 0-30.49472-12.16512t-12.16512-30.49472q0-18.00192 12.32896-30.33088l268.67712-268.32896-268.67712-268.32896q-12.32896-12.32896-12.32896-30.33088 0-18.3296 12.16512-30.49472t30.49472-12.16512q18.00192 0 30.33088 12.32896l268.32896 268.67712 268.32896-268.67712q12.32896-12.32896 30.33088-12.32896z"/>
                 </svg>
               </button>
-              <button @click="doSearch()" class="flex items-center justify-center rounded hover:text-red-600 my-1">
+              <button @click="doSearch()" class="flex items-center justify-center rounded hover:text-red-600">
                 <!--          text-gray-600"-->
                 <svg class="svg-icon"
                      style="width: 2em; height: 2em;vertical-align: middle;fill: currentColor;overflow: hidden;"
@@ -33,35 +32,10 @@
           </el-input>
         </label>
       </el-row>
-      <el-row v-if="showFields" :justify="'center'" :gutter="20" :align="'middle'" class="p-2">
-        <el-button :text="true" link @click="showFieldSearch=!showFieldSearch"
-                   class="cursor-pointer">
-          {{ showFieldSearch ? 'hide fields' : 'show fields included in search' }}
+      <el-row :justify="'center'" :gutter="20" :align="'middle'" class="pt-2">
+        <el-button @click="showAdvancedSearch"
+                   class="cursor-pointer">Advanced Search&nbsp;<span class="text-xs text-gray-400 bg-slate-200 shadow rounded-2xl px-2">beta</span>
         </el-button>
-      </el-row>
-      <el-row v-show="showFieldSearch"
-              :justify="'center'" :gutter="20" :align="'middle'" class="">
-        <p class="mx-2 px-2 break-all text-sm">Search using the following fields:</p>
-      </el-row>
-      <el-row v-show="showFieldSearch"
-              :justify="'start'" :gutter="20" :align="'middle'"
-              v-for="(value, key, index) of searchFields" :key="index">
-        <div class="mx-2 min-w-300">
-          <el-checkbox v-model="searchFields[key].checked" class="px-3 mx-2.5 break-all"
-                       @change="fieldSelected(key, $event)"
-                       :label="value.label || value.name"
-                       size="large"/>
-        </div>
-      </el-row>
-      <el-row v-show="showFieldSearch"
-              :justify="'space-around'" :gutter="20" :align="'middle'">
-        <el-radio-group class="mx-2 px-2 break-all"
-                        v-model="operator"
-                        @change="doSearch">
-          <el-radio :label="'must'">And</el-radio>
-          <el-radio :label="'should'">Or</el-radio>
-          <el-radio :label="'must_not'">Not</el-radio>
-        </el-radio-group>
       </el-row>
     </el-col>
   </el-row>
@@ -74,52 +48,19 @@ import {Close} from '@element-plus/icons-vue'
 import {isEmpty} from 'lodash';
 
 export default {
-  props: ['searchInput', 'clearSearch', 'filters', 'search', 'fields', 'showFields'],
+  props: ['searchInput', 'clearSearch', 'filters', 'search', 'fields', 'showFields', 'enableAdvancedSearch'],
   components: {},
   created() {
-    this.updateSearchFields();
-    if (!this.operator) {
-      this.operator = 'should';
-    }
     this.searchQuery = this.searchInput;
   },
   updated() {
-    this.updateSearchFields();
-    if (!this.operator) {
-      this.operator = 'should';
-    }
   },
-  // computed: {
-  //   searchFields() {
-  //     const sf = decodeURIComponent(this.$route.query.sf) || null;
-  //     if (!isEmpty(sf)) {
-  //       this.showFieldSearch = true;
-  //       try {
-  //         return JSON.parse(sf);
-  //       } catch (e) {
-  //         this.searchFields = null;
-  //       }
-  //     } else {
-  //       this.searchFields = null;
-  //     }
-  //   }
-  // },
   async mounted() {
-    this.updateSearchFields();
-    if (!this.operator) {
-      this.operator = 'should';
-    }
     this.searchQuery = this.searchInput;
   },
   watch: {
-    '$route.query.o'() {
-      this.operator = this.$route.query.o;
-    },
     '$route.query.q'() {
       this.searchQuery = this.$route.query.q;
-    },
-    '$route.query.sf'() {
-      this.updateSearchFields();
     },
     clearSearch() {
       this.resetBar();
@@ -127,22 +68,9 @@ export default {
   },
   methods: {
     isEmpty,
-    updateSearchFields() {
-      const sf = decodeURIComponent(this.$route.query.sf) || null;
-      if (!isEmpty(sf) && sf !== 'undefined') {
-        this.showFieldSearch = true;
-        try {
-          this.searchFields = JSON.parse(sf);
-        } catch (e) {
-          this.searchFields = null;
-        }
-      } else {
-        this.searchFields = this.fields;
-      }
-    },
     async resetBar() {
       this.searchQuery = '';
-      let query = {q: this.searchQuery, o: this.operator, sf: encodeURIComponent(JSON.stringify(this.searchFields))};
+      let query = {q: this.searchQuery};
       if (this.$route.query.f) {
         console.log(this.$route.query.f);
         query = {...query, f: this.$route.query.f};
@@ -161,27 +89,20 @@ export default {
       if (typeof e === 'string') {
         this.searchQuery = e;
       }
+      this.$emit('updateSearchInput', this.searchQuery);
     },
     async doSearch() {
       let query = {
-        q: this.searchQuery,
-        o: this.operator
+        q: this.searchQuery
       };
-      let sf;
-      if (!isEmpty(this.searchFields)) {
-        sf = encodeURIComponent(JSON.stringify(this.searchFields))
-      }
-      if (sf) {
-        query = {...query, sf}
-      }
       if (this.$route.query.f) {
         query = {...query, f: this.$route.query.f};
       }
-      await this.$router.push({path: 'search', query});
+      this.$emit('basicSearch');
+      // await this.$router.push({path: 'search', query});
     },
-    async fieldSelected(key, event) {
-      this.searchFields[key]['checked'] = event;
-      this.doSearch();
+    showAdvancedSearch() {
+      this.$emit('advanced-search');
     }
   },
   data() {
@@ -192,7 +113,7 @@ export default {
       items: [],
       scrollId: '',
       showFieldSearch: false,
-      operator: 'should',
+      operator: 'must',
       searchFields: {}
     }
   }

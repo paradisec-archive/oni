@@ -22,7 +22,7 @@ export default class ElasticService {
   }
 
 
-  async multi({multi, filters, aggs, searchFields, sort, order, operation, pageSize, searchFrom}) {
+  async multi({multi, filters, aggs, searchFields, sort, order, operation, pageSize, searchFrom, queries}) {
     try {
       const httpService = new HTTPService({router: this.router, loginPath: '/login'});
       let route = this.searchRoute + this.indexRoute;
@@ -54,12 +54,17 @@ export default class ElasticService {
       }
       // console.log('sorting');
       // console.log(JSON.stringify(sorting));
-      const query = this.boolQuery({
-        searchQuery: multi,
-        fields: searchFields,
-        filters,
-        operation
-      });
+      let query;
+      if (queries) {
+        query = this.disMaxQuery({queries, filters});
+      } else {
+        query = this.boolQuery({
+          searchQuery: multi,
+          fields: searchFields,
+          filters,
+          operation
+        });
+      }
       //console.log(query);
       body.highlight = this.highlights(this.highlightFields);
       body.query = query;
@@ -132,48 +137,34 @@ export default class ElasticService {
 
   boolQuery({searchQuery, fields, filters, operation}) {
     //console.log('bool query');
-    const filterTerms = [];
-    let boolQueryObj;
-    //console.log(JSON.stringify(filters));
-    for (let bucket of Object.keys(filters)) {
-      if (filters[bucket].length > 0 || (filters[bucket]?.v && filters[bucket].v.length > 0)) {
-        //TODO: send the type of field in the filters
-        let field = '';
-        let type;
-        if (!filters[bucket]?.t) {
-          field = bucket.concat('.keyword');
-        } else {
-          type = filters[bucket]?.t;
-          field = bucket.concat('.' + type);
-        }
-        let values = filters[bucket]?.v || filters[bucket];
-        //console.log(values)
-        filterTerms.push(esb.termsQuery(field, values))
-      }
-    }
+    const filterTerms = this.termsQuery(filters);
+    let boolQueryObj = {};
     if (isEmpty(searchQuery) && filterTerms.length > 0) {
-      boolQueryObj = esb.boolQuery().must(filterTerms);
+      boolQueryObj = esb.boolQuery().filter(filterTerms);
     } else if (!isEmpty(searchQuery) && filterTerms.length > 0) {
-      let phraseQuery = [];
+      let multiFields = []
       for (let [key, value] of Object.entries(fields)) {
         if (value.checked) {
-          phraseQuery.push(esb.matchPhraseQuery(key, searchQuery));
+          multiFields.push(key);
         }
       }
+      let phraseQuery = esb.multiMatchQuery(multiFields, searchQuery).type('phrase');
       boolQueryObj = switchFilter(operation, boolQueryObj, phraseQuery, filterTerms);
     } else if (!isEmpty(searchQuery) && filterTerms.length <= 0) {
-      let phraseQuery = [];
+      let multiFields = []
       for (let [key, value] of Object.entries(fields)) {
         if (value.checked) {
-          phraseQuery.push(esb.matchPhraseQuery(key, searchQuery));
+          multiFields.push(key);
         }
       }
+      let phraseQuery = esb.multiMatchQuery(multiFields, searchQuery).type('phrase');
       boolQueryObj = switchFilter(operation, boolQueryObj, phraseQuery, filterTerms);
     } else if (isEmpty(searchQuery) && filterTerms.length <= 0) {
       boolQueryObj = esb.matchAllQuery();
     }
     const esbQuery = esb.requestBodySearch().query(boolQueryObj)
     const query = esbQuery.toJSON().query;
+    // console.log(JSON.stringify({query: query}))
     return query;
   }
 
@@ -193,21 +184,138 @@ export default class ElasticService {
     highlight = {...highlight, ...this.highlighConfig};
     return highlight;
   }
+
+  disMaxQuery({queries, filters}) {
+    const filterTerms = this.termsQuery(filters);
+    const esbQueries = [];
+    const mustDMQueries = [];
+    const mustBoolQueries = [];
+    const shouldDMQueries = [];
+    const shouldBoolQueries = [];
+    const mustNotDMQueries = [];
+    const mustNotBoolQueries = [];
+    const boolQuery = esb.boolQuery();
+    for (let q of queries) {
+      if (q.operation === 'must') {
+        if (q.multiField) {
+          mustDMQueries.push(esb.multiMatchQuery(q.fields, q.query).operator('or').type(q.type));
+        } else {
+          let b = esb.matchQuery(q.fields, q.query);
+          if (q.type === 'phrase_prefix') {
+            b = esb.matchPhrasePrefixQuery(q.fields, q.query);
+          }
+          if (q.type === 'wildcard') {
+            b = esb.wildcardQuery(q.fields, q.query);
+          }
+          if (q.type === 'regex') {
+            b = esb.regexpQuery(q.fields, q.query);
+          }
+          mustBoolQueries.push(esb.boolQuery().must(b));
+        }
+      }
+      if (q.operation === 'should') {
+        if (q.multiField) {
+          shouldDMQueries.push(esb.multiMatchQuery(q.fields, q.query).operator('or').type(q.type));
+        } else {
+          let b = esb.matchQuery(q.fields, q.query);
+          if (q.type === 'phrase_prefix') {
+            b = esb.matchPhrasePrefixQuery(q.fields, q.query);
+          }
+          if (q.type === 'wildcard') {
+            b = esb.wildcardQuery(q.fields, q.query);
+          }
+          if (q.type === 'regex') {
+            b = esb.regexpQuery(q.fields, q.query);
+          }
+          shouldBoolQueries.push(esb.boolQuery().must(b));
+        }
+      }
+      if (q.operation === 'must_not') {
+        if (q.multiField) {
+          mustNotDMQueries.push(esb.multiMatchQuery(q.fields, q.query).operator('or').type(q.type));
+        } else {
+          let b = esb.matchQuery(q.fields, q.query);
+          if (q.type === 'phrase_prefix') {
+            b = esb.matchPhrasePrefixQuery(q.fields, q.query);
+          }
+          if (q.type === 'wildcard') {
+            b = esb.wildcardQuery(q.fields, q.query);
+          }
+          if (q.type === 'regex') {
+            b = esb.regexpQuery(q.fields, q.query);
+          }
+          mustNotBoolQueries.push(esb.boolQuery().must(b));
+        }
+      }
+    }
+    if (mustDMQueries.length > 0) {
+      boolQuery.must(
+        esb.disMaxQuery().queries(mustDMQueries)
+      )
+    }
+    if (mustBoolQueries.length > 0) {
+      boolQuery.must(mustBoolQueries)
+    }
+    if (shouldDMQueries.length > 0) {
+      boolQuery.should(
+        esb.disMaxQuery().queries(shouldDMQueries)
+      )
+    }
+    if (shouldBoolQueries.length > 0) {
+      boolQuery.should(shouldBoolQueries)
+    }
+    if (mustNotDMQueries.length > 0) {
+      boolQuery.mustNot(
+        esb.disMaxQuery().queries(mustNotDMQueries)
+      )
+    }
+    if (mustNotBoolQueries.length > 0) {
+      boolQuery.mustNot(mustNotBoolQueries);
+    }
+    boolQuery.filter(filterTerms);
+    boolQuery.minimumShouldMatch(0);
+    const esbQuery = esb.requestBodySearch().query(boolQuery)
+    const query = esbQuery.toJSON().query;
+    console.log(JSON.stringify({query: query}))
+    return query;
+  }
+
+  termsQuery(filters) {
+    let filterTerms = [];
+    //console.log(JSON.stringify(filters));
+    for (let bucket of Object.keys(filters)) {
+      if (filters[bucket].length > 0 || (filters[bucket]?.v && filters[bucket].v.length > 0)) {
+        //TODO: send the type of field in the filters
+        let field = '';
+        let type;
+        if (!filters[bucket]?.t) {
+          field = bucket.concat('.keyword');
+        } else {
+          type = filters[bucket]?.t;
+          field = bucket.concat('.' + type);
+        }
+        let values = filters[bucket]?.v || filters[bucket];
+        //console.log(values)
+        filterTerms.push(esb.termsQuery(field, values));
+      }
+    }
+    return filterTerms;
+  }
 }
 
-function switchFilter(operation, boolQueryObj, phraseQuery, filterTerms){
+function switchFilter(operation, boolQueryObj, phraseQuery, filterTerms) {
   switch (operation) {
     case 'must':
-      boolQueryObj = esb.boolQuery().must(phraseQuery).must(filterTerms);
+      boolQueryObj = esb.boolQuery().must(phraseQuery).filter(filterTerms);
       break;
     case 'should':
-      boolQueryObj = esb.boolQuery().should(phraseQuery).must(filterTerms);
+      boolQueryObj = esb.boolQuery().should(phraseQuery).filter(filterTerms);
       break;
     case 'must_not':
-      boolQueryObj = esb.boolQuery().mustNot(phraseQuery).must(filterTerms);
+      boolQueryObj = esb.boolQuery().mustNot(phraseQuery).filter(filterTerms);
       break;
     default:
-      boolQueryObj = esb.boolQuery().should(phraseQuery).must(filterTerms);
+      boolQueryObj = esb.boolQuery().should(phraseQuery).filter(filterTerms);
   }
   return boolQueryObj;
 }

@@ -5,10 +5,23 @@
     <el-row :gutter="40" :offset="1" style="margin-right: 0" class="flex flex-row h-screen">
       <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="5" :span="4"
               class="h-full max-h-screen overflow-y-auto flex flex-col flex-grow ">
-        <div class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
-          <search-bar ref='searchBar' @populate='populate' v-bind:searchInput="searchInput" @input="onInputChange"
+        <div v-show="!advancedSearch"
+             class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
+          <search-bar ref='searchBar' @populate='populate' :searchInput="searchInput"
                       @search="search" :clearSearch="clear" :filters="this.filters" :fields="searchFields"
-                      class="grow justify-items-center items-center m-4" :showFields="true"/>
+                      class="grow justify-items-center items-center m-4"
+                      @advanced-search="enableAdvancedSearch" :enableAdvancedSearch="advancedSearch"
+                      @updateSearchInput="onInputChange"
+                      @basicSearch="updateRoutes"/>
+        </div>
+        <div class="flex-1 w-full min-w-full bg-white mt-4 mb-4 border-b-2">
+          <div class="py-3 px-2">
+            <div class="">
+              <p class="text-xl text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
+                Filters
+              </p>
+            </div>
+          </div>
         </div>
         <div class="pt-2">
           <div class="flex w-full" v-for="aggs of aggregations" :key="aggs.name">
@@ -19,7 +32,6 @@
                 <span class="text-xl text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
                   {{ aggs.display }}
                 </span>
-
                 <span class="py-1 px-2">
                     <font-awesome-icon v-if="aggs.active" icon="fa fa-chevron-down"/>
                   <span v-else>
@@ -32,21 +44,28 @@
               </li>
               <li v-if="aggs?.buckets?.length <= 0" class="w-full min-w-full">&nbsp;</li>
               <search-aggs :buckets="aggs.buckets" :aggsName="aggs.name" :ref="aggs.name"
-                           v-show="aggs.active" @is-active="aggs.active = true"/>
+                           v-show="aggs.active" @is-active="aggs.active = true"
+                           @changed-aggs="newAggs"/>
             </ul>
           </div>
         </div>
       </el-col>
       <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :span="20" :offset="0"
               class="max-h-screen overflow-y-auto">
+        <div v-show="advancedSearch" class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
+          <search-advanced :advancedSearch="advancedSearch" :fields="searchFields"
+                           @basic-search="basicSearch"
+                           @do-advanced-search="updateRoutes" :resetAdvancedSearch="resetAdvancedSearch"/>
+        </div>
         <div class="pr-0">
           <div class="top-20 z-10 bg-white pb-5">
             <el-row :align="'middle'" class="mt-4 pb-2 border-0 border-b-[2px] border-solid border-red-700 text-2xl">
-              <span class="my-1 mr-3" v-if="!isEmpty(this.$route.query.q)">Showing searches for: &nbsp;
-                <span class="px-3 border-dashed border-2 border-indigo-600">{{ this.$route.query.q }}</span>
-              </span>
-              <span class="my-1 mr-1" v-if="!isEmpty(this.filters)">Filtering by:</span>
-              <el-button-group class="my-1 mr-2" v-for="(filter, filterKey) of this.filters" :key="filterKey"
+              <el-button-group class="mr-1">
+                <el-button type="warning" v-show="changedFilters" @click="updateRoutes()">Apply Filters</el-button>
+              </el-button-group>
+              <span class="my-1 mr-1" v-show="!changedFilters" v-if="!isEmpty(this.filters)">Filtering by:</span>
+              <el-button-group v-show="!changedFilters"
+                               class="my-1 mr-2" v-for="(filter, filterKey) of this.filters" :key="filterKey"
                                v-model="this.filters">
                 <el-button plain>{{ clean(filterKey) }}</el-button>
                 <el-button v-if="filter && filter.length > 0" v-for="f of filter" :key="f" color="#626aef" plain
@@ -57,13 +76,15 @@
                   </el-icon>
                 </el-button>
               </el-button-group>
+              <el-button-group class="mr-1">
+                <el-button v-show="!isEmpty(this.filters)" @click="clearFilters()">Clear Filters</el-button>
+              </el-button-group>
               <span id="total_results"
                     class="my-1 mr-2" v-show="this.totals['value']">Total: <span>{{ this.totals['value'] }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
             </el-row>
             <el-row class="pt-2">
               <el-col :span="24" class="flex space-x-4">
-                <el-button-group v-if="(!isEmpty(this.$route.query.f) || !isEmpty(this.$route.query.q)) && !isStart"
-                                 class="my-1">
+                <el-button-group class="my-1">
                   <el-button type="default" v-on:click="this.resetSearch">RESTART SEARCH</el-button>
                 </el-button-group>
                 <el-select v-model="selectedSorting" @change="sortResults" class="my-1">
@@ -146,6 +167,19 @@
         </span>
       </template>
     </el-dialog>
+    <div v-show="changedFilters"
+         class="bg-white rounded m-4 p-4 px-8 shadow-md border"
+         role="alert"
+         style="bottom: 16px; z-index: 2044; position: fixed">
+      <el-row class="p-2">
+        <div class="w-full">
+          <el-button-group class="self-center">
+            <el-button @click="clearFilters()">Clear Filters</el-button>
+            <el-button type="warning" @click="updateRoutes()">Apply Filters</el-button>
+          </el-button-group>
+        </div>
+      </el-row>
+    </div>
   </div>
 </template>
 
@@ -157,13 +191,15 @@ import {CloseBold} from "@element-plus/icons-vue";
 import {defineAsyncComponent, toRaw} from "vue";
 import SearchDetailElement from './SearchDetailElement.component.vue';
 import SearchAggs from './SearchAggs.component.vue';
-import {putLocalStorage} from '@/storage';
+import {putLocalStorage, getLocalStorage, removeLocalStorage} from '@/storage';
+import SearchAdvanced from "./SearchAdvanced.component.vue";
 
 export default {
   components: {
     SearchBar: defineAsyncComponent(() =>
         import("@/components/SearchBar.component.vue")
     ),
+    SearchAdvanced,
     SearchDetailElement,
     CloseBold,
     SearchAggs
@@ -206,7 +242,11 @@ export default {
       ],
       selectedOrder: {value: 'desc', label: 'Descending'},
       searchFrom: 0,
-      selectedOperation: 'should'
+      selectedOperation: 'must',
+      changedFilters: false,
+      advancedSearch: false,
+      advancedQueries: null,
+      resetAdvancedSearch: false
     };
   },
   watch: {
@@ -217,6 +257,9 @@ export default {
       //Every new search will force sort relevance:
       this.selectedSorting = this.sorting[0];
       this.currentPage = 1;
+      if (this.$route.query.a) {
+        this.advancedSearch = true;
+      }
       await this.search();
       this.loading = false;
     }
@@ -227,30 +270,22 @@ export default {
     if (this.$route.query.q) {
       this.searchInput = this.$route.query.q;
     }
-    if (!this.$route.query.sf) {
-      this.searchFields = this.$store.state.configuration.ui.searchFields;
-    } else {
-      try {
-        this.searchFields = JSON.parse(decodeURIComponent(this.$route.query.sf));
-      } catch (e) {
-        console.error('sf error:')
-        console.error(e);
-      }
+    if (this.$route.query.a) {
+      this.advancedSearch = true;
+      let advancedQueries = getLocalStorage({key: 'advancedQueries'});
+      this.advancedQueries = advancedQueries;
     }
-    if (this.$route.query.o) {
-      this.selectedOperation = this.$route.query.o;
-    } //else default selectedOperation
     this.loading = true;
-    const aggregations = await this.$elasticService.multi({
-      multi: '',
-      filters: {},
-      sort: this.sorting[0].value,
-      order: 'desc',
-      operation: 'must',
-      pageSize: 10,
-      searchFrom: 0
-    });
-    this.aggregations = this.populateAggregations(aggregations['aggregations']);
+    // const aggregations = await this.$elasticService.multi({
+    //   multi: '',
+    //   filters: {},
+    //   sort: this.sorting[0].value,
+    //   order: 'desc',
+    //   operation: 'must',
+    //   pageSize: 10,
+    //   searchFrom: 0
+    // });
+    // this.aggregations = this.populateAggregations(aggregations['aggregations']);
     await this.search();
     this.loading = false;
     putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
@@ -267,18 +302,18 @@ export default {
     if (!this.$route.query.sf) {
       this.searchFields = this.$store.state.configuration.ui.searchFields;
     }
+    if (this.$route.query.a) {
+      this.advancedSearch = true;
+      let advancedQueries = getLocalStorage({key: 'advancedQueries'});
+      this.advancedQueries = advancedQueries;
+    }
   },
   async updated() {
     console.log('updated');
-    await this.updateFilters({});
-    console.log(this.selectedOperation);
-    if (this.$route.query.o) {
-      this.selectedOperation = this.$route.query.o
+    if (this.$route.query.q) {
+      this.advancedSearch = false;
     }
-    if (!this.$route.query.sf) {
-      this.searchFields = this.$store.state.configuration.ui.searchFields;
-      console.log(this.searchFields);
-    }
+    // await this.updateFilters({});
     putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   methods: {
@@ -319,22 +354,27 @@ export default {
         console.error(e);
       }
     },
-    async updateRoutes() {
+    async updateRoutes(queries) {
       let filters;
-      const query = {q: this.$route.query.q, sf: this.$route.query.sf}
-      if (!this.$route.query.sf) {
-        this.searchFields = this.$store.state.configuration.ui.searchFields;
-        query.sf = encodeURIComponent(JSON.stringify(this.searchFields));
-      }
-      if (this.filters) {
+      const query = {};
+      if (!isEmpty(this.filters)) {
         filters = toRaw(this.filters);
         filters = encodeURIComponent(JSON.stringify(filters));
         query.f = filters;
-      }
-      if (!this.$route.query.o) {
-        query.o = this.selectedOperation;
       } else {
-        query.o = this.$route.query.o;
+        delete query.f;
+      }
+      if (queries) {
+        this.advancedQueries = queries;
+        putLocalStorage({key: 'advancedQueries', data: this.advancedQueries});
+        delete query.q;
+        query.a = true;
+        this.currentPage = 1;
+        this.selectedSorting = this.sorting[0];
+        this.search();
+      } else {
+        this.advancedQueries = null; //clear advanced search
+        query.q = this.searchInput;
       }
       await this.$router.push({path: 'search', query, replace: true});
     },
@@ -364,6 +404,7 @@ export default {
         }
       }
       if (items?.['aggregations']) {
+        this.aggregations = this.populateAggregations(items['aggregations']);
         this.memberOfBuckets = items['aggregations']?.['_memberOf.name.@value'];
       }
     },
@@ -398,6 +439,10 @@ export default {
       this.$route.query.q = '';
       this.$route.query.f = '';
       this.$route.query.t = '';
+      this.advancedSearch = this.$route.query.a || false;
+      this.advancedQueries = null;
+      this.resetAdvancedSearch = true
+      removeLocalStorage({key: 'advancedQueries'});
       this.searchFields = this.$store.state.configuration.ui.searchFields;
       this.$route.query.sf = encodeURIComponent(this.searchFields);
       this.$route.query.o = this.selectedOperation;
@@ -445,25 +490,13 @@ export default {
     },
     async search() {
       this.loading = true;
+      this.changedFilters = false;
       this.noMoreResults = false;
-      if (!isEmpty(this.$route.query.q)) {
-        this.searchInput = this.$route.query.q;
-      }
       let filters = {};
       if (!isEmpty(this.filters)) {
         filters = this.filters;
       } else {
         filters = {};
-      }
-      if (!isEmpty(this.$route.query.sf)) {
-        try {
-          this.searchFields = JSON.parse(decodeURIComponent(this.$route.query.sf));
-        } catch (e) {
-          this.searchFields = this.$store.state.configuration.ui.searchFields;
-        }
-      }
-      if (this.$route.query.o) {
-        this.selectedOperation = this.$route.query.o;
       }
       let sort = this.selectedSorting.value;
       if (!sort) {
@@ -474,15 +507,19 @@ export default {
         order = this.selectedOrder;
       }
       try {
+        console.log("this.advancedQueries")
+        let advancedQueries = getLocalStorage({key: 'advancedQueries'});
+        this.advancedQueries = advancedQueries;
         this.items = await this.$elasticService.multi({
           multi: this.searchInput,
-          filters: toRaw(filters),
+          filters: toRaw(this.filters),
           searchFields: this.searchFields,
           sort: sort,
           order: order,
           operation: this.selectedOperation,
           pageSize: this.pageSize,
-          searchFrom: (this.currentPage - 1) * this.pageSize
+          searchFrom: (this.currentPage - 1) * this.pageSize,
+          queries: this.advancedQueries
         });
         this.populate({items: this.items, newSearch: true, aggregations: this.aggregations});
         this.loading = false;
@@ -550,6 +587,43 @@ export default {
       this.currentPage = page;
       await this.search();
       this.scrollToTop(scrollTo)
+    },
+    async clearFilters() {
+      this.filters = {};
+      await this.updateRoutes();
+    },
+    newAggs({query, aggsName}) {
+      if (query.f) {
+        //In here we need to merge the filters
+        const decodedFilters = JSON.parse(decodeURIComponent(query.f));
+        this.mergeFilters(decodedFilters, aggsName);
+      }
+      if (query.q) {
+        this.searchInput = decodeURIComponent(query.q);
+      }
+      console.log(isEmpty(this.filters))
+      this.changedFilters = true;
+    },
+    enableAdvancedSearch() {
+      this.advancedSearch = true;
+      this.searchInput = '';
+    },
+    basicSearch() {
+      this.advancedSearch = false;
+    },
+    mergeFilters(newFilters, aggsName) {
+      let filters = toRaw(this.filters);
+      if (isEmpty(this.filters)) {
+        this.filters = newFilters;
+      } else {
+        this.filters[aggsName] = newFilters[aggsName] || [];
+        if (isEmpty(this.filters[aggsName])) {
+          delete this.filters[aggsName];
+        }
+      }
+      console.log('is this.filters empty?');
+      console.log(isEmpty(this.filters))
+      // this.filters = filters;
     }
   }
 };

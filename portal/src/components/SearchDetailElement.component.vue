@@ -33,7 +33,7 @@
           <p>{{ first(details?.language)?.['@value'] }}</p>
         </el-row>
         <el-row :align="'middle'" v-if="Array.isArray(_memberOf) && _memberOf.length > 0" class="">
-          <p class="font-normal">
+          <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
             Member of:&nbsp;
           </p>
           <div class="flex flex-wrap">
