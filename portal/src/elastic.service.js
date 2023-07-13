@@ -208,7 +208,7 @@ export default class ElasticService {
             b = esb.wildcardQuery(q.fields, q.query);
           }
           if (q.type === 'regex') {
-            b = esb.regexpQuery(q.fields, q.query);
+            b = esb.regexpQuery(q.fields, q.query).caseInsensitive(true);
           }
           mustBoolQueries.push(esb.boolQuery().must(b));
         }
@@ -225,7 +225,7 @@ export default class ElasticService {
             b = esb.wildcardQuery(q.fields, q.query);
           }
           if (q.type === 'regex') {
-            b = esb.regexpQuery(q.fields, q.query);
+            b = esb.regexpQuery(q.fields, q.query).caseInsensitive(true);
           }
           shouldBoolQueries.push(esb.boolQuery().must(b));
         }
@@ -242,7 +242,7 @@ export default class ElasticService {
             b = esb.wildcardQuery(q.fields, q.query);
           }
           if (q.type === 'regex') {
-            b = esb.regexpQuery(q.fields, q.query);
+            b = esb.regexpQuery(q.fields, q.query).caseInsensitive(true);
           }
           mustNotBoolQueries.push(esb.boolQuery().must(b));
         }
