@@ -274,6 +274,9 @@ export default {
       this.advancedSearch = true;
       let advancedQueries = getLocalStorage({key: 'advancedQueries'});
       this.advancedQueries = advancedQueries;
+    } else {
+      this.advancedSearch = false;
+      removeLocalStorage({key: 'advancedQueries'});
     }
     this.loading = true;
     // const aggregations = await this.$elasticService.multi({
