@@ -41,6 +41,11 @@ export default {
   async mounted() {
     await this.updateFilters();
   },
+  updated() {
+    if (this.checkedBuckets.length > 0) {
+      this.$emit('is-active');
+    }
+  },
   methods: {
     clear() {
       this.checkedBuckets = [];
