@@ -4,17 +4,8 @@
       <el-row class="p-2" :gutter="10">
         <p>Search in:</p>
       </el-row>
-      <el-row class="px-2 pb-2" :gutter="10" v-for="(sg, index) in searchGroup" :key="index">
-        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="h-auto">
-          <el-select v-if="index>0" class="w-20 mx-2 mb-2"
-                     v-model="sg.operation"
-                     :default-first-option="true">
-            <el-option label="AND" value="must"/>
-            <el-option label="OR" value="should"/>
-            <el-option label="NOT" value="must_not"/>
-          </el-select>
-        </el-col>
-        <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5" class="h-auto">
+      <el-row v-if="!useQueryString" class="px-2 pb-2" :gutter="10" v-for="(sg, index) in searchGroup" :key="index">
+        <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8" class="h-auto">
           <el-select class="w-full m-2"
                      placeholder="Select a Field"
                      :default-first-option="true"
@@ -27,29 +18,20 @@
             </el-option>
           </el-select>
         </el-col>
-        <!--        <el-col :xs="24" :sm="24" :md="3" :lg="3" :xl="3" class="h-auto">-->
-        <!--          <el-select class="w-full m-2"-->
-        <!--                     v-model="sg.operation"-->
-        <!--                     :default-first-option="true">-->
-        <!--            <el-option label="must" value="must"/>-->
-        <!--            <el-option label="should" value="should"/>-->
-        <!--            <el-option label="must not" value="must_not"/>-->
-        <!--          </el-select>-->
-        <!--        </el-col>-->
-        <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5" class="h-auto">
-          <el-select class="w-full m-2"
-                     v-model="sg.type"
-                     :default-first-option="true">
-            <el-option label="match" value="phrase"/>
-            <el-option label="prefix" value="phrase_prefix"
-                       :disabled="sg.field === 'all_fields' || sg.field === '@id' "/>
-            <el-option label="wildcard" value="wildcard"
-                       :disabled="sg.field === 'all_fields' || sg.field === '@id' "/>
-            <el-option label="regex" value="regex"
-                       :disabled="sg.field === 'all_fields' || sg.field === '@id' "/>
-          </el-select>
-        </el-col>
-        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12" class="h-auto">
+<!--        <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5" class="h-auto">-->
+<!--          <el-select class="w-full m-2"-->
+<!--                     v-model="sg.type"-->
+<!--                     :default-first-option="true">-->
+<!--            <el-option label="match" value="phrase"/>-->
+<!--            <el-option label="prefix" value="phrase_prefix"-->
+<!--                       :disabled="sg.field === 'all_fields' || sg.field === '@id' "/>-->
+<!--            <el-option label="wildcard" value="wildcard"-->
+<!--                       :disabled="sg.field === 'all_fields' || sg.field === '@id' "/>-->
+<!--            <el-option label="regex" value="regex"-->
+<!--                       :disabled="sg.field === 'all_fields' || sg.field === '@id' "/>-->
+<!--          </el-select>-->
+<!--        </el-col>-->
+        <el-col :xs="24" :sm="24" :md="14" :lg="14" :xl="14" class="h-auto">
           <el-input class="w-full m-2" v-model="sg.searchInput"/>
         </el-col>
         <el-col :xs="24" :sm="24" :md="1" :lg="1" :xl="1" class="h-auto">
@@ -57,10 +39,26 @@
             <font-awesome-icon icon="fa fa-minus"/>
           </el-button>
         </el-col>
-
+        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="h-auto">
+          <el-select v-if="index < searchGroup.length - 1" class="w-20 m-2 mt-4"
+                     v-model="sg.operation"
+                     :default-first-option="true">
+            <el-option label="AND" value="AND"/>
+            <el-option label="OR" value="OR"/>
+            <el-option label="NOT" value="NOT"/>
+          </el-select>
+        </el-col>
       </el-row>
-      <el-row class="p-2" :gutter="10" :justify="'start'">
-        <el-button-group>
+      <el-row v-if="useQueryString" class="p-2" :gutter="10" :justify="'start'">
+        <el-input
+            v-model="textQueryString"
+            :rows="2"
+            type="textarea"
+            placeholder="name.@value: (market) AND name.@value: (forces)"
+        />
+      </el-row>
+      <el-row class="p-2" :gutter="10" :justify="'space-between'">
+        <el-button-group v-if="!useQueryString">
           <el-button @click="addNewLine"
                      class="cursor-pointer">
             <font-awesome-icon icon="fa fa-plus"/>&nbsp;Add New Line
@@ -70,6 +68,9 @@
             <font-awesome-icon icon="fa fa-rotate-left"/>&nbsp;Clear
           </el-button>
         </el-button-group>
+        <el-button @click="doUseQueryString">
+          {{ useQueryString ? 'Use Box Search' : 'Use Query String' }}
+        </el-button>
       </el-row>
       <el-row class="p-2" :gutter="10" :justify="'center'">
         <el-button @click="advancedSearch"
@@ -105,8 +106,8 @@ export default {
     if (this.resetAdvancedSearch) {
       this.searchGroup = [{
         field: 'all_fields',
-        operation: 'must',
-        operator: 'must',
+        operation: 'AND',
+        operator: 'AND',
         type: 'phrase',
         searchInput: ''
       }];
@@ -119,56 +120,25 @@ export default {
       let advancedQueries = getLocalStorage({key: 'advancedQueries'});
       this.advancedQueries = advancedQueries;
     }
-    if (this.advancedQueries) {
-      this.searchGroup = [];
-      for (let sg of this.advancedQueries) {
-        const searchGroup = {};
-        if (sg.multiField) {
-          searchGroup.field = 'all_fields';
-          searchGroup.fields = Object.keys(this.fields).map((f) => f);
-        } else {
-          searchGroup.field = sg.fields[0];
-          searchGroup.fields = sg.fields;
-        }
-        searchGroup.operation = sg.operation;
-        searchGroup.operator = sg.operator;
-        searchGroup.searchInput = sg.query;
-        searchGroup.type = sg.type;
-        this.searchGroup.push(searchGroup);
-      }
-    }
   },
   watch: {},
   methods: {
     isEmpty,
     advancedSearch() {
-      const queries = [];
-      this.searchGroup.forEach((sg, i) => {
-        let fields;
-        if (sg.field === 'all_fields') {
-          fields = Object.keys(this.fields).map((f) => f);
-        } else {
-          fields = [sg.field];
+      if (this.useQueryString) {
+        this.queries = {
+          queryString: this.textQueryString,
         }
-        if (i === 0) {
-          sg.operation = 'must'
-        }
-        queries.push({
-          multiField: sg.field === 'all_fields',
-          fields: fields, // This can have multiple values
-          operator: sg.operator,
-          operation: sg.operation,
-          type: sg.type,
-          query: sg.searchInput
-        });
-      });
-      this.$emit('doAdvancedSearch', queries);
+      } else {
+        this.setQueryString();
+      }
+      this.$emit('doAdvancedSearch', this.queries);
     },
     addNewLine() {
       this.searchGroup.push({
         field: 'all_fields',
-        operation: 'must',
-        operator: 'must',
+        operation: 'AND',
+        operator: 'AND',
         type: 'phrase',
         searchInput: ''
       });
@@ -176,25 +146,60 @@ export default {
     clear() {
       this.searchGroup = [{
         field: 'all_fields',
-        operation: 'must',
-        operator: 'must',
+        operation: 'AND',
+        operator: 'AND',
         type: 'phrase',
         searchInput: ''
       }];
     },
     removeLine(index) {
-      this.searchGroup.splice(index, 1)
+      this.searchGroup.splice(index, 1);
     },
     showBasicSearch() {
       removeLocalStorage({key: 'advancedQueries'});
       this.searchGroup = [{
         field: 'all_fields',
-        operation: 'must',
-        operator: 'must',
+        operation: 'AND',
+        operator: 'AND',
         type: 'phrase',
         searchInput: ''
       }];
       this.$emit('basic-search');
+    },
+    doUseQueryString() {
+      this.useQueryString = !this.useQueryString;
+      this.setQueryString();
+      this.textQueryString = this.queries.queryString;
+    },
+    setQueryString() {
+      let queryString = '';
+      this.searchGroup.forEach((sg, i) => {
+        let lastOneSG = false;
+        if (i + 1 === this.searchGroup.length) {
+          lastOneSG = true;
+        }
+        if (isEmpty(sg.searchInput)) {
+          sg.searchInput = '*';
+        }
+        if (sg.field === 'all_fields') {
+          let qqq = '(';
+          Object.keys(this.fields).map((f, index, keys) => {
+            let lastOne = false;
+            if (index + 1 === keys.length) {
+              lastOne = true;
+            }
+            let qq = '';
+            qq = ` ${f} : ${sg.searchInput}  ${!lastOne ? 'OR' : ''}`;
+            qqq += qq;
+          });
+          queryString += ` ${qqq} ) ${!lastOneSG ? sg.operation : ''}`;
+        } else {
+          queryString += ` ${sg.field}: ( ${sg.searchInput} ) ${!lastOneSG ? sg.operation : ''}`;
+        }
+      });
+      this.queries = {
+        queryString: queryString
+      }
     }
   },
   data() {
@@ -204,8 +209,8 @@ export default {
     });
     const searchGroup = [{
       field: 'all_fields',
-      operation: 'must',
-      operator: 'and',
+      operation: 'AND',
+      operator: 'AND',
       type: 'phrase',
       searchInput: ''
     }]
@@ -213,8 +218,11 @@ export default {
     return {
       searchGroup: searchGroup,
       selectedField: {},
-      selectedOperation: 'must',
-      fieldAdvancedSearch: fieldAdvancedSearch
+      selectedOperation: 'AND',
+      fieldAdvancedSearch: fieldAdvancedSearch,
+      useQueryString: false,
+      queries: '',
+      textQueryString: ''
     }
   }
 }

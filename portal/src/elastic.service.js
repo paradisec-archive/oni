@@ -195,82 +195,87 @@ export default class ElasticService {
     const mustNotDMQueries = [];
     const mustNotBoolQueries = [];
     const boolQuery = esb.boolQuery();
-    for (let q of queries) {
-      if (q.operation === 'must') {
-        if (q.multiField) {
-          mustDMQueries.push(esb.multiMatchQuery(q.fields, q.query).operator('or').type(q.type));
-        } else {
-          let b = esb.matchQuery(q.fields, q.query);
-          if (q.type === 'phrase_prefix') {
-            b = esb.matchPhrasePrefixQuery(q.fields, q.query);
+    if (queries.queryString) {
+      boolQuery.must(esb.queryStringQuery(queries.queryString));
+    } else {
+      debugger
+      for (let q of queries) {
+        if (q.operation === 'must') {
+          if (q.multiField) {
+            mustDMQueries.push(esb.multiMatchQuery(q.fields, q.query).operator('or').type(q.type));
+          } else {
+            let b = esb.matchQuery(q.fields, q.query);
+            if (q.type === 'phrase_prefix') {
+              b = esb.matchPhrasePrefixQuery(q.fields, q.query);
+            }
+            if (q.type === 'wildcard') {
+              b = esb.wildcardQuery(q.fields, q.query);
+            }
+            if (q.type === 'regex') {
+              b = esb.regexpQuery(q.fields, q.query).caseInsensitive(true);
+            }
+            mustBoolQueries.push(esb.boolQuery().must(b));
           }
-          if (q.type === 'wildcard') {
-            b = esb.wildcardQuery(q.fields, q.query);
+        }
+        if (q.operation === 'should') {
+          if (q.multiField) {
+            shouldDMQueries.push(esb.multiMatchQuery(q.fields, q.query).operator('or').type(q.type));
+          } else {
+            let b = esb.matchQuery(q.fields, q.query);
+            if (q.type === 'phrase_prefix') {
+              b = esb.matchPhrasePrefixQuery(q.fields, q.query);
+            }
+            if (q.type === 'wildcard') {
+              b = esb.wildcardQuery(q.fields, q.query);
+            }
+            if (q.type === 'regex') {
+              b = esb.regexpQuery(q.fields, q.query).caseInsensitive(true);
+            }
+            shouldBoolQueries.push(esb.boolQuery().must(b));
           }
-          if (q.type === 'regex') {
-            b = esb.regexpQuery(q.fields, q.query).caseInsensitive(true);
+        }
+        if (q.operation === 'must_not') {
+          if (q.multiField) {
+            mustNotDMQueries.push(esb.multiMatchQuery(q.fields, q.query).operator('or').type(q.type));
+          } else {
+            let b = esb.matchQuery(q.fields, q.query);
+            if (q.type === 'phrase_prefix') {
+              b = esb.matchPhrasePrefixQuery(q.fields, q.query);
+            }
+            if (q.type === 'wildcard') {
+              b = esb.wildcardQuery(q.fields, q.query);
+            }
+            if (q.type === 'regex') {
+              b = esb.regexpQuery(q.fields, q.query).caseInsensitive(true);
+            }
+            mustNotBoolQueries.push(esb.boolQuery().must(b));
           }
-          mustBoolQueries.push(esb.boolQuery().must(b));
         }
       }
-      if (q.operation === 'should') {
-        if (q.multiField) {
-          shouldDMQueries.push(esb.multiMatchQuery(q.fields, q.query).operator('or').type(q.type));
-        } else {
-          let b = esb.matchQuery(q.fields, q.query);
-          if (q.type === 'phrase_prefix') {
-            b = esb.matchPhrasePrefixQuery(q.fields, q.query);
-          }
-          if (q.type === 'wildcard') {
-            b = esb.wildcardQuery(q.fields, q.query);
-          }
-          if (q.type === 'regex') {
-            b = esb.regexpQuery(q.fields, q.query).caseInsensitive(true);
-          }
-          shouldBoolQueries.push(esb.boolQuery().must(b));
-        }
+      if (mustDMQueries.length > 0) {
+        boolQuery.must(
+          esb.disMaxQuery().queries(mustDMQueries)
+        )
       }
-      if (q.operation === 'must_not') {
-        if (q.multiField) {
-          mustNotDMQueries.push(esb.multiMatchQuery(q.fields, q.query).operator('or').type(q.type));
-        } else {
-          let b = esb.matchQuery(q.fields, q.query);
-          if (q.type === 'phrase_prefix') {
-            b = esb.matchPhrasePrefixQuery(q.fields, q.query);
-          }
-          if (q.type === 'wildcard') {
-            b = esb.wildcardQuery(q.fields, q.query);
-          }
-          if (q.type === 'regex') {
-            b = esb.regexpQuery(q.fields, q.query).caseInsensitive(true);
-          }
-          mustNotBoolQueries.push(esb.boolQuery().must(b));
-        }
+      if (mustBoolQueries.length > 0) {
+        boolQuery.must(mustBoolQueries)
       }
-    }
-    if (mustDMQueries.length > 0) {
-      boolQuery.must(
-        esb.disMaxQuery().queries(mustDMQueries)
-      )
-    }
-    if (mustBoolQueries.length > 0) {
-      boolQuery.must(mustBoolQueries)
-    }
-    if (shouldDMQueries.length > 0) {
-      boolQuery.should(
-        esb.disMaxQuery().queries(shouldDMQueries)
-      )
-    }
-    if (shouldBoolQueries.length > 0) {
-      boolQuery.should(shouldBoolQueries)
-    }
-    if (mustNotDMQueries.length > 0) {
-      boolQuery.mustNot(
-        esb.disMaxQuery().queries(mustNotDMQueries)
-      )
-    }
-    if (mustNotBoolQueries.length > 0) {
-      boolQuery.mustNot(mustNotBoolQueries);
+      if (shouldDMQueries.length > 0) {
+        boolQuery.should(
+          esb.disMaxQuery().queries(shouldDMQueries)
+        )
+      }
+      if (shouldBoolQueries.length > 0) {
+        boolQuery.should(shouldBoolQueries)
+      }
+      if (mustNotDMQueries.length > 0) {
+        boolQuery.mustNot(
+          esb.disMaxQuery().queries(mustNotDMQueries)
+        )
+      }
+      if (mustNotBoolQueries.length > 0) {
+        boolQuery.mustNot(mustNotBoolQueries);
+      }
     }
     boolQuery.filter(filterTerms);
     boolQuery.minimumShouldMatch(0);

@@ -445,7 +445,11 @@ export default {
       this.$route.query.q = '';
       this.$route.query.f = '';
       this.$route.query.t = '';
-      this.advancedSearch = this.$route.query.a || false;
+      if (this.resetAdvancedSearch) {
+        this.advancedSearch = false;
+      } else {
+        this.advancedSearch = this.$route.query.a || false;
+      }
       this.advancedQueries = null;
       this.resetAdvancedSearch = true
       removeLocalStorage({key: 'advancedQueries'});
@@ -616,6 +620,8 @@ export default {
     },
     basicSearch() {
       this.advancedSearch = false;
+      this.resetAdvancedSearch = true;
+      this.resetSearch();
     },
     mergeFilters(newFilters, aggsName) {
       let filters = toRaw(this.filters);

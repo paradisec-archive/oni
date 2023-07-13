@@ -430,12 +430,12 @@
           "max_analyzed_offset": 1000000
         }
       },
-      "fields": [
-        {"name": "@id", "label": "ID"},
-        {"name": "name.@value", "label": "Name"},
-        {"name": "description.@value", "label": "Description"},
-        {"name": "_text", "label": "Text"}
-      ],
+      "fields": {
+          "@id": {"label": "ID", "checked": true},
+          "name.@value": {"label": "Name", "checked": true},
+          "description.@value": {"label": "Description", "checked": true},
+          "_text": {"label": "Text", "checked": true}
+      },
       "aggregations": [
         {
           "display": "Collection",
