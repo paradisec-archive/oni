@@ -81,7 +81,8 @@ export default class ElasticService {
       let response = await httpService.post({route, body})
       if (response.status !== 200) {
         //httpService.checkAuthorised({status: response.status});
-        throw new Error(response.statusText);
+        //TODO: Return an exact error from the API.
+        throw new Error('There was an error with your query');
       } else {
         const results = await response.json();
         //console.log(results);
@@ -305,6 +306,35 @@ export default class ElasticService {
       }
     }
     return filterTerms;
+  }
+
+  queryString(searchGroup) {
+    let queryString = '';
+    searchGroup.forEach((sg, i) => {
+      let lastOneSG = false;
+      if (i + 1 === searchGroup.length) {
+        lastOneSG = true;
+      }
+      if (isEmpty(sg.searchInput)) {
+        sg.searchInput = '*';
+      }
+      if (sg.field === 'all_fields') {
+        let qqq = '(';
+        Object.keys(this.fields).map((f, index, keys) => {
+          let lastOne = false;
+          if (index + 1 === keys.length) {
+            lastOne = true;
+          }
+          let qq = '';
+          qq = ` ${f} : ${sg.searchInput} ${!lastOne ? 'OR' : ''} `;
+          qqq += qq;
+        });
+        queryString += ` ${qqq} ) ${!lastOneSG ? sg.operation : ''} `;
+      } else {
+        queryString += ` ( ${sg.field}: ( ${sg.searchInput} ) ) ${!lastOneSG ? sg.operation : ''}`;
+      }
+    });
+    return queryString;
   }
 }
 

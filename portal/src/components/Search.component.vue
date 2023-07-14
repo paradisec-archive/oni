@@ -272,8 +272,9 @@ export default {
     }
     if (this.$route.query.a) {
       this.advancedSearch = true;
-      let advancedQueries = getLocalStorage({key: 'advancedQueries'});
-      this.advancedQueries = advancedQueries;
+      let searchGroup = JSON.parse(decodeURIComponent(this.$route.query.a));
+      let queryString = this.$elasticService.queryString(searchGroup);
+      this.advancedQueries = {queryString, searchGroup};
     } else {
       this.advancedSearch = false;
       removeLocalStorage({key: 'advancedQueries'});
@@ -307,11 +308,11 @@ export default {
     }
     if (this.$route.query.a) {
       this.advancedSearch = true;
-      let advancedQueries = getLocalStorage({key: 'advancedQueries'});
-      this.advancedQueries = advancedQueries;
+      let searchGroup = JSON.parse(decodeURIComponent(this.$route.query.a));
+      let queryString = this.$elasticService.queryString(searchGroup);
+      this.advancedQueries = {queryString, searchGroup};
     } else {
       this.advancedSearch = false;
-      removeLocalStorage({key: 'advancedQueries'});
     }
   },
   async updated() {
@@ -372,12 +373,16 @@ export default {
       }
       if (queries) {
         this.advancedQueries = queries;
-        putLocalStorage({key: 'advancedQueries', data: this.advancedQueries});
         delete query.q;
-        query.a = true;
+        query.a = queries.searchGroup;
         this.currentPage = 1;
         this.selectedSorting = this.sorting[0];
         this.search();
+      } else if (this.$route.query.a) {
+        this.advancedSearch = true;
+        let searchGroup = JSON.parse(decodeURIComponent(this.$route.query.a));
+        let queryString = this.$elasticService.queryString(searchGroup);
+        this.advancedQueries = {queryString, searchGroup};
       } else {
         this.advancedQueries = null; //clear advanced search
         query.q = this.searchInput;
@@ -452,7 +457,6 @@ export default {
       }
       this.advancedQueries = null;
       this.resetAdvancedSearch = true
-      removeLocalStorage({key: 'advancedQueries'});
       this.searchFields = this.$store.state.configuration.ui.searchFields;
       this.$route.query.sf = encodeURIComponent(this.searchFields);
       this.$route.query.o = this.selectedOperation;
@@ -517,9 +521,6 @@ export default {
         order = this.selectedOrder;
       }
       try {
-        console.log("this.advancedQueries")
-        let advancedQueries = getLocalStorage({key: 'advancedQueries'});
-        this.advancedQueries = advancedQueries;
         this.items = await this.$elasticService.multi({
           multi: this.searchInput,
           filters: toRaw(this.filters),
