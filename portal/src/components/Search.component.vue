@@ -193,6 +193,7 @@ import SearchDetailElement from './SearchDetailElement.component.vue';
 import SearchAggs from './SearchAggs.component.vue';
 import {putLocalStorage, getLocalStorage, removeLocalStorage} from '@/storage';
 import SearchAdvanced from "./SearchAdvanced.component.vue";
+import {v4 as uuid} from 'uuid';
 
 export default {
   components: {
@@ -258,7 +259,7 @@ export default {
       this.selectedSorting = this.sorting[0];
       this.currentPage = 1;
       if (this.$route.query.a) {
-        this.advancedSearch = true;
+        this.updateAdvancedQueries();
       }
       await this.search();
       this.loading = false;
@@ -271,10 +272,7 @@ export default {
       this.searchInput = this.$route.query.q;
     }
     if (this.$route.query.a) {
-      this.advancedSearch = true;
-      let searchGroup = JSON.parse(decodeURIComponent(this.$route.query.a));
-      let queryString = this.$elasticService.queryString(searchGroup);
-      this.advancedQueries = {queryString, searchGroup};
+      this.updateAdvancedQueries();
     } else {
       this.advancedSearch = false;
       removeLocalStorage({key: 'advancedQueries'});
@@ -307,10 +305,7 @@ export default {
       this.searchFields = this.$store.state.configuration.ui.searchFields;
     }
     if (this.$route.query.a) {
-      this.advancedSearch = true;
-      let searchGroup = JSON.parse(decodeURIComponent(this.$route.query.a));
-      let queryString = this.$elasticService.queryString(searchGroup);
-      this.advancedQueries = {queryString, searchGroup};
+      this.updateAdvancedQueries()
     } else {
       this.advancedSearch = false;
     }
@@ -364,30 +359,48 @@ export default {
     async updateRoutes(queries) {
       let filters;
       const query = {};
+      let localFilterUpdate = false;
       if (!isEmpty(this.filters)) {
         filters = toRaw(this.filters);
         filters = encodeURIComponent(JSON.stringify(filters));
         query.f = filters;
+        localFilterUpdate = true;
       } else {
         delete query.f;
       }
-      if (queries) {
+      if (this.$route.query.f && !localFilterUpdate) {
+        query.f = this.$route.query.f;
+      }
+      let localSearchGroupUpdate = false;
+      if (queries?.searchGroup) {
         this.advancedQueries = queries;
         delete query.q;
         query.a = queries.searchGroup;
         this.currentPage = 1;
         this.selectedSorting = this.sorting[0];
-        this.search();
-      } else if (this.$route.query.a) {
-        this.advancedSearch = true;
-        let searchGroup = JSON.parse(decodeURIComponent(this.$route.query.a));
-        let queryString = this.$elasticService.queryString(searchGroup);
-        this.advancedQueries = {queryString, searchGroup};
+        localSearchGroupUpdate = true;
+      }
+      if (this.$route.query.a && !localSearchGroupUpdate) {
+        query.a = this.$route.query.a;
+        delete query.q;
+        this.updateAdvancedQueries();
       } else {
         this.advancedQueries = null; //clear advanced search
         query.q = this.searchInput;
       }
+      query.r = uuid();
       await this.$router.push({path: 'search', query, replace: true});
+    },
+    updateAdvancedQueries() {
+      this.advancedSearch = true;
+      let searchGroup;
+      try {
+        searchGroup = JSON.parse(decodeURIComponent(this.$route.query.a));
+      } catch (e) {
+        throw new Error('There was a problem with your advanced query please try again');
+      }
+      let queryString = this.$elasticService.queryString(searchGroup);
+      this.advancedQueries = {queryString, searchGroup};
     },
     async bucketSelected({checkedBuckets, id}) {
       // this.filters[id] = checkedBuckets.map((k) => {
