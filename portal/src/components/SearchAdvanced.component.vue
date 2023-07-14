@@ -163,7 +163,7 @@ export default {
       } else {
         this.setQueryString();
       }
-      this.$emit('doAdvancedSearch', this.queries);
+      this.$emit('doAdvancedSearch', {queries: this.queries});
     },
     addNewLine() {
       this.searchGroup.push({

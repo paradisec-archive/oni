@@ -61,7 +61,7 @@
           <div class="top-20 z-10 bg-white pb-5">
             <el-row :align="'middle'" class="mt-4 pb-2 border-0 border-b-[2px] border-solid border-red-700 text-2xl">
               <el-button-group class="mr-1">
-                <el-button type="warning" v-show="changedFilters" @click="updateRoutes()">Apply Filters</el-button>
+                <el-button type="warning" v-show="changedFilters" @click="updateRoutes({updateFilters: true})">Apply Filters</el-button>
               </el-button-group>
               <span class="my-1 mr-1" v-show="!changedFilters" v-if="!isEmpty(this.filters)">Filtering by:</span>
               <el-button-group v-show="!changedFilters"
@@ -175,7 +175,7 @@
         <div class="w-full">
           <el-button-group class="self-center">
             <el-button @click="clearFilters()">Clear Filters</el-button>
-            <el-button type="warning" @click="updateRoutes()">Apply Filters</el-button>
+            <el-button type="warning" @click="updateRoutes({updateFilters: true})">Apply Filters</el-button>
           </el-button-group>
         </div>
       </el-row>
@@ -333,7 +333,7 @@ export default {
               delete this.filters[clear.filterKey];
             }
             //if there is an update on the filter the site will do another search.
-            await this.updateRoutes();
+            await this.updateRoutes({updateFilters: true});
           }
         } else {
           // or updating filters from routes
@@ -356,11 +356,11 @@ export default {
         console.error(e);
       }
     },
-    async updateRoutes(queries) {
+    async updateRoutes({queries, updateFilters}) {
       let filters;
       const query = {};
       let localFilterUpdate = false;
-      if (!isEmpty(this.filters)) {
+      if (!isEmpty(this.filters) || updateFilters) {
         filters = toRaw(this.filters);
         filters = encodeURIComponent(JSON.stringify(filters));
         query.f = filters;
@@ -407,7 +407,7 @@ export default {
       //   return {key: k}
       // });
       this.filters[id] = checkedBuckets;
-      await this.updateRoutes();
+      await this.updateRoutes({updateFilters: true});
     },
     populate({items, newSearch, aggregations}) {
       this.items = [];
@@ -614,7 +614,7 @@ export default {
     },
     async clearFilters() {
       this.filters = {};
-      await this.updateRoutes();
+      await this.updateRoutes({updateFilters: true});
     },
     newAggs({query, aggsName}) {
       if (query.f) {
