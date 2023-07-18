@@ -98,7 +98,7 @@ export default {
       if (this.$route.query.f) {
         query = {...query, f: this.$route.query.f};
       }
-      this.$emit('basicSearch');
+      this.$emit('basicSearch', {});
       // await this.$router.push({path: 'search', query});
     },
     showAdvancedSearch() {
