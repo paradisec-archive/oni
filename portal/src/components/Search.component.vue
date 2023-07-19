@@ -52,7 +52,7 @@
       </el-col>
       <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :span="20" :offset="0"
               class="max-h-screen overflow-y-auto">
-        <div v-show="advancedSearch" class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
+        <div v-show="advancedSearch" id="advanced_search_box" class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
           <search-advanced :advancedSearch="advancedSearch" :fields="searchFields"
                            @basic-search="basicSearch"
                            @do-advanced-search="updateRoutes" :resetAdvancedSearch="resetAdvancedSearch"/>
@@ -630,6 +630,7 @@ export default {
     },
     enableAdvancedSearch() {
       this.advancedSearch = true;
+      this.scrollToTop('advanced_search_box');
       this.searchInput = '';
     },
     basicSearch() {

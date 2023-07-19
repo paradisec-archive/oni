@@ -13,12 +13,13 @@
     "showLogo": true,
     "navHeight": "80px",
     "help": {
-      "mainText": "For access please email help@example.com",
-      "citationText": "How to add a citation: Language Commons of Australia"
+      "aboutText": "This is an Oni Data Portal publication. This portal provides access to a repository of language data, it is provided by the Language Data Commons of Australia [LDaCA](<a href='https://ldaca.edu.au'>https://ldaca.edu.au</a>).",
+      "helpUrl": "https://www.example.com",
+      "citationText": "CITE AS: Language Data Commons of Australia. A project with co-investment from Australian Research Data Commons, The University of Queensland, The University of Melbourne, The University of Sydney, Monash University, First Languages Australia and AARNet. https://ldaca.edu.au",
     },
     "terms": {
       "text": "Example terms of service",
-      "href":"/terms",
+      "href": "/terms",
       "title": "Terms of Service"
     },
     "privacy": {
@@ -39,6 +40,10 @@
     "login": {
       "enabled": true
     },
+    "authorizationProvider": {
+      "label": "REMS",
+      "url": "https://rems-uat.ldaca.edu.au/applications"
+    },
     "loginProviders": [
       {
         "name": "github",
@@ -55,16 +60,12 @@
         "buttonStyle": "background: rgba(76 60 185)"
       }
     ],
-    "authorizationProvider": {
-      "label": "REMS",
-      "url": "https://rems-uat.ldaca.edu.au/applications"
-    },
     "enrollment": {
       "enforced": false,
       "URL": "https://registry-test.ldaca.edu.au/registry/co_petitions/start/coef:9"
     },
     "topNavItems": [ {
-      "route": "/search?f=%257B%2522%2540type%2522%253A%255B%2522RepositoryCollection%2522%255D%257D",
+      "route": "search?f=%257B%2522%2540type%2522%253A%255B%2522RepositoryCollection%2522%255D%257D",
       "display": "Collections"
     }],
     "main": {
@@ -95,7 +96,9 @@
         "contentSize"
       ],
       "expand": [
-        "speaker", "author"
+        "speaker",
+        "author",
+        "citation"
       ]
     },
     "collection": {
@@ -105,7 +108,11 @@
       },
       "top": [
         {
-          "display": "",
+          "display": "Name",
+          "name": "name"
+        },
+        {
+          "display": "Description",
           "name": "description"
         },
         {
@@ -133,11 +140,13 @@
           "_access",
           "_collectionStack",
           "_metadataIsPublic",
-          "_metadataLicense"
+          "_metadataLicense",
+          "identifier"
         ],
         "displayHasMember": false,
         "displayHasPart": true
-      }
+      },
+      "relationships": [{"name":"notebook", "display":"Notebooks", "type":"SoftwareApplication"}]
     },
     "object": {
       "name": {
@@ -146,7 +155,11 @@
       },
       "top": [
         {
-          "display": "",
+          "display": "Name",
+          "name": "name"
+        },
+        {
+          "display": "Description",
           "name": "description"
         },
         {
@@ -205,7 +218,11 @@
       },
       "top": [
         {
-          "display": "",
+          "display": "Name",
+          "name": "name"
+        },
+        {
+          "display": "Description",
           "name": "description"
         },
         {
@@ -274,8 +291,15 @@
         "display": "Annotation Type",
         "url": "https://schema.org/annotationType",
         "definition": "Dear Data Team, please add description"
+      },
+      {
+        "id": "_collectionStack",
+        "display": "Collection Hierarchy"
       }
-    ]
+    ],
+    "analytics": {
+      "gaMeasurementId": "G-XXX"
+    }
   },
   "api": {
     "bootstrap": false,
@@ -317,6 +341,19 @@
       "admin": "1234-1234-1234-1234"
     },
     "services": {},
+    "authorization": {
+      "provider": "rems",
+      "enrollment": {
+        "enforced":  false,
+        "groups": ["CO:Members:all"],
+        "URL": "https://registry-test.ldaca.edu.au/registry/co_petitions/start/coef:9"
+      },
+      "rems": {
+        "apiUser": "XXX",
+        "apiKey": "XXX",
+        "apiHost": "https://rems-uat.ldaca.edu.au/api"
+      }
+    },
     "authentication": {
       "cilogon": {
         "clientID": "cilogon:/client_id/XXXXXXXXXXXX",
@@ -335,7 +372,9 @@
         "state": "cilogon",
         "oauthType": "AuthorizationCode",
         "useFormData": true,
-        "memberOf": "isMemberOf"
+        "memberOf": "isMemberOf",
+        "userid": "sub",
+        "username": "sub"
       },
       "github": {
         "clientID": "XXXXXXXXXXXX",
@@ -350,7 +389,9 @@
         "scope": "read:org, user",
         "state": "github",
         "oauthType": "ClientCredentials",
-        "useHeaders": true
+        "useHeaders": true,
+        "userid": "id",
+        "username": "login"
       }
     },
     "licenses": [
@@ -403,10 +444,10 @@
         "description": "No License"
       },
       "defaultMetadata": {
-        "isPublic": true,
-        "name": "Attribution 4.0 International (CC BY 4.0)",
         "id": "https://creativecommons.org/licenses/by/4.0/",
-        "description": "You are free to:\nShare — copy and redistribute the material in any medium or format\nAdapt — remix, transform, and build upon the material\nfor any purpose, even commercially.\nThis license is acceptable for Free Cultural Works.\nThe licensor cannot revoke these freedoms as long as you follow the license terms."
+        "name": "Attribution 4.0 International (CC BY 4.0)",
+        "description": "You are free to:\nShare — copy and redistribute the material in any medium or format\nAdapt — remix, transform, and build upon the material\nfor any purpose, even commercially.\nThis license is acceptable for Free Cultural Works.\nThe licensor cannot revoke these freedoms as long as you follow the license terms.",
+        "isPublic": true
       }
     },
     "identifier": {
@@ -415,9 +456,9 @@
     "elastic": {
       "bootstrap": false,
       "node": "http://elasticsearch:9200",
-      "log": "debug",
       "maxScroll": 5000,
       "scrollTimeout": "10m",
+      "log": "debug",
       "index": "items",
       "indexConfiguration": {
         "mapping": {
@@ -517,6 +558,7 @@
           "@id": {
             "type": "keyword"
           },
+          "hasPart": {},
           "hasFile": {
             "type": "nested",
             "properties": {
