@@ -149,7 +149,7 @@ export default class ElasticService {
           multiFields.push(key);
         }
       }
-      let phraseQuery = esb.multiMatchQuery(multiFields, searchQuery).type('phrase');
+      let phraseQuery = esb.multiMatchQuery(multiFields, searchQuery).type('best_fields');
       boolQueryObj = switchFilter(operation, boolQueryObj, phraseQuery, filterTerms);
     } else if (!isEmpty(searchQuery) && filterTerms.length <= 0) {
       let multiFields = []
@@ -158,7 +158,7 @@ export default class ElasticService {
           multiFields.push(key);
         }
       }
-      let phraseQuery = esb.multiMatchQuery(multiFields, searchQuery).type('phrase');
+      let phraseQuery = esb.multiMatchQuery(multiFields, searchQuery).type('best_fields');
       boolQueryObj = switchFilter(operation, boolQueryObj, phraseQuery, filterTerms);
     } else if (isEmpty(searchQuery) && filterTerms.length <= 0) {
       boolQueryObj = esb.matchAllQuery();
@@ -199,7 +199,7 @@ export default class ElasticService {
     if (queries.queryString) {
       boolQuery.must(esb.queryStringQuery(queries.queryString));
     } else {
-      debugger
+      //Note: this code below is never used. Delete
       for (let q of queries) {
         if (q.operation === 'must') {
           if (q.multiField) {

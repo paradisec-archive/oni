@@ -10,27 +10,38 @@
       </el-row>
       <el-row class="p-2" :gutter="10" v-if="showHelp">
         <p>Bellow a query string "mini-language" is used</p>
-        <ul>
-          <li>The query string is parsed into a series of terms and operators. A term can be a single word -- quick or
+        <ul class="px-2 list-disc list-inside">
+          <li class="px-3 py-1">The query string is parsed into a series of terms and operators. A term can be a single
+            word -- quick or
             brown -- or a phrase, surrounded by double quotes -- "quick brown" -- which searches for all the words in
             the phrase, in the same order.
           </li>
-          <li>Wildcard searches can be run on individual terms, using ? to replace a single character, and * to replace
+          <li class="px-3 py-1">Wildcard searches can be run on individual terms, using ? to replace a single character,
+            and * to replace
             zero or more characters
           </li>
-          <li>Regular expression patterns can be embedded in the query string by wrapping them in forward-slashes
+          <li class="px-3 py-1">Regular expression patterns can be embedded in the query string by wrapping them in
+            forward-slashes
             ("/"):
           </li>
-          <li>The reserved characters are: <code class="literal">+ - = &amp;&amp; || &gt; &lt; ! ( ) { } [ ] ^ " ~ * ? :
-            \ /</code>Failing to escape these
+          <li class="px-3 py-1">The reserved characters are: <code class="literal backdrop-blur">+ - = &amp;&amp; ||
+            &gt; &lt; ! ( ) { } [ ] ^ " ~ * ? :
+            \ /</code>&nbsp;Failing to escape these
             special characters correctly could lead to a syntax error which prevents your query from running.
           </li>
-          <li>The familiar boolean operators AND, OR and NOT (also written &&, || and !) are also supported but beware
+          <li class="px-3 py-1">The familiar boolean operators AND, OR and NOT (also written &&, || and !) are also
+            supported but beware
             that they do not honor the usual precedence rules, so parentheses should be used whenever multiple operators
             are used together. For instance the previous query could be rewritten as:
             <code class="literal">((quick AND fox) OR (brown AND fox) OR fox) AND NOT news</code>
           </li>
-          <li>If you search for the literal word AND, OR, and NOT they all should be escaped. eg. \OR</li>
+          <li class="px-3 py-1">If you search for the literal word AND, OR, and NOT they all should be escaped. eg.
+            \OR
+          </li>
+          <li class="px-3 py-1">Clicking on "Use Query String" will show you the actual search string used for your
+            search.
+            You can update your search string however it will not convert back to the search box
+          </li>
         </ul>
       </el-row>
       <el-row v-if="!useQueryString" class="px-2 pb-2" :gutter="10" v-for="(sg, index) in searchGroup" :key="index">
