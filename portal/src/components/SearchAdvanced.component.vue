@@ -1,6 +1,6 @@
 <template>
   <el-row :offset="1" :gutter="10" :align="'bottom'" class="flex flex-wrap content-around p-3">
-    <el-col :xs="4" class="h-auto">
+    <el-col class="h-auto">
       <el-row class="p-2" :gutter="10" :justify="'space-between'">
         <p>Search in:</p>
         <el-button @click="showHelp = !showHelp"
