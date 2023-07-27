@@ -2,7 +2,7 @@
   <el-menu
       id="top_menu"
       mode="horizontal"
-      :ellipsis="false"
+      :ellipsis="true"
       :default-active="active"
       :router="true"
   >
@@ -24,7 +24,7 @@
         </el-row>
       </router-view>
     </el-menu-item>
-    <div class="flex-grow"/>
+    <el-menu-item class="flex-auto"/>
     <el-menu-item v-for="topNavItem of topNavItems" :index="topNavItem.route" :router="topNavItem.route">
       <router-view :key="topNavItem.route">
         <el-row :gutter="10" class="flex items-center justify-center">
@@ -47,6 +47,7 @@
         </el-row>
       </router-link>
     </el-menu-item>
+    <nav-user v-if="isLoginEnabled"/>
     <el-menu-item index="help" :route="'/help'">
       <router-link to="/help">
         <el-row :gutter="10" class="flex items-center justify-center">
@@ -58,7 +59,6 @@
         </el-row>
       </router-link>
     </el-menu-item>
-    <nav-user v-if="isLoginEnabled"/>
   </el-menu>
 </template>
 <script>

@@ -1,11 +1,7 @@
 <template>
-  <div class="min-w-full pb-4 pt-0 px-2 pl-4">
-    <div class="bg-white z-10">
-    </div>
-  </div>
-    <el-row :gutter="40" :offset="1" style="margin-right: 0" class="flex flex-row h-screen">
+    <el-row :gutter="40" :offset="1" style="" class="pb-4 pt-0 px-2 pl-4">
       <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="5" :span="4"
-              class="h-full max-h-screen overflow-y-auto flex flex-col flex-grow ">
+              class="h-full max-h-screen overflow-y-auto flex flex-col h-screen">
         <div v-show="!advancedSearch"
              class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
           <search-bar ref='searchBar' @populate='populate' :searchInput="searchInput"
@@ -52,7 +48,7 @@
         </div>
       </el-col>
       <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :span="20" :offset="0"
-              class="max-h-screen overflow-y-auto">
+              class="max-h-screen overflow-y-auto flex flex-row h-screen">
         <div v-show="advancedSearch" id="advanced_search_box" class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
           <search-advanced :advancedSearch="advancedSearch" :fields="searchFields"
                            @basic-search="basicSearch"
