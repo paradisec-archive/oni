@@ -2,6 +2,7 @@
   <div class="min-w-full pb-4 pt-0 px-2 pl-4">
     <div class="bg-white z-10">
     </div>
+  </div>
     <el-row :gutter="40" :offset="1" style="margin-right: 0" class="flex flex-row h-screen">
       <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="5" :span="4"
               class="h-full max-h-screen overflow-y-auto flex flex-col flex-grow ">
@@ -167,7 +168,7 @@
         </span>
       </template>
     </el-dialog>
-    <div v-show="changedFilters"
+    <el-row v-show="changedFilters"
          class="bg-white rounded m-4 p-4 px-8 shadow-md border"
          role="alert"
          style="bottom: 16px; z-index: 2044; position: fixed">
@@ -179,8 +180,8 @@
           </el-button-group>
         </div>
       </el-row>
-    </div>
-  </div>
+    </el-row>
+    <el-row></el-row>
 </template>
 
 

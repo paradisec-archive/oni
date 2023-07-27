@@ -5,7 +5,7 @@
         <p>Search in:</p>
         <el-button @click="showHelp = !showHelp"
                    class="cursor-pointer">
-          <font-awesome-icon icon="fa fa-question"/>&nbsp;Help
+          Search Help&nbsp;<font-awesome-icon icon="fa fa-circle-question"/>
         </el-button>
       </el-row>
       <el-row class="p-2" :gutter="10" v-if="showHelp">
