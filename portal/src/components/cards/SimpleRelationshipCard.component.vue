@@ -6,7 +6,7 @@
           <el-link class="ml-2"
                    :underline="true"
                    type="primary"
-                   :href="'/' + objectName + '?id=' + f._id">
+                   :href="'/object?_id=' + f._id">
             {{ first(f._source.name)?.['@value'] || f._id }}
           </el-link>
         </li>
@@ -44,6 +44,7 @@ export default {
           '@type': [this.objectType]
         }, sort: 'relevance', order: 'desc'
       });
+      debugger;
       this.objectTotals = items?.['hits']?.['total']?.['value'];
       this.objectsScrollId = items?.['_scroll_id'];
       const thisItems = items?.['hits']?.['hits'];
