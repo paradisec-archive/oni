@@ -22,7 +22,7 @@
     </el-col>
     <el-col :xs="24" :sm="24" :md="24" :lg="8" :xl="8">
       <el-row :gutter="20" :align="'middle'" class="justify-center content-center pb-5">
-        <el-col>
+        <el-col v-if="this.license?.['@id']">
           <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
             <h5 class="text-2xl font-medium">Access</h5>
             <hr class="divider divider-gray pt-2"/>
@@ -31,7 +31,7 @@
         </el-col>
       </el-row>
       <el-row :gutter="20" class="pb-5">
-        <el-col>
+        <el-col v-if="metadata?._memberOf">
           <MemberOfCard :routePath="'collection'" :_memberOf="metadata?._memberOf"/>
         </el-col>
       </el-row>

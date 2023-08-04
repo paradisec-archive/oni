@@ -44,7 +44,6 @@ export default {
           '@type': [this.objectType]
         }, sort: 'relevance', order: 'desc'
       });
-      debugger;
       this.objectTotals = items?.['hits']?.['total']?.['value'];
       this.objectsScrollId = items?.['_scroll_id'];
       const thisItems = items?.['hits']?.['hits'];
