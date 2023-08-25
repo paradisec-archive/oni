@@ -4,7 +4,10 @@
   "description": "Scripts to create structural and elastic indexes for an Oni",
   "main": "structural-index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "index": "node structural-index.js",
+    "elastic": "node elastic-ocfl-oni-index.js",
+    "notebooks": "node elastic-notebook-index.js"
   },
   "author": "Moises Sacal Bonequi",
   "license": "MIT",
