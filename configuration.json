@@ -395,40 +395,15 @@
     },
     "licenses": [
       {
-        "license": "https://www.dynamicsoflanguage.edu.au/sydney-speaks/licence/A/",
-        "group": "sydney-speaks-license-a",
-        "enrollment": {
-          "url": "https://registry-test.ldaca.edu.au/registry/co_petitions/start/coef:20",
-          "label": "Click to enrol for access to Sydney Speaks A",
-          "class": ""
-        }
-      },
-      {
-        "license": "https://www.dynamicsoflanguage.edu.au/sydney-speaks/licence/B/",
-        "group": "sydney-speaks-license-b",
-        "enrollment": {
-          "url": "https://registry-test.ldaca.edu.au/registry/co_petitions/start/coef:36",
-          "label": "Click to enrol for access to for access to Sydney Speaks B",
-          "class": ""
-        }
-      },
-      {
-        "license": "https://www.dynamicsoflanguage.edu.au/sydney-speaks/licence/C/",
-        "group": "sydney-speaks-license-c",
+        "license": "#agreeToTerms",
+        "group": "agree-to-terms",
+        "access": "login",
         "enrollment": {}
-      },
-      {
-        "license": "https://www.dynamicsoflanguage.edu.au/sydney-speaks/licence/D/",
-        "group": "sydney-speaks-license-d",
-        "enrollment": {
-          "url": "https://registry-test.ldaca.edu.au/registry/co_petitions/start/coef:33",
-          "label": "Click to enrol for access to Sydney Speaks D",
-          "class": ""
-        }
       },
       {
         "license": "#restricted",
         "group": "restricted-users",
+        "access": "loginPlus",
         "enrollment": {}
       }
     ],

@@ -123,7 +123,7 @@
   </div>
 </template>
 <script>
-import {first, merge, toArray, isEmpty, find} from 'lodash';
+import {first, merge, toArray, isEmpty, find, isUndefined} from 'lodash';
 import SummariesCard from './cards/SummariesCard.component.vue';
 import AggregationHelper from './helpers/AggregationHelper.component.vue';
 import AggregationAsIcon from "./widgets/AggregationAsIcon.component.vue";
@@ -241,7 +241,11 @@ export default {
       const key = first(detail)?.['@id'];
       let license = this.licenses.find(l => l.license === key);
       if (license) {
-        return 'login';
+        if (isUndefined(license.access)) {
+          return 'login';
+        } else {
+          return license.access;
+        }
       } else {
         return 'public';
       }
