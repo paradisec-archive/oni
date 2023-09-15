@@ -176,8 +176,8 @@ export default class ElasticService {
         .numberOfFragments(3)
         .fragmentSize(200)
         .fields(highlightFields)
-        .preTags('<mark class="font-bold">', highlightFields[0])
-        .postTags('</mark>', highlightFields[0])
+        .preTags('<mark class="font-bold">')
+        .postTags('</mark>')
       );
 
     const query = esbQuery.toJSON().query;

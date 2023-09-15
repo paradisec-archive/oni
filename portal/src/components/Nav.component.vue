@@ -6,7 +6,7 @@
       :default-active="active"
       :router="true"
   >
-    <el-menu-item index="home" :route="topNavHome">
+    <el-menu-item index="home" :route="topNavHome + Date.now()">
       <router-view :key="topNavHome">
         <el-row :gutter="10" class="flex items-center justify-center min-w-md">
           <el-col :span="4">
@@ -83,7 +83,7 @@ export default {
       showLogo: this.$store.state.configuration.ui?.showLogo,
       showNotebooks: this.$store.state.configuration.ui?.showNotebooks,
       navHeight: this.$store.state.configuration.ui?.navHeight || '50px',
-      topNavHome: this.$store.state.configuration.ui?.topNavHome || '/search',
+      topNavHome: this.$store.state.configuration.ui?.topNavHome || '/search?s=',
       topNavItems: this.$store.state.configuration.ui?.topNavItems || [],
       logo,
       active: '',
