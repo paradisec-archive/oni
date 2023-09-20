@@ -256,7 +256,7 @@ export default {
       this.loading = true;
       if (this.$route.query.s) {
         this.isStart = true;
-        this.basicSearch();
+        this.resetSearch();
       } else {
         await this.updateFilters({});
         this.onInputChange(this.$route.query.q);
@@ -462,10 +462,9 @@ export default {
     async resetSearch() {
       this.clear = !this.clear;
       this.searchInput = '';
-      // this.$route.query.q = '';
-      // this.$route.query.f = '';
-      // this.$route.query.t = '';
-      // this.$route.query.s = Date.now();
+      this.$route.query.q = '';
+      this.$route.query.f = '';
+      this.$route.query.t = '';
       if (this.resetAdvancedSearch) {
         this.advancedSearch = false;
       } else {
@@ -474,8 +473,8 @@ export default {
       this.advancedQueries = null;
       this.resetAdvancedSearch = true
       this.searchFields = this.$store.state.configuration.ui.searchFields;
-      // this.$route.query.sf = encodeURIComponent(this.searchFields);
-      // this.$route.query.o = this.selectedOperation;
+      this.$route.query.sf = encodeURIComponent(this.searchFields);
+      this.$route.query.o = this.selectedOperation;
       this.selectedOrder = 'desc';
       this.filterButton = [];
       this.isStart = true;
@@ -483,7 +482,9 @@ export default {
       this.currentPage = 1;
       this.filters = {};
       await this.clearAggregations();
-      await this.search();
+      // await this.search();
+      const query = {};
+      await this.$router.push({path: 'search', query});
     },
     scrollToTop(id) {
       setTimeout(function () {
