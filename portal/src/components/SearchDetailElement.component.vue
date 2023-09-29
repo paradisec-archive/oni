@@ -29,7 +29,7 @@
           <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
             Language:&nbsp;
           </p>
-          <span v-for="l of details?.language">{{first(l?.name)?.['@value']}}&nbsp;</span>
+          <span v-for="l of details?.language">{{first(l?.name)?.['@value']}}</span>
           <p>{{ first(details?.language)?.['@value'] }}</p>
         </el-row>
         <el-row :align="'middle'" v-if="Array.isArray(_memberOf) && _memberOf.length > 0" class="">
