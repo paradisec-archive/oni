@@ -1,5 +1,5 @@
 <template>
-  <el-row :offset="1" :gutter="10" :align="'bottom'" class="flex flex-wrap content-around">
+  <el-row :offset="1" :gutter="0" :align="'bottom'" class="flex flex-wrap content-around">
     <el-col :xs="24" class="h-auto">
       <el-row :justify="'center'" :gutter="10" :align="'middle'">
         <label for="searchInput" class="h-14 mx-2 w-full">

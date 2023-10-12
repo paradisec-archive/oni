@@ -1,7 +1,8 @@
 <template>
-  <el-row :gutter="40" :offset="1" style="" class="pb-4 pt-0 px-2 pl-4">
-    <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="5" :span="4"
-            class="h-full max-h-screen overflow-y-auto flex flex-col h-screen">
+  <el-row :gutter="0" :offset="0" style="" class="pb-4 pt-0" >
+    <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="5" :offset="0"
+            class="h-full max-h-screen overflow-y-auto flex flex-col h-screen p-2"
+    id="search_aggregation">
       <div v-show="!advancedSearch"
            class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
         <search-bar ref='searchBar' @populate='populate' :searchInput="searchInput"
@@ -47,8 +48,9 @@
         </div>
       </div>
     </el-col>
-    <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :span="20" :offset="0"
-            class="max-h-screen overflow-y-auto flex flex-row h-screen">
+    <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :offset="0"
+            class="max-h-screen overflow-y-auto flex flex-row h-screen p-2 px-3"
+    id="search_results">
       <div v-show="advancedSearch" id="advanced_search_box"
            class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
         <search-advanced :advancedSearch="advancedSearch" :fields="searchFields"
@@ -108,7 +110,7 @@
             </el-col>
           </el-row>
         </div>
-        <div class="py-2 w-full">
+        <div class="py-0 w-full">
           <el-pagination class="items-center w-full"
                          background layout="prev, pager, next"
                          :total="totals['value']"
@@ -460,6 +462,7 @@ export default {
       this.searchInput = value;
     },
     async resetSearch() {
+      this.scrollToTop();
       this.clear = !this.clear;
       this.searchInput = '';
       this.$route.query.q = '';
@@ -486,10 +489,39 @@ export default {
       const query = {};
       await this.$router.push({path: 'search', query});
     },
-    scrollToTop(id) {
+    scrollToTop(){
+      setTimeout(function () {
+        console.log('ran scrolling to top')
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        window.scrollTo(0,0);
+        document.getElementById('search_results').scrollTop = 0;
+        document.getElementById('search_aggregation').scrollTop = 0;
+        document.getElementById('advanced_search_box').scrollTop = 0;
+      }, 100);
+    },
+    scrollToId(id) {
       setTimeout(function () {
         // window.scroll({top: 0, left:0, behavior: 'smooth'});
-        document.getElementById(id).scrollIntoView({behavior: 'smooth'});
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        window.scrollTo(0,0);
+        const element = document.getElementById(id);
+        element.scrollIntoView({behavior: 'smooth'});
+        element.scrollTop = 0;
+      }, 100);
+    },
+    scrollToSelector(selector){
+      setTimeout(function () {
+        // window.scroll({top: 0, left:0, behavior: 'smooth'});
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        window.scrollTo(0,0);
+        const element = document.querySelector(selector);
+        element.scrollIntoView({behavior: 'smooth'});
+        element.scrollTop = 0;
       }, 100);
     },
     async clearAggregations() {
@@ -604,7 +636,7 @@ export default {
     async updatePages(page, scrollTo) {
       this.currentPage = page;
       await this.search();
-      this.scrollToTop(scrollTo)
+      this.scrollToId(scrollTo);
     },
     async clearFilters() {
       this.filters = {};
@@ -624,7 +656,7 @@ export default {
     },
     enableAdvancedSearch() {
       this.advancedSearch = true;
-      this.scrollToTop('advanced_search_box');
+      this.scrollToId('advanced_search_box');
       this.searchInput = '';
     },
     basicSearch() {
