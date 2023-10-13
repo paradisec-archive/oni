@@ -7,7 +7,7 @@
 </template>
 <script>
 import AggregationAsIcon from "../widgets/AggregationAsIcon.component.vue";
-import {isUndefined, uniqBy} from "lodash";
+import {isUndefined, uniqBy, orderBy} from "lodash";
 
 export default {
   components: {AggregationAsIcon},
@@ -36,7 +36,9 @@ export default {
           });
         }
       }
-      return uniqBy(buckets, 'key');
+      const uniqueBuckets = uniqBy(buckets, 'key');
+      const orderedBuckets = orderBy(uniqueBuckets, ['key']);
+      return orderedBuckets;
     }
   },
   methods: {
