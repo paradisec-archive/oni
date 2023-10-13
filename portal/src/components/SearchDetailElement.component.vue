@@ -84,7 +84,7 @@
         <el-row v-if="score" class="pt-2">
           <div>
             <font-awesome-icon icon="fa-solid fa-5x fa-award"/>
-            Search Score: {{ score }}
+            Relevance Score: {{ score }}
           </div>
         </el-row>
         <el-row class="py-2">
