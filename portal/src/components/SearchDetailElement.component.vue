@@ -4,7 +4,7 @@
       <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :span="20">
         <el-row :align="'middle'">
           <h5 class="text-2xl font-medium dark:text-white">
-            <a :href="href" class="text-blue-600 hover:text-blue-800 visited:text-purple-600 break-all">
+            <a :href="href" class="text-blue-600 hover:text-blue-800 visited:text-purple-600 break-words">
               {{ this.name || this.id }}</a>
           </h5>
         </el-row>
