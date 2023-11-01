@@ -1,7 +1,7 @@
 <template>
   <el-row :justify="'center'" class="">
     <el-col>
-      <div class="container max-w-screen-lg mx-auto">
+      <div class="container max-screen-lg mx-auto">
         <div v-if="!togglePreview" class="flex justify-center w-full">
           <el-button size="large" round @click="tryDownloadBlob();togglePreview=true">Preview File
           </el-button>
@@ -188,7 +188,7 @@ export default {
       //TODO: craete some file widgets
       if (this.path && (this.path.endsWith(".txt") || this.path.endsWith(".csv") || this.path.endsWith(".eaf") || this.path.endsWith(".html") || this.path.endsWith(".xml"))) {
         this.type = 'txt';
-        this.data = await this.responseBlob.text();
+        this.data = await this.responseBlob.text({type:'text/plain', endings:'native'});
         if (this.path.endsWith(".csv")) {
           this.tryCSV = true;
         }
