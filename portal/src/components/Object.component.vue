@@ -81,7 +81,7 @@
   </template>
 </template>
 <script>
-import {first, isUndefined, reject, isEmpty} from "lodash";
+import {first, isUndefined, reject, isEmpty, sortBy} from "lodash";
 import {initSnip, toggleSnip} from "../tools";
 import MetaField from "./MetaField.component.vue";
 import {defineAsyncComponent} from 'vue';
@@ -220,6 +220,7 @@ export default {
         }
         this.meta.push({name: filter, data: this.metadata[filter], help: helper});
       }
+      this.meta = sortBy(this.meta, 'name');
     },
     populateLicense() {
       this.license = first(this.metadata?.license);
