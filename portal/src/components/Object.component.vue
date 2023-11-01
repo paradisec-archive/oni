@@ -124,7 +124,7 @@ export default {
       parts: [],
       crateId: '',
       rootId: '',
-      access: [],
+      access: null,
       activePart: null,
       loading: false,
       membersFiltered: {},
