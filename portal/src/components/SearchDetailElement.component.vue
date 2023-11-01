@@ -69,7 +69,7 @@
           </p>
         </el-row>
         <el-row class="py-4 pr-4" v-if="first(details?.description)">
-          <p>{{ first(details?.description)?.['@value'] }}</p>
+          <p :id="'desc_'+_uuid">{{ first(details?.description)?.['@value'] }}</p>
         </el-row>
         <el-row v-if="types && types.includes('RepositoryCollection')">
           <span v-if="!isEmpty(subCollections)">Collections: {{ subCollections?.total }},&nbsp;</span>
@@ -127,6 +127,8 @@ import {first, merge, toArray, isEmpty, find, isUndefined} from 'lodash';
 import SummariesCard from './cards/SummariesCard.component.vue';
 import AggregationHelper from './helpers/AggregationHelper.component.vue';
 import AggregationAsIcon from "./widgets/AggregationAsIcon.component.vue";
+import {initSnip, toggleSnip} from "../tools";
+import {v4 as uuid} from 'uuid';
 
 export default {
   components: {
@@ -147,7 +149,8 @@ export default {
       members: [],
       typeFile: null,
       subCollections: [],
-      licenses: this.$store.state.configuration.ui?.licenses || []
+      licenses: this.$store.state.configuration.ui?.licenses || [],
+      _uuid: uuid()
     }
   },
   watch: {
@@ -218,6 +221,9 @@ export default {
         this.typeFile = find(buckets, (obj) => obj.key === 'File');
       }
       this.total = this.members?.total;
+      if (!this.descriptionSnipped) {
+        initSnip({selector:'#desc_' + this._uuid, lines: 3});
+      }
       this.loading = false;
     },
     //TODO: refactor this integrate to multi
@@ -249,6 +255,10 @@ export default {
       } else {
         return 'public';
       }
+    },
+    doSnip(selector) {
+      toggleSnip(selector);
+      this.descriptionSnipped = true;
     }
   }
 }

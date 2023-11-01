@@ -170,7 +170,7 @@ export default {
       this.metadata = metadata?._source;
       //console.log(this.metadata);
       await this.populate();
-      initSnip('#license', '#readMoreLicense');
+      initSnip({selector: '#license', button: '#readMoreLicense'});
       putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
       this.loading = false;
     } catch (e) {
