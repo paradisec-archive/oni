@@ -56,7 +56,7 @@
       </div>
     </el-col>
   </el-row>
-  <el-row class="flex justify-center">
+  <el-row class="flex justify-center" v-show="!loading" v-if="access['hasAccess']">
     <el-button-group class="m-2">
       <el-link v-if="!hideOpenLink" class="mr-2" :href="this.fileUrl" :underline="false">
         <el-button type="default" class="px-2">View File</el-button>
