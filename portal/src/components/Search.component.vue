@@ -33,7 +33,7 @@
               <span class="py-1 px-2">
                     <font-awesome-icon v-if="aggs.active" icon="fa fa-chevron-down"/>
                   <span v-else>
-                    <span class="text-xs rounded-full w-32 h-32 text-white bg-red-600 p-1">{{
+                    <span class="text-xs rounded-full w-32 h-32 text-white bg-purple-500 p-1">{{
                         aggs?.buckets?.length
                       }}</span>&nbsp;
                     <font-awesome-icon icon="fa fa-chevron-right"/>
