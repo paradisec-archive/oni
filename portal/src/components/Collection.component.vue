@@ -105,7 +105,7 @@
   </el-row>
 </template>
 <script>
-import {first, isUndefined, isEmpty, reject} from "lodash";
+import {first, isUndefined, isEmpty, reject, sortBy} from "lodash";
 import {defineAsyncComponent} from 'vue';
 import MetaField from "./MetaField.component.vue";
 import LicenseCard from "./cards/LicenseCard.component.vue"
@@ -251,6 +251,7 @@ export default {
         }
         this.meta.push({name: filter, data: this.metadata[filter], help: helper});
       }
+      this.meta = sortBy(this.meta, 'name');
     },
     populateLicense() {
       this.license = first(this.metadata?.license);
