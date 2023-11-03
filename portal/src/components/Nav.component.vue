@@ -48,17 +48,28 @@
       </router-link>
     </el-menu-item>
     <nav-user v-if="isLoginEnabled"/>
-    <el-menu-item index="help" :route="'/help'">
-      <router-link to="/help">
-        <el-row :gutter="10" class="flex items-center justify-center">
-          <el-col :span="24">
-            <div class="flex flex-col justify-center items-center" :style="{'height': navHeight}">
-              <span>Help</span>
-            </div>
-          </el-col>
-        </el-row>
-      </router-link>
-    </el-menu-item>
+    <el-sub-menu index="help-sub">
+      <template #title class="flex flex-col justify-center items-center" :style="{'height': navHeight}">
+        <div class="flex flex-col justify-center items-center" :style="{'height': navHeight}">
+          <span>Help</span>
+        </div>
+      </template>
+      <el-menu-item index="help-sub-about" :route="'/about'">
+        <router-link to="/about">
+          About Oni
+        </router-link>
+      </el-menu-item>
+      <el-menu-item index="help-sub-api" :route="'/docs'">
+        <router-link to="/docs">
+          Oni Api docs
+        </router-link>
+      </el-menu-item>
+      <el-menu-item v-for="helpLink of subHelpLinks">
+        <router-link custom to="/about">
+          <el-link :href="helpLink.href" :target="helpLink.target">{{ helpLink.name }}</el-link>
+        </router-link>
+      </el-menu-item>
+    </el-sub-menu>
   </el-menu>
 </template>
 <script>
@@ -85,6 +96,7 @@ export default {
       navHeight: this.$store.state.configuration.ui?.navHeight || '50px',
       topNavHome: this.$store.state.configuration.ui?.topNavHome || '/search?s=',
       topNavItems: this.$store.state.configuration.ui?.topNavItems || [],
+      subHelpLinks: this.$store.state.configuration.ui?.subHelpLinks || [],
       logo,
       active: '',
       populate: null,
