@@ -29,6 +29,17 @@
                 class="hover:cursor-pointer py-3 flex md:flex md:flex-grow flex-row justify-between space-x-1">
                 <span class="text-xl text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
                   {{ aggs.display }}
+                      <el-tooltip v-if="aggs.help"
+                                  class="box-item"
+                                  effect="light"
+                                  trigger="hover"
+                                  :content="aggs.help"
+                                  placement="top"
+                      >
+                      <el-button link>
+                        <font-awesome-icon icon="fa-solid fa-circle-info"/>
+                      </el-button>
+                    </el-tooltip>
                 </span>
               <span class="py-1 px-2">
                     <font-awesome-icon v-if="aggs.active" icon="fa fa-chevron-down"/>
@@ -447,13 +458,15 @@ export default {
         const name = info?.name;
         const hide = info?.hide;
         const active = info?.active;
+        const help = info?.help;
         a[agg] = {
           buckets: aggregations[agg]?.buckets || aggregations[agg]?.values?.buckets,
           display: display || agg,
           order: order || 0,
           name: name || agg,
           hide: hide,
-          active: active
+          active: active,
+          help: help || ''
         };
       }
       return orderBy(a, 'order');
