@@ -105,7 +105,7 @@
         <template v-else>
           <el-row :span="24" class="flex justify-center" v-for="agg of aggConfig">
             <template v-if="agg.icons">
-              <template v-if="agg.name.includes('license')"><!--This is needed because license comes from configuration-->
+              <template v-if="agg.name === 'license.@id'"><!--This is needed because license comes from configuration-->
                 <AggregationHelper :asIcons="true"
                                    :item="findLicense(details.license)"
                                    :field="{'display': 'Licence'}"/>
