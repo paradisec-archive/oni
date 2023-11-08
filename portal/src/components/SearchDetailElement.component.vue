@@ -29,7 +29,7 @@
           <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
             Language:&nbsp;
           </p>
-          <span v-for="l of details?.language">{{first(l?.name)?.['@value']}}</span>
+          <span v-for="l of details?.language">{{ first(l?.name)?.['@value'] }}</span>
           <p>{{ first(details?.language)?.['@value'] }}</p>
         </el-row>
         <el-row :align="'middle'" v-if="Array.isArray(_memberOf) && _memberOf.length > 0" class="">
@@ -93,30 +93,32 @@
       </el-col>
       <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="5" :span="4" :offset="0">
         <template v-if="types.includes('RepositoryCollection') || types.includes('RepositoryObject')">
-          <el-row :span="24" class="flex justify-center">
-            <AggregationHelper :asIcons="true"
-                               :aggregations="aggregations"
-                               :field="{ 'name': 'license.@id', 'display': 'Access' }"
-                               :id="id"/>
-          </el-row>
-          <el-row :span="24" class="flex justify-center">
-            <AggregationHelper :asIcons="true"
-                               :aggregations="aggregations"
-                               :field="{ 'name': 'encodingFormat.@value', 'display': 'File Formats' }"
-                               :id="id"/>
-          </el-row>
-          <el-row :span="24" class="flex justify-center">
-            <AggregationHelper :asIcons="true"
-                               :aggregations="aggregations"
-                               :field="{ 'name': 'modality.name.@value', 'display': 'Modality' }"
-                               :id="id"/>
+          <el-row :span="24" class="flex justify-center" v-for="agg of aggConfig">
+            <template v-if="agg.icons">
+              <AggregationHelper :asIcons="true"
+                                 :aggregations="aggregations"
+                                 :field="{ 'name': agg.name, 'display': agg.display }"
+                                 :id="id"/>
+            </template>
           </el-row>
         </template>
-        <el-row :span="24" class="flex justify-center" v-else>
-          <AggregationAsIcon class="w-full" :item="findLicense(details.license)"/>
-          <AggregationAsIcon class="w-full" :item="first(details.encodingFormat)?.['@value']"/>
-          <AggregationAsIcon class="w-full" :item="first(first(details.modality)?.['name'])?.['@value']"/>
-        </el-row>
+        <template v-else>
+          <el-row :span="24" class="flex justify-center" v-for="agg of aggConfig">
+            <template v-if="agg.icons">
+              <template v-if="agg.item === 'license'"><!--This is needed because license comes from configuration-->
+                <AggregationHelper :asIcons="true"
+                                   :item="findLicense(details.license)"
+                                   :field="{'display': 'Licence'}"/>
+              </template>
+              <template v-else>
+                <AggregationHelper :asIcons="true"
+                                   :item="getValue(agg.name)"
+                                   :field="{ 'name': agg.name, 'display': agg.display }"
+                                   :id="id"/>
+              </template>
+            </template>
+          </el-row>
+        </template>
       </el-col>
     </el-row>
     <hr class="divide-y divide-gray-500"/>
@@ -150,7 +152,8 @@ export default {
       typeFile: null,
       subCollections: [],
       licenses: this.$store.state.configuration.ui?.licenses || [],
-      _uuid: uuid()
+      _uuid: uuid(),
+      aggConfig: this.$store.state.configuration.ui.aggregations
     }
   },
   watch: {
@@ -222,7 +225,7 @@ export default {
       }
       this.total = this.members?.total;
       if (!this.descriptionSnipped) {
-        initSnip({selector:'#desc_' + this._uuid, lines: 3});
+        initSnip({selector: '#desc_' + this._uuid, lines: 3});
       }
       this.loading = false;
     },
@@ -254,6 +257,16 @@ export default {
         }
       } else {
         return 'public';
+      }
+    },
+    getValue(name) {
+      //this is because this!! value = "first(first(details.modality)?.['name'])?.['@value']"
+      if (name.includes('name')) {
+        let det = /[^.]*/.exec(name)?.[0];
+        return first(first(this.details[det])?.['name'])?.['@value']
+      } else {
+        let det = /[^.]*/.exec(name)?.[0];
+        return first(this.details[det])?.['@value']
       }
     },
     doSnip(selector) {

@@ -64,14 +64,19 @@
           Oni Api docs
         </router-link>
       </el-menu-item>
-      <el-menu-item v-for="helpLink of subHelpLinks">
-        <router-link custom to="/about">
-          <el-link :href="helpLink.href" :target="helpLink.target">{{ helpLink.name }}</el-link>
-        </router-link>
-      </el-menu-item>
+      <template v-for="helpLink of subHelpLinks">
+        <el-menu-item :route="{}">
+          <a :href="helpLink.href" :target="helpLink.target">{{ helpLink.name }}</a>
+        </el-menu-item>
+      </template>
     </el-sub-menu>
   </el-menu>
 </template>
+<style>
+.el-menu-item a {
+  display: block;
+}
+</style>
 <script>
 
 import {

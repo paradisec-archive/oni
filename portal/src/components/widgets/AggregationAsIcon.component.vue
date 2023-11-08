@@ -37,7 +37,7 @@
         <el-tooltip
             class="box-item"
             effect="dark"
-            :content="item"
+            :content="`${field?.display}: ${item}`"
             placement="bottom"
         >
         <font-awesome-icon
