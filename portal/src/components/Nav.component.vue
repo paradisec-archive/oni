@@ -65,9 +65,11 @@
         </router-link>
       </el-menu-item>
       <template v-for="helpLink of subHelpLinks">
-        <el-menu-item :route="{}">
-          <a :href="helpLink.href" :target="helpLink.target">{{ helpLink.name }}</a>
-        </el-menu-item>
+        <li class="el-menu-item">
+          <a class="w-full block" :href="helpLink.href" :target="helpLink.target">
+            {{ helpLink.name }}
+          </a>
+        </li>
       </template>
     </el-sub-menu>
   </el-menu>
