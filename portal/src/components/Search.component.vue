@@ -1,8 +1,8 @@
 <template>
-  <el-row :gutter="0" :offset="0" style="" class="pb-4 pt-0" >
+  <el-row :gutter="0" :offset="0" style="" class="pb-4 pt-0">
     <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="5" :offset="0"
             class="h-full max-h-screen overflow-y-auto flex flex-col h-screen p-2"
-    id="search_aggregation">
+            id="search_aggregation">
       <div v-show="!advancedSearch"
            class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
         <search-bar ref='searchBar' @populate='populate' :searchInput="searchInput"
@@ -61,7 +61,7 @@
     </el-col>
     <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :offset="0"
             class="max-h-screen overflow-y-auto flex flex-row h-screen p-2 px-3"
-    id="search_results">
+            id="search_results">
       <div v-show="advancedSearch" id="advanced_search_box"
            class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
         <search-advanced :advancedSearch="advancedSearch" :fields="searchFields"
@@ -502,12 +502,12 @@ export default {
       const query = {};
       await this.$router.push({path: 'search', query});
     },
-    scrollToTop(){
+    scrollToTop() {
       setTimeout(function () {
         console.log('ran scrolling to top')
         document.body.scrollTop = 0; // For Safari
         document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
-        window.scrollTo(0,0);
+        window.scrollTo(0, 0);
         document.getElementById('search_results').scrollTop = 0;
         document.getElementById('search_aggregation').scrollTop = 0;
         document.getElementById('advanced_search_box').scrollTop = 0;
@@ -520,18 +520,18 @@ export default {
         document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
         document.body.scrollTop = 0; // For Safari
         document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
-        window.scrollTo(0,0);
+        window.scrollTo(0, 0);
         const element = document.getElementById(id);
         element.scrollIntoView({behavior: 'smooth'});
         element.scrollTop = 0;
       }, 100);
     },
-    scrollToSelector(selector){
+    scrollToSelector(selector) {
       setTimeout(function () {
         // window.scroll({top: 0, left:0, behavior: 'smooth'});
         document.body.scrollTop = 0; // For Safari
         document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
-        window.scrollTo(0,0);
+        window.scrollTo(0, 0);
         const element = document.querySelector(selector);
         element.scrollIntoView({behavior: 'smooth'});
         element.scrollTop = 0;
@@ -554,10 +554,14 @@ export default {
     },
     async search() {
       this.loading = true;
-      if (this.isStart) {
+      if (this.isStart) { //Revert start to sorting by collections
         this.selectedSorting = this.sorting[1].value; //collection
         this.isStart = false;
-      } else {
+      } else if (this.searchInput) { // If there is a query sort by relevance
+        this.selectedSorting = this.defaultSorting.value;
+      } else if (this.advancedSearch) { // If advanced search is enabled sort by relevance
+        this.selectedSorting = this.defaultSorting.value;
+      } else if (!this.selectedSorting) { // If there is one selected sorting do that
         this.selectedSorting = this.defaultSorting.value;
       }
       this.changedFilters = false;
