@@ -653,7 +653,7 @@ export default {
     async updatePages(page, scrollTo) {
       this.currentPage = page;
       await this.search();
-      this.scrollToId(scrollTo);
+      this.scrollToTop();//Id(scrollTo);
     },
     async clearFilters() {
       this.filters = {};
@@ -673,7 +673,7 @@ export default {
     },
     enableAdvancedSearch() {
       this.advancedSearch = true;
-      this.scrollToId('advanced_search_box');
+      this.scrollToTop();//('advanced_search_box');
       this.searchInput = '';
     },
     basicSearch() {
@@ -698,3 +698,8 @@ export default {
   }
 };
 </script>
+<style>
+html {
+  scroll-behavior: smooth;
+}
+</style>
