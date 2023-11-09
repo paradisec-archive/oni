@@ -41,7 +41,7 @@ services:
     volumes:
       - ./configuration.json:/srv/configuration.json
       - ./wait-for-it.sh:/wait-for-it.sh
-      - /home/mark/opt/storage/oni:/home/mark/opt/storage/oni
+      - /opt/storage/oni:/opt/storage/oni
     ports:
       - "8080:8080"
     command: ["/wait-for-it.sh", "db:5432", "-t", "20", "elasticsearch:9200", "-t", "20", "--", "node", "./server.bundle.js"]
