@@ -1,6 +1,6 @@
 <template>
   <el-row :gutter="0" :offset="0" style="" class="pb-4 pt-0">
-    <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="5" :offset="0"
+    <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="7" :offset="0"
             class="h-full max-h-screen overflow-y-auto flex flex-col h-screen p-2"
             id="search_aggregation">
       <div v-show="!advancedSearch"
@@ -59,7 +59,7 @@
         </div>
       </div>
     </el-col>
-    <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="19" :offset="0"
+    <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="17" :offset="0"
             class="max-h-screen overflow-y-auto flex flex-row h-screen p-2 px-3"
             id="search_results">
       <div v-show="advancedSearch" id="advanced_search_box"
