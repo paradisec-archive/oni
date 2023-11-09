@@ -1,6 +1,6 @@
 <template>
   <template v-if="ui">
-    <header>
+    <header class="sticky top-0 z-50">
       <nav-view/>
     </header>
     <main class="">

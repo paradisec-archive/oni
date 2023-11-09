@@ -1,5 +1,5 @@
 <template>
-  <div class="px-10 pt-10 pb-7 sticky top-0 z-10 bg-white">
+  <div class="px-10 pt-10 pb-7 z-10 bg-white">
     <el-row :align="'middle'" class="mb-2 text-3xl font-medium dark:text-white">
       <h5>
         <member-of-link :memberOf="metadata?._memberOf"/>
