@@ -132,7 +132,8 @@ export default {
     async resolveFile() {
       this.parentId = this.crateId;
       this.path = this.id;
-      this.route = `/object/open?id=${this.crateId}`;
+      this.route = `/object/open?id=${encodeURIComponent(this.crateId)}`;
+
       if (this.path != '') {
         this.route += `&path=${this.path}`;
       }
