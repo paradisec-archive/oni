@@ -8,41 +8,8 @@
           Search Help&nbsp;<font-awesome-icon icon="fa fa-circle-question"/>
         </el-button>
       </el-row>
-      <el-row class="p-2" :gutter="10" v-if="showHelp">
-        <p>The information which you enter in the Advanced Search box(es) is treated as part of a 'mini-language'.</p>
-        <ul class="px-2 list-disc list-inside">
-          <li class="px-3 py-1">The query string is parsed into a series of terms and operators.</li>
-          <li class="px-3 py-1">In general, the search functions are NOT case sensitive.</li>
-          <li class="px-3 py-1">A term can be a single word -- 'quick' or 'brown' -- or a phrase, surrounded by double
-            quotes -- "quick brown" -- which searches for all the words in the phrase, in the same order. NB: In the
-            Basic Search box, multi-word expressions are treated as being linked by OR regardless of whether they have
-            quote marks around them.
-          </li>
-          <li class="px-3 py-1">Wildcard searches can be run on terms consisting of a single word, using ? to replace a
-            single character, and * to replace zero or more characters. Wildcards cannot be included in a phrase search.
-          </li>
-          <li class="px-3 py-1">Regular expression patterns can be embedded in the query string by wrapping them in
-            forward-slashes ("/"). This search engine does not support full Perl-compatible regex syntax, for more see:
-            <a target="_blank" rel="noopener noreferrer" class="underline text-blue-300" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/regexp-syntax.html">RegExp Syntax</a>.
-          </li>
-          <li class="px-3 py-1">The reserved characters are: <code class="literal backdrop-blur">+ - = && || > &lt; ! (
-            ) { } [ ] ^ " ~ * ? : \ /</code></li>
-          <li class="px-3 py-1">Reserved characters should be escaped using a back-slash ("\"). Failing to escape these
-            special characters correctly could lead to a syntax error which prevents your query from running. For
-            example, to search for 'LGBTQ+', you would need to enter the string 'LGBTQ\+'.
-          </li>
-<!--          <li class="px-3 py-1">The familiar boolean operators AND, OR and NOT (also written &&, || and !) are also-->
-<!--            supported but beware that they do not honor the usual precedence rules, so parentheses should be used-->
-<!--            whenever multiple operators are used together. For instance, to search for files which contain both 'public'-->
-<!--            and 'house' or 'government' and 'house' or 'house' but not 'cottage', the query should be ((public AND-->
-<!--            house) OR (government AND house) OR house) AND NOT cottage-->
-<!--          </li>-->
-<!--          <li class="px-3 py-1">If you search for the literal word AND, OR, and NOT they all should be escaped. eg. \OR.-->
-<!--            Note that this is a situation where the search is case sensitive: 'and' does not need to be escaped, but-->
-<!--            'AND' does.-->
-<!--          </li>-->
-          <!--          <li class="px-3 py-1">Clicking on "Use Query String" will show you the actual search string used for your search. You can update your search string however it will not convert back to the search box</li>-->
-        </ul>
+      <el-row class="p-2 px-8" :gutter="10" v-if="showHelp">
+        <SearchAdvancedHelp/>
       </el-row>
       <el-row class="px-2 pb-2" :gutter="10" v-for="(sg, index) in searchGroup" :key="index">
         <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8" class="h-auto">
@@ -130,7 +97,6 @@
                    class="cursor-pointer">Switch to basic search
         </el-button>
       </el-row>
-
     </el-col>
   </el-row>
 </template>
@@ -141,10 +107,11 @@ import {defineAsyncComponent} from 'vue';
 import {Close} from '@element-plus/icons-vue'
 import {isEmpty} from 'lodash';
 import {getLocalStorage, removeLocalStorage} from '@/storage';
+import SearchAdvancedHelp from "./SearchAdvancedHelp.component.vue";
 
 export default {
   props: ['searchInput', 'fields', 'resetAdvancedSearch'],
-  components: {},
+  components: {SearchAdvancedHelp},
   created() {
   },
   updated() {
