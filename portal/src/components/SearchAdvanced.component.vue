@@ -2,7 +2,7 @@
   <el-row :offset="1" :gutter="10" :align="'bottom'" class="flex flex-wrap content-around p-3">
     <el-col class="h-auto">
       <el-row class="p-2" :gutter="10" :justify="'space-between'">
-        <p>Search in:</p>
+        <p>Advanced Search:</p>
         <el-button @click="showHelp = !showHelp"
                    class="cursor-pointer">
           Search Help&nbsp;<font-awesome-icon icon="fa fa-circle-question"/>

@@ -80,12 +80,6 @@
     </tbody>
   </table>
   <p class="py-2 font-bold">
-    Reserved Characters
-  </p>
-  <p class="py-2">
-    The reserved characters are: <code>+ &#x2212; = &#x26;&#x26; ; || &#x3E; &#x3C; ! ( ) { } [ ] ^ &#x22; ~ * ? : \ /</code>
-  </p>
-  <p class="py-2 font-bold">
     Regular Expressions
   </p>
   <p>
@@ -93,8 +87,17 @@
     e.g. <code class="literal backdrop-blur">/gr[ae]y/</code> or <code class="literal backdrop-blur">/honou*r/</code>.
     Currently, regular expressions can only be used for full-word searches and not phrases. This search engine does not
     support full Perl-compatible regex syntax, for more information see:
-    <a class="underline" title="RegExp Syntax" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/regexp-syntax.html">
+    <a class="underline" title="RegExp Syntax"
+       href="https://www.elastic.co/guide/en/elasticsearch/reference/current/regexp-syntax.html">
       RegExp Syntax</a>.
+  </p>
+  <p class="py-2 font-bold">
+    Reserved Characters: &nbsp;
+  </p>
+  <p class="py-2">
+    <code>
+      &plus;&#x20;&minus;&#x20;&equals;&#x20;&amp;&amp;&#x20;&semi;&#x20;&vert;&vert;&#x20;&gt;&#x20;&lt;&#x20;&excl;&#x20;&lpar;&#x20;&rpar;&#x20;&lcub;&#x20;&rcub;&#x20;&lsqb;&#x20;&rsqb;&#x20;&Hat;&#x20;&quot;&#x20;&#x7E;&#x20;&ast;&#x20;&quest;&#x20;&colon;&#x20;&bsol;&#x20;&sol;
+    </code>
   </p>
   <!--
   <li class="px-3 py-1">A term can be a single word -- 'quick' or 'brown' -- or a phrase, surrounded by double
