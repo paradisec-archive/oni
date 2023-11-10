@@ -39,19 +39,19 @@
     </thead>
     <tbody>
     <tr>
-      <td><code class="literal backdrop-blur">" "</code></td>
+      <td><code>" "</code></td>
       <td>Use double quotation marks before and after a phrase to search for that exact phrase, e.g. <code
           class="literal backdrop-blur">"public house"</code>. Searching for space in a phrasal search will also return
         entries where hyphen occurs instead.
       </td>
     </tr>
     <tr class="bg-gray-50">
-      <td><code class="literal backdrop-blur">^</code></td>
+      <td><code>^</code></td>
       <td>Boost operator that makes one term more relevant than another, e.g. <code class="literal backdrop-blur">quick^2
         fox</code></td>
     </tr>
     <tr>
-      <td><code class="literal backdrop-blur">~</code></td>
+      <td><code>~</code></td>
       <td>Creates a fuzzy query to return results similar to the search term by changing, removing, inserting or
         transposing one character. Can also be applied to phrase searches allowing the specified words to be further
         apart or in a different order. Add a number following this to increase the number of variations, e.g. <code
@@ -59,22 +59,22 @@
       </td>
     </tr>
     <tr class="bg-gray-50">
-      <td><code class="literal backdrop-blur">?</code></td>
+      <td><code>?</code></td>
       <td>Wildcard to replace zero or one of the previous character. Wildcards cannot be included in a phrase search.
       </td>
     </tr>
     <tr>
-      <td><code class="literal backdrop-blur">*</code></td>
+      <td><code>*</code></td>
       <td>Wildcard to replace zero or more of the previous character. Wildcards cannot be included in a phrase search.
       </td>
     </tr>
     <tr class="bg-gray-50">
-      <td><code class="literal backdrop-blur">+</code></td>
+      <td><code>+</code></td>
       <td>Wildcard to replace one or more of the previous character. Wildcards cannot be included in a phrase search.
       </td>
     </tr>
     <tr>
-      <td><code class="literal backdrop-blur">( )</code></td>
+      <td><code>( )</code></td>
       <td>Defines a sub-expression.</td>
     </tr>
     </tbody>
@@ -83,7 +83,7 @@
     Reserved Characters
   </p>
   <p class="py-2">
-    The reserved characters are: <code class="literal backdrop-blur">+ - = && || > &lt; ! ( ) { } [ ] ^ " ~ * ? : \ /</code>
+    The reserved characters are: <code>+ &#x2212; = &#x26;&#x26; ; || &#x3E; &#x3C; ! ( ) { } [ ] ^ &#x22; ~ * ? : \ /</code>
   </p>
   <p class="py-2 font-bold">
     Regular Expressions
