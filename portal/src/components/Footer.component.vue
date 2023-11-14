@@ -1,5 +1,5 @@
 <template>
-  <div class="h-28 text-center bg-gray-50 grid place-items-center ">
+  <div class="h-24 text-center bg-gray-50 grid place-items-center ">
     <el-row>
       <el-col :span="24">
         <span>{{ copyright }}</span>&nbsp;
