@@ -42,7 +42,7 @@
       <td><code>" "</code></td>
       <td>Use double quotation marks before and after a phrase to search for that exact phrase, e.g. <code
           class="literal backdrop-blur">"public house"</code>. Searching for space in a phrasal search will also return
-        entries where hyphen occurs instead.
+        entries where a hyphen occurs instead.
       </td>
     </tr>
     <tr class="bg-gray-50">
