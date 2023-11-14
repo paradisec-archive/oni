@@ -2,13 +2,13 @@
   <template v-if="ui">
     <header class="sticky top-0 z-50">
       <el-row :gutter="0" :offset="0" style="" class="flex items-center justify-center">
-        <el-col :xs="24" :sm="24" :md="24" :lg="20" :xl="17" :offset="0">
+        <el-col :xs="24" :sm="24" :md="24" :lg="22" :xl="17" :offset="0">
       <nav-view/>
         </el-col>
       </el-row>
     </header>
     <el-row :gutter="0" :offset="0" style="" class="flex items-center justify-center">
-      <el-col :xs="24" :sm="24" :md="24" :lg="20" :xl="17" :offset="0">
+      <el-col :xs="24" :sm="24" :md="24" :lg="22" :xl="17" :offset="0">
     <main class="">
       <router-view/>
     </main>
