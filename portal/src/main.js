@@ -15,6 +15,7 @@ import router from "./routes";
 import {store} from "./store";
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import {MankuIcon} from "manku-icon-lib";
 import log from "loglevel";
 import prefix from "loglevel-plugin-prefix";
 import VuePapaParse from 'vue-papa-parse'
@@ -37,6 +38,7 @@ import VueGtag from "vue-gtag";
   app.use(ElementPlus);
   app.use(VuePapaParse);
   app.component('font-awesome-icon', FontAwesomeIcon);
+  app.component('manku-icon', MankuIcon);
   app.config.globalProperties.$http = new HTTPService({router, loginPath: "/login"});
   app.config.globalProperties.$log = log;
 
