@@ -8,7 +8,7 @@
             content="You can access this data immediately and by doing so you accept the licence terms specified on the record."
             placement="bottom"
         >
-          <manku-icon name="Public" size="50" fill="grey"/>
+          <manku-icon name="Public" size="40" fill="grey"/>
         </el-tooltip>
       </span>
       <span class="flex justify-center" v-if="accessIcon === 'login'">
@@ -18,7 +18,7 @@
             content="You can access this data after logging in. You may also have to agree to licence terms in an automatic process."
             placement="bottom"
         >
-          <manku-icon name="Login" size="50" fill="grey"/>
+          <manku-icon name="Login" size="40" fill="grey"/>
         </el-tooltip>
       </span>
       <span class="flex justify-center" v-if="accessIcon === 'loginPlus'">
@@ -28,7 +28,7 @@
             content="There are restrictions on access to this data. Log in to get further information."
             placement="bottom"
         >
-          <manku-icon name="Login+" size="50" fill="grey"/>
+          <manku-icon name="Login+" size="40" fill="grey"/>
         </el-tooltip>
       </span>
     </span>
