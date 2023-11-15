@@ -40,10 +40,11 @@
             :content="`${field?.display}: ${item}`"
             placement="bottom"
         >
-        <font-awesome-icon
-            :icon="['fa-solid', iconType]"
-            size="2x"
-            style="color: rgba(0,0,0,0.55);"/>
+        <font-awesome-icon v-if="!special"
+                           :icon="['fa-solid', iconType]"
+                           size="2x"
+                           style="color: rgba(0,0,0,0.55);"/>
+          <manku-icon v-else :name="iconType" size="40" fill="grey"/>
       </el-tooltip>
       </span>
     </span>
@@ -58,7 +59,8 @@ export default {
     return {
       noIcon: false,
       iconType: 'file',
-      accessIcon: 'none'
+      accessIcon: 'none',
+      special: false
     }
   },
   mounted() {
@@ -81,9 +83,11 @@ export default {
     } else if (/application\/x-ipynb+json/.test(this.item)) {
       this.iconType = 'clipboard';
     } else if (/WrittenLanguage/.test(this.item)) {
-      this.iconType = 'fa-pencil';
+      this.iconType = 'WrittenLanguage';
+      this.special = true;
     } else if (/SpokenLanguage/.test(this.item)) {
-      this.iconType = 'fa-microphone-lines';
+      this.iconType = 'SpokenLanguage';
+      this.special = true;
     } else if (/Song/.test(this.item)) {
       this.iconType = 'fa-music';
     } else if (/Gesture/.test(this.item)) {
