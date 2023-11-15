@@ -8,7 +8,7 @@
             content="You can access this data immediately and by doing so you accept the licence terms specified on the record."
             placement="bottom"
         >
-        <img class="object-fill block" :src="publicIcon" :srcset="publicIcon" :style="{'height': '60px'}"/>
+          <manku-icon name="Public" size="50" fill="grey"/>
         </el-tooltip>
       </span>
       <span class="flex justify-center" v-if="accessIcon === 'login'">
@@ -18,7 +18,7 @@
             content="You can access this data after logging in. You may also have to agree to licence terms in an automatic process."
             placement="bottom"
         >
-        <img class="object-fill block" :src="loginIcon" :srcset="loginIcon" :style="{'height': '60px'}"/>
+          <manku-icon name="Login" size="50" fill="grey"/>
         </el-tooltip>
       </span>
       <span class="flex justify-center" v-if="accessIcon === 'loginPlus'">
@@ -28,7 +28,7 @@
             content="There are restrictions on access to this data. Log in to get further information."
             placement="bottom"
         >
-        <img class="object-fill block" :src="loginIconPlus" :srcset="loginIconPlus" :style="{'height': '60px'}"/>
+          <manku-icon name="Login+" size="50" fill="grey"/>
         </el-tooltip>
       </span>
     </span>
@@ -50,9 +50,7 @@
   </span>
 </template>
 <script>
-import publicIcon from "@/assets/access-public.svg";
-import loginIcon from "@/assets/access-login-pass.svg";
-import loginIconPlus from "@/assets/access-login-restricted.svg";
+
 
 export default {
   props: ['item', 'id', 'field'],
@@ -60,10 +58,7 @@ export default {
     return {
       noIcon: false,
       iconType: 'file',
-      accessIcon: 'none',
-      publicIcon,
-      loginIcon,
-      loginIconPlus
+      accessIcon: 'none'
     }
   },
   mounted() {
@@ -86,16 +81,16 @@ export default {
     } else if (/application\/x-ipynb+json/.test(this.item)) {
       this.iconType = 'clipboard';
     } else if (/WrittenLanguage/.test(this.item)) {
-      this.iconType = 'fa-feather';
-    } else if (/SpokenLanguage/.test(this.item)){
-        this.iconType = 'fa-microphone-lines';
-    } else if (/Song/.test(this.item)){
+      this.iconType = 'fa-pencil';
+    } else if (/SpokenLanguage/.test(this.item)) {
+      this.iconType = 'fa-microphone-lines';
+    } else if (/Song/.test(this.item)) {
       this.iconType = 'fa-music';
-    } else if (/Gesture/.test(this.item)){
+    } else if (/Gesture/.test(this.item)) {
       this.iconType = 'fa-hand';
-    } else if (/SignLanguage/.test(this.item)){
+    } else if (/SignLanguage/.test(this.item)) {
       this.iconType = 'fa-hands-asl-interpreting';
-    } else if (/WhistledLanguage/.test(this.item)){
+    } else if (/WhistledLanguage/.test(this.item)) {
       this.iconType = 'fa-face-kiss';
     } else if (/public/.test(this.item)) {
       this.accessIcon = 'public';
