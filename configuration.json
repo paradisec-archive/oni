@@ -11,6 +11,7 @@
     "splashEnabled": true,
     "splashLauncher": "Acknowledgement of Country",
     "showLogo": true,
+    "showEllipsis": true,
     "navHeight": "80px",
     "help": {
       "aboutText": "This is an Oni Data Portal publication. This portal provides access to a repository of language data, it is provided by the Language Data Commons of Australia [LDaCA](<a href='https://ldaca.edu.au'>https://ldaca.edu.au</a>).",

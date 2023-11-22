@@ -2,7 +2,7 @@
   <el-menu
       id="top_menu"
       mode="horizontal"
-      :ellipsis="true"
+      :ellipsis="showEllipsis"
       :default-active="active"
       :router="true"
   >
@@ -104,6 +104,7 @@ export default {
       topNavHome: this.$store.state.configuration.ui?.topNavHome || '/search?s=',
       topNavItems: this.$store.state.configuration.ui?.topNavItems || [],
       subHelpLinks: this.$store.state.configuration.ui?.subHelpLinks || [],
+      showEllipsis: this.$store.state.configuration.ui?.showEllipsis || false,
       logo,
       active: '',
       populate: null,
