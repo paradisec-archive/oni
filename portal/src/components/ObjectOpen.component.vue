@@ -6,7 +6,7 @@
           <el-col :xs="24" :sm="15" :md="24" :lg="24" :xl="24">
             <h3 class="relative space-x-3 font-bold p-3 text-xl select-none text-left">
               <a class="break-words no-underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
-                :href="`/object?id=${parentId}&_crateId=${crateId}&fileId=${id}`">
+                :href="`/object?id=${encodeURIComponent(parentId)}&_crateId=${encodeURIComponent(crateId)}&fileId=${id}`">
                 <font-awesome-icon icon="fa fa-arrow-left" />
                 {{ parentTitle }} </a>&nbsp;><span>{{ title || id }}</span>
             </h3>

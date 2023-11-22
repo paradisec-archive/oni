@@ -19,7 +19,7 @@ export default {
       const memberOf = first(this.memberOf);
       const id = memberOf?.['@id'];
       const _crateId = memberOf?.['@id'];
-      this.link = `/collection?id=${id}&_crateId=${_crateId}`;
+      this.link = `/collection?id=${encodeURIComponent(id)}&_crateId=${encodeURIComponent(_crateId)}`;
       this.value = first(memberOf?.['name'])?.['@value'] || undefined;
     }
   },

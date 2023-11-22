@@ -261,7 +261,7 @@ export default {
     },
     moreObjects() {
       const filter = {
-        '_memberOf.@id': [this.crateId]
+        '_memberOf.@id': [encodeURIComponent(this.crateId)]
       };
       return encodeURIComponent(JSON.stringify(filter));
     }
