@@ -249,7 +249,7 @@ export default {
         {value: 'relevance', label: 'Relevance'}
       ],
       selectedSorting: null,
-      defaultSorting: this.$store.state.configuration.ui.search.defaultSorting || {value: 'relevance', label: 'Relevance'},
+      defaultSorting: this.$store.state.configuration.ui.search?.defaultSorting || {value: 'relevance', label: 'Relevance'},
       ordering: this.$store.state.configuration.ui.search?.ordering  || [
         {value: 'asc', label: 'Ascending'},
         {value: 'desc', label: 'Descending'}
