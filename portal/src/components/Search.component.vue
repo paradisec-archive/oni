@@ -247,7 +247,8 @@ export default {
       searchFields: this.$store.state.configuration.ui.searchFields,
       sorting: [
         {value: 'relevance', label: 'Relevance'},
-        {value: '_isTopLevel.@value.keyword', label: 'Collections'}
+        // {value: '_isTopLevel.@value.keyword', label: 'Collections'},
+        {value: 'name', label: 'Name'}
       ],
       selectedSorting: null,
       defaultSorting: {value: 'relevance', label: 'Relevance'},
@@ -255,7 +256,7 @@ export default {
         {value: 'asc', label: 'Ascending'},
         {value: 'desc', label: 'Descending'}
       ],
-      selectedOrder: {value: 'desc', label: 'Descending'},
+      selectedOrder: {value: 'asc', label: 'Ascending'},
       searchFrom: 0,
       selectedOperation: 'must',
       changedFilters: false,
