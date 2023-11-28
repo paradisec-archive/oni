@@ -32,7 +32,13 @@ export default class ElasticService {
           _score: {
             order: order
           }
-        }]
+        }];
+      } else if (sort === 'name') {
+        sorting = [{
+          "name.@value.keyword": {
+            "order": order
+          }
+        }];
       } else {
         sorting = [{
           _script: {
