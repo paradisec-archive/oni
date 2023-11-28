@@ -244,19 +244,17 @@ export default {
       errorDialogText: '',
       conformsToNotebook: this.$store.state.configuration.ui.conformsTo?.notebook,
       noMoreResults: false,
-      searchFields: this.$store.state.configuration.ui.searchFields,
-      sorting: [
-        {value: 'relevance', label: 'Relevance'},
-        // {value: '_isTopLevel.@value.keyword', label: 'Collections'},
-        {value: 'name', label: 'Name'}
+      searchFields: this.$store.state.configuration.ui.searchFields, // Comes from merged API configuration
+      sorting: this.$store.state.configuration.ui.search?.sorting || [
+        {value: 'relevance', label: 'Relevance'}
       ],
       selectedSorting: null,
-      defaultSorting: {value: 'relevance', label: 'Relevance'},
-      ordering: [
+      defaultSorting: this.$store.state.configuration.ui.search.defaultSorting || {value: 'relevance', label: 'Relevance'},
+      ordering: this.$store.state.configuration.ui.search?.ordering  || [
         {value: 'asc', label: 'Ascending'},
         {value: 'desc', label: 'Descending'}
       ],
-      selectedOrder: {value: 'asc', label: 'Ascending'},
+      selectedOrder: this.$store.state.configuration.ui.search?.defaultOrder || {value: 'asc', label: 'Ascending'},
       searchFrom: 0,
       selectedOperation: 'must',
       changedFilters: false,

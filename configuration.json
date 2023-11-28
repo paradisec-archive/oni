@@ -79,6 +79,18 @@
         "route": "/search?f=%257B%2522%2540type%2522%253A%255B%2522SoftwareApplication%2522%255D%257D",
         "display": "Notebooks"
       }],
+    "search": {
+      "sorting": [
+        {"value": "relevance", "label": "Relevance"},
+        {"value": "_isTopLevel.@value.keyword", "label": "Collections"},
+        {"value": "name", "label": "Name"}
+      ],
+      "ordering": [
+        {"value": "asc", "label": "Ascending"},
+        {"value": "desc", "label": "Descending"}
+      ],
+      "defaultOrder": {"value": "desc", "label": "Descending"}
+    },
     "main": {
       "fields": [
         {
