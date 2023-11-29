@@ -254,6 +254,7 @@ export default {
         {value: 'asc', label: 'Ascending'},
         {value: 'desc', label: 'Descending'}
       ],
+      defaultOrder: this.$store.state.configuration.ui.search?.defaultOrder || {value: 'asc', label: 'Ascending'},
       selectedOrder: this.$store.state.configuration.ui.search?.defaultOrder || {value: 'asc', label: 'Ascending'},
       searchFrom: 0,
       selectedOperation: 'must',
@@ -490,7 +491,7 @@ export default {
       this.searchFields = this.$store.state.configuration.ui.searchFields;
       this.$route.query.sf = encodeURIComponent(this.searchFields);
       this.$route.query.o = this.selectedOperation;
-      this.selectedOrder = 'desc';
+      this.selectedOrder = this.defaultOrder;
       this.filterButton = [];
       this.isStart = true;
       this.isBrowse = false;
