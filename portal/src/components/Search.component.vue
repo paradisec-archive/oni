@@ -491,7 +491,7 @@ export default {
       this.searchFields = this.$store.state.configuration.ui.searchFields;
       this.$route.query.sf = encodeURIComponent(this.searchFields);
       this.$route.query.o = this.selectedOperation;
-      this.selectedOrder = this.defaultOrder;
+      this.selectedOrder = this.defaultOrder.value;
       this.filterButton = [];
       this.isStart = true;
       this.isBrowse = false;
@@ -573,9 +573,6 @@ export default {
         filters = {};
       }
       let order = this.selectedOrder.value;
-      if (!order) {
-        order = this.selectedOrder;
-      }
       try {
         this.items = await this.$elasticService.multi({
           multi: this.searchInput,
