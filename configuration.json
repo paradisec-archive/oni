@@ -83,8 +83,9 @@
       "sorting": [
         {"value": "relevance", "label": "Relevance"},
         {"value": "_isTopLevel.@value.keyword", "label": "Collections"},
-        {"value": "name", "label": "Name"}
+        {"value": "name", "label": "Name", "field": "name.@value.keyword"}
       ],
+      "searchSorting": {"value": "relevance", "label": "Relevance"},
       "ordering": [
         {"value": "asc", "label": "Ascending"},
         {"value": "desc", "label": "Descending"}

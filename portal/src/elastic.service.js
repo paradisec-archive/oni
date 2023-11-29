@@ -22,7 +22,7 @@ export default class ElasticService {
   }
 
 
-  async multi({multi, filters, aggs, searchFields, sort, order, operation, pageSize, searchFrom, queries}) {
+  async multi({multi, filters, aggs, searchFields, sort, order, operation, pageSize, searchFrom, queries, sortField}) {
     try {
       const httpService = new HTTPService({router: this.router, loginPath: '/login'});
       let route = this.searchRoute + this.indexRoute;
@@ -33,12 +33,10 @@ export default class ElasticService {
             order: order
           }
         }];
-      } else if (sort === 'name') {
-        sorting = [{
-          "name.@value.keyword": {
-            "order": order
-          }
-        }];
+      } else if (sortField) {
+        const sortByKeyword = {}
+        sortByKeyword[sortField] = { order: order };
+        sorting = [sortByKeyword];
       } else {
         sorting = [{
           _script: {

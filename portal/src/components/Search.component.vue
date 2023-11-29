@@ -248,7 +248,9 @@ export default {
       sorting: this.$store.state.configuration.ui.search?.sorting || [
         {value: 'relevance', label: 'Relevance'}
       ],
+      searchSorting: this.$store.state.configuration.ui.search?.searchSorting || {"value": "relevance", "label": "Relevance"},
       selectedSorting: null,
+      startSorting: this.$store.state.configuration.ui.search?.startSorting || {"value": "_isTopLevel.@value.keyword", "label": "Collections"},
       defaultSorting: this.$store.state.configuration.ui.search?.defaultSorting || {value: 'relevance', label: 'Relevance'},
       ordering: this.$store.state.configuration.ui.search?.ordering  || [
         {value: 'asc', label: 'Ascending'},
@@ -491,7 +493,7 @@ export default {
       this.searchFields = this.$store.state.configuration.ui.searchFields;
       this.$route.query.sf = encodeURIComponent(this.searchFields);
       this.$route.query.o = this.selectedOperation;
-      this.selectedOrder = this.defaultOrder.value;
+      this.selectedOrder = this.defaultOrder;
       this.filterButton = [];
       this.isStart = true;
       this.isBrowse = false;
@@ -554,15 +556,15 @@ export default {
     },
     async search() {
       this.loading = true;
-      if (this.isStart) { //Revert start to sorting by collections
-        this.selectedSorting = this.sorting[1].value; //collection
+      if (this.isStart) { //Revert start to sorting by the startSorting
+        this.selectedSorting = this.startSorting;
         this.isStart = false;
       } else if (this.searchInput) { // If there is a query sort by relevance
-        this.selectedSorting = this.defaultSorting.value;
+        this.selectedSorting = this.searchSorting;
       } else if (this.advancedSearch) { // If advanced search is enabled sort by relevance
-        this.selectedSorting = this.defaultSorting.value;
+        this.selectedSorting = this.searchSorting;
       } else if (!this.selectedSorting) { // If there is one selected sorting do that
-        this.selectedSorting = this.defaultSorting.value;
+        this.selectedSorting = this.defaultSorting;
       }
       this.changedFilters = false;
       this.noMoreResults = false;
@@ -572,14 +574,14 @@ export default {
       } else {
         filters = {};
       }
-      let order = this.selectedOrder.value;
       try {
         this.items = await this.$elasticService.multi({
           multi: this.searchInput,
           filters: toRaw(this.filters),
           searchFields: this.searchFields,
-          sort: this.selectedSorting,
-          order: order,
+          sort: this.selectedSorting.value,
+          order: this.selectedOrder.value,
+          sortField: this.selectedSorting?.field, //This is not mandatory but if field exists in sorting it will sort by this field
           operation: this.selectedOperation,
           pageSize: this.pageSize,
           searchFrom: (this.currentPage - 1) * this.pageSize,
@@ -639,12 +641,13 @@ export default {
     },
     sortResults(sort) {
       this.currentPage = 1;
-      this.selectedSorting = sort;
+      this.selectedSorting = find(this.sorting, {value: sort});
+
       this.search();
     },
     orderResults(order) {
       this.currentPage = 1;
-      this.selectedOrder = order;
+      this.selectedOrder = find(this.ordering, {value: order});
       this.search();
     },
     async updatePages(page, scrollTo) {
