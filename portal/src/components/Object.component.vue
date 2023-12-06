@@ -56,10 +56,13 @@
   <template v-if="parts && parts.length > 0">
     <el-row class="m-5 pl-10 pr-12">
       <el-col :span="24" class="divide-solid divide-y-2 divide-red-700">
-        <div class="grid-content p-6">
-          <h5 class="mb-2 text-2xl tracking-tight dark:text-white">
+        <div class="grid-content p-2 m-2">
+          <h2 class="text-2xl tracking-tight dark:text-white">
             Files: {{ parts.length }}
-          </h5>
+            <AggregationAsIcon v-for="part of uniqBy(parts, isEqual)"
+                               :item="first(part['encodingFormat'])['@value']"
+                               :field="{'name': 'File', 'display': 'File' }" :id="id"/>
+          </h2>
         </div>
         <div></div>
       </el-col>
@@ -81,7 +84,7 @@
   </template>
 </template>
 <script>
-import {first, isUndefined, reject, isEmpty, sortBy} from "lodash";
+import {first, isUndefined, reject, isEmpty, sortBy, uniqBy, isEqual} from "lodash";
 import {initSnip, toggleSnip} from "../tools";
 import MetaField from "./MetaField.component.vue";
 import {defineAsyncComponent} from 'vue';
@@ -92,6 +95,7 @@ import MemberOfLink from './widgets/MemberOfLink.component.vue';
 import MetaTopCard from './cards/MetaTopCard.component.vue';
 import {putLocalStorage} from '@/storage';
 import CollectionItem from "./CollectionItem.component.vue";
+import AggregationAsIcon from "./widgets/AggregationAsIcon.component.vue";
 
 export default {
   components: {
@@ -104,7 +108,8 @@ export default {
     ObjectPart: defineAsyncComponent(() =>
         import('./ObjectPart.component.vue')
     ),
-    CollectionItem
+    CollectionItem,
+    AggregationAsIcon
   },
   props: [],
   data() {
@@ -128,7 +133,9 @@ export default {
       activePart: null,
       loading: false,
       membersFiltered: {},
-      conformsToObject: this.$store.state.configuration.ui.conformsTo?.object
+      conformsToObject: this.$store.state.configuration.ui.conformsTo?.object,
+      uniqBy: uniqBy,
+      isEqual: isEqual
     }
   },
   async updated() {
@@ -178,6 +185,7 @@ export default {
     }
   },
   methods: {
+    isEqual,
     first,
     isEmpty,
     toggleSnip,
