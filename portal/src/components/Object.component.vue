@@ -59,8 +59,8 @@
         <div class="grid-content p-2 m-2">
           <h2 class="text-2xl tracking-tight dark:text-white">
             Files: {{ parts.length }}
-            <AggregationAsIcon v-for="part of uniqBy(parts, isEqual)"
-                               :item="first(part['encodingFormat'])['@value']"
+            <AggregationAsIcon v-for="part of uniqueParts"
+                               :item="part"
                                :field="{'name': 'File', 'display': 'File' }" :id="id"/>
           </h2>
         </div>
@@ -74,7 +74,8 @@
             <a :id="'part-' + encodeURIComponent(part?.['@id'])"></a>
             <object-part :part="part" :title="first(part?.name)?.['@value'] || part?.['@id']"
                          :active="isPartActive(part?.['@id'], index)" :id="encodeURIComponent(part?.['@id'])"
-                         :encoding="first(part?.['encodingFormat'])" :crateId="this.crateId" :rootId="this.rootId"
+                         :encodingFormat="first(part?.['encodingFormat'])?.['@value']" :crateId="this.crateId"
+                         :rootId="this.rootId"
                          :parentName="first(this.name)?.['@value']" :parentId="this.$route.query.id" :license="license"
                          :access="access"/>
           </li>
@@ -84,7 +85,7 @@
   </template>
 </template>
 <script>
-import {first, isUndefined, reject, isEmpty, sortBy, uniqBy, isEqual} from "lodash";
+import {first, isUndefined, reject, isEmpty, sortBy, isEqual} from "lodash";
 import {initSnip, toggleSnip} from "../tools";
 import MetaField from "./MetaField.component.vue";
 import {defineAsyncComponent} from 'vue';
@@ -127,22 +128,20 @@ export default {
       licenseSnipped: false,
       buckets: [],
       parts: [],
+      uniqueParts: [],
       crateId: '',
       rootId: '',
       access: null,
       activePart: null,
       loading: false,
       membersFiltered: {},
-      conformsToObject: this.$store.state.configuration.ui.conformsTo?.object,
-      uniqBy: uniqBy,
-      isEqual: isEqual
+      conformsToObject: this.$store.state.configuration.ui.conformsTo?.object
     }
   },
   async updated() {
     const fileId = this.$route.query.fileId;
     if (fileId) {
       setTimeout(function () {
-        console.log(fileId)
         const fileElement = document.getElementById('part-' + encodeURIComponent(fileId));
         fileElement.scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
       }, 200);
@@ -175,7 +174,6 @@ export default {
         metadata = await this.$elasticService.single({_id});
       }
       this.metadata = metadata?._source;
-      //console.log(this.metadata);
       await this.populate();
       initSnip({selector: '#license', button: '#readMoreLicense'});
       putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
@@ -233,19 +231,20 @@ export default {
     populateLicense() {
       this.license = first(this.metadata?.license);
       if (!this.license?.['@id']) {
-        console.log('show alert! no license nono')
+        console.log('show alert! no license no!no!')
       } else {
         this.licenseText = first(this.license?.description)?.['@value'];
       }
     },
     populateParts() {
       this.parts = this.metadata.hasPart;
+      let uniqueParts = this.parts.map((p) => first(p.encodingFormat)?.['@value']);
+      this.uniqueParts = [...new Set(uniqueParts)];
     },
     populateAccess() {
       this.access = this.metadata._access;
     },
     isPartActive(id, index) {
-      console.log(this.$route.query.fileId, id, index)
       if (this.$route.query.fileId === id) {
         this.activePart = true;
         return true;

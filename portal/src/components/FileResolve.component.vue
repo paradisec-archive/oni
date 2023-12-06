@@ -81,7 +81,7 @@ import AccessHelper from "./AccessHelper.component.vue";
 
 export default {
   inheritAttrs: false,
-  props: ['resolve', 'id', 'encoding', 'crateId', 'rootId', 'pdfPages', 'name', 'parentName', 'hideOpenLink', 'previewText', 'isPreview', 'access', 'license'],
+  props: ['resolve', 'id', 'encodingFormat', 'crateId', 'rootId', 'pdfPages', 'name', 'parentName', 'hideOpenLink', 'previewText', 'isPreview', 'access', 'license'],
   components: {
     PlainTextWidget,
     CSVWidget,
@@ -127,18 +127,20 @@ export default {
   },
   async mounted() {
     this.setFileUrl();
+    if (this.resolve) {
+      await this.resolveFile();
+    }
   },
   methods: {
     async resolveFile() {
       this.parentId = this.crateId;
       this.path = this.id;
       this.route = `/object/open?id=${encodeURIComponent(this.crateId)}`;
-
       if (this.path != '') {
         this.route += `&path=${this.path}`;
       }
       // Try to display only text and pdfs by default if there is an encodingFormat
-      if (this.encoding && (this.encoding['@value'] && this.encoding['@value'].match('csv|pdf|txt|text|eaf'))) {
+      if (this.encodingFormat && this.encodingFormat.match('text/|pdf')) {
         this.togglePreview = true;
       }
       if (!this.isPreview) {
@@ -187,7 +189,7 @@ export default {
       }
       //TODO: Ask for MIME types
       //TODO: craete some file widgets
-      if (this.path && (this.path.endsWith(".txt") || this.path.endsWith(".csv") || this.path.endsWith(".eaf") || this.path.endsWith(".html") || this.path.endsWith(".xml"))) {
+      if (this.encodingFormat && (this.encodingFormat?.startsWith('text/'))) {
         this.type = 'txt';
         this.data = await this.responseBlob.text({type:'text/plain', endings:'native'});
         if (this.path.endsWith(".csv")) {
