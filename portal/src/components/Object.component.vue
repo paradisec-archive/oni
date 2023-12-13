@@ -35,7 +35,7 @@
           <MemberOfCard :routePath="'collection'" :_memberOf="metadata?._memberOf"/>
         </el-col>
       </el-row>
-      <el-row v-if="membersFiltered?.data">
+      <el-row v-if="membersFiltered?.data && membersFiltered?.data.length">
         <el-col>
           <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
             <h5 class="text-2xl font-medium ">Other Objects in this Collection</h5>
@@ -44,7 +44,7 @@
               <li v-for="d of membersFiltered.data">
                 <collection-item :field="d._source" :routePath="'object'"/>
               </li>
-              <li>
+              <li v-if="membersFiltered">
                 <el-link type="primary" :href="`/search?f=${moreObjects()}`">more...</el-link>
               </li>
             </ul>
@@ -146,10 +146,12 @@ export default {
         fileElement.scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
       }, 200);
     }
-    this.membersFiltered = await this.filter({
-      '_memberOf.@id': [this.crateId],
-      'conformsTo.@id': [this.conformsToObject]
-    }, false);
+    if(this.crateId) {
+      this.membersFiltered = await this.filter({
+        '_memberOf.@id': [this.crateId],
+        'conformsTo.@id': [this.conformsToObject]
+      }, false);
+    }
     putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   async mounted() {
@@ -177,7 +179,6 @@ export default {
       await this.populate();
       initSnip({selector: '#license', button: '#readMoreLicense'});
       putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
-      this.loading = false;
     } catch (e) {
       console.error(e)
     }
@@ -188,13 +189,18 @@ export default {
     isEmpty,
     toggleSnip,
     async populate() {
-      this.rootId = first(this.metadata['_root'])?.['@id'];
-      this.populateAccess();
-      this.populateName(this.config.name);
-      this.populateTop(this.config.top);
-      this.populateMeta(this.config.meta);
-      this.populateLicense();
-      this.populateParts();
+      try {
+        this.rootId = first(this.metadata['_root'])?.['@id'];
+        this.populateAccess();
+        this.populateName(this.config.name);
+        this.populateTop(this.config.top);
+        this.populateMeta(this.config.meta);
+        this.populateLicense();
+        this.populateParts();
+      } catch (e) {
+        console.error(e);
+      }
+      this.loading = false;
     },
     populateName(config) {
       this.name = this.metadata[config.name];
@@ -238,8 +244,10 @@ export default {
     },
     populateParts() {
       this.parts = this.metadata.hasPart;
-      let uniqueParts = this.parts.map((p) => first(p.encodingFormat)?.['@value']);
-      this.uniqueParts = [...new Set(uniqueParts)];
+      if(this.parts?.length) {
+        let uniqueParts = this.parts.map((p) => first(p.encodingFormat)?.['@value']);
+        this.uniqueParts = [...new Set(uniqueParts)];
+      }
     },
     populateAccess() {
       this.access = this.metadata._access;
@@ -255,13 +263,24 @@ export default {
     },
     //TODO: refactor this integrate to multi
     async filter(filters, scroll) {
-      const items = await this.$elasticService.multi({scroll, filters, sort: 'relevance', order: 'desc'});
-      if (items?.hits?.hits.length > 0) {
+      try {
+        const items = await this.$elasticService.multi({scroll, filters, sort: 'relevance', order: 'desc'});
+        if (items?.hits?.hits.length > 0) {
+          return {
+            data: items?.hits?.hits,
+            aggregations: items?.aggregations,
+            total: items.hits?.total.value,
+            scrollId: items?._scroll_id,
+            route: null
+          }
+        }
+      } catch (e) {
+        console.error(e);
         return {
-          data: items?.hits?.hits,
-          aggregations: items?.aggregations,
-          total: items.hits?.total.value,
-          scrollId: items?._scroll_id,
+          data: [],
+          aggregations: {},
+          total: 0,
+          scrollId: null,
           route: null
         }
       }

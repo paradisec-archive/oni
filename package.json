@@ -17,7 +17,7 @@
     "@octokit/rest": "^19.0.3",
     "fs-extra": "^10.0.0",
     "lodash": "^4.17.20",
-    "manku-icon-lib": "^1.0.5",
+    "manku-icon-lib": "^1.0.9",
     "node-fetch": "^2.6.1",
     "octokit": "^2.0.5",
     "ro-crate": "^3.2.1",
