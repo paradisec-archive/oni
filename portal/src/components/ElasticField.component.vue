@@ -13,7 +13,16 @@
   <template v-else>
     <template v-if="url">
       <a class="break-words underline text-blue-600 hover:text-blue-800 visited:text-purple-600" :href="id"
-         target="_blank" rel="nofollow noreferrer">{{ name || id }}</a>
+         target="_blank" rel="nofollow noreferrer">
+        <manku-icon :name="title.toLowerCase()">
+          <template #notFound>
+          <span>
+            {{ name || id }}
+          </span>
+          </template>
+        </manku-icon>
+      </a>
+
     </template>
     <template v-else-if="value">{{ value }}</template>
     <template v-else>
