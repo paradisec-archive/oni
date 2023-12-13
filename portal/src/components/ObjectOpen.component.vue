@@ -6,7 +6,7 @@
           <el-col :xs="24" :sm="15" :md="24" :lg="24" :xl="24">
             <h3 class="relative space-x-3 font-bold p-3 text-xl select-none text-left">
               <a class="break-words no-underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
-                :href="`/object?id=${parentId}&_crateId=${crateId}&fileId=${id}`">
+                :href="`/object?id=${encodeURIComponent(parentId)}&_crateId=${encodeURIComponent(crateId)}&fileId=${id}`">
                 <font-awesome-icon icon="fa fa-arrow-left" />
                 {{ parentTitle }} </a>&nbsp;><span>{{ title || id }}</span>
             </h3>
@@ -14,7 +14,7 @@
         </el-row>
         <el-row>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="flex justify-center h-screen overflow-auto">
-            <file-resolve :id="id" :resolve="resolve" :encoding="encoding"
+            <file-resolve :id="id" :resolve="true" :encodingFormat="encodingFormat"
               :crateId="crateId" :rootId="rootId" :name="title" :parentName="parentTitle" :hideOpenLink="true"
               :isPreview="false" :access="access" :license="license" />
           </el-col>
@@ -39,8 +39,7 @@ export default {
       id: '',
       crateId: '',
       title: '',
-      resolve: true,
-      encoding: '',
+      encodingFormat: '',
       rootId: '',
       parentId: '',
       parentTitle: '',
@@ -51,7 +50,6 @@ export default {
   beforeMount() {
     this.id = this.$route.query.id;
     this.crateId = this.$route.query.crateId;
-
   },
   async mounted() {
     await this.getFileMetadata();
@@ -63,7 +61,6 @@ export default {
         _crateId: this.crateId
       });
       this.metadata = metadata?._source;
-      console.log(this.metadata);
       this.populateData();
       this.license = first(this.metadata?.license);
       this.access = this.metadata._access;
@@ -74,7 +71,9 @@ export default {
       const parent = first(this.metadata['_parent']);
       this.parentId = parent['@id'];
       this.parentTitle = first(parent['name'])?.['@value'] || this.parentId;
-      this.encoding = first(this.metadata?.['encodingFormat']);
+      this.encodingFormat = first(this.metadata?.['encodingFormat'])?.['@value'];
+      console.log('--------------')
+      console.log(this.encodingFormat)
     }
   }
 }

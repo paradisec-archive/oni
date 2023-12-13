@@ -35,7 +35,7 @@
           <MemberOfCard :routePath="'collection'" :_memberOf="metadata?._memberOf"/>
         </el-col>
       </el-row>
-      <el-row v-if="membersFiltered?.data">
+      <el-row v-if="membersFiltered?.data && membersFiltered?.data.length">
         <el-col>
           <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
             <h5 class="text-2xl font-medium ">Other Objects in this Collection</h5>
@@ -44,7 +44,7 @@
               <li v-for="d of membersFiltered.data">
                 <collection-item :field="d._source" :routePath="'object'"/>
               </li>
-              <li>
+              <li v-if="membersFiltered">
                 <el-link type="primary" :href="`/search?f=${moreObjects()}`">more...</el-link>
               </li>
             </ul>
@@ -56,10 +56,13 @@
   <template v-if="parts && parts.length > 0">
     <el-row class="m-5 pl-10 pr-12">
       <el-col :span="24" class="divide-solid divide-y-2 divide-red-700">
-        <div class="grid-content p-6">
-          <h5 class="mb-2 text-2xl tracking-tight dark:text-white">
+        <div class="grid-content p-2 m-2">
+          <h2 class="text-2xl tracking-tight dark:text-white">
             Files: {{ parts.length }}
-          </h5>
+            <AggregationAsIcon v-for="part of uniqueParts"
+                               :item="part"
+                               :field="{'name': 'File', 'display': 'File' }" :id="id"/>
+          </h2>
         </div>
         <div></div>
       </el-col>
@@ -71,7 +74,8 @@
             <a :id="'part-' + encodeURIComponent(part?.['@id'])"></a>
             <object-part :part="part" :title="first(part?.name)?.['@value'] || part?.['@id']"
                          :active="isPartActive(part?.['@id'], index)" :id="encodeURIComponent(part?.['@id'])"
-                         :encoding="first(part?.['encodingFormat'])" :crateId="this.crateId" :rootId="this.rootId"
+                         :encodingFormat="first(part?.['encodingFormat'])?.['@value']" :crateId="this.crateId"
+                         :rootId="this.rootId"
                          :parentName="first(this.name)?.['@value']" :parentId="this.$route.query.id" :license="license"
                          :access="access"/>
           </li>
@@ -81,7 +85,7 @@
   </template>
 </template>
 <script>
-import {first, isUndefined, reject, isEmpty, sortBy} from "lodash";
+import {first, isUndefined, reject, isEmpty, sortBy, isEqual} from "lodash";
 import {initSnip, toggleSnip} from "../tools";
 import MetaField from "./MetaField.component.vue";
 import {defineAsyncComponent} from 'vue';
@@ -92,6 +96,7 @@ import MemberOfLink from './widgets/MemberOfLink.component.vue';
 import MetaTopCard from './cards/MetaTopCard.component.vue';
 import {putLocalStorage} from '@/storage';
 import CollectionItem from "./CollectionItem.component.vue";
+import AggregationAsIcon from "./widgets/AggregationAsIcon.component.vue";
 
 export default {
   components: {
@@ -104,7 +109,8 @@ export default {
     ObjectPart: defineAsyncComponent(() =>
         import('./ObjectPart.component.vue')
     ),
-    CollectionItem
+    CollectionItem,
+    AggregationAsIcon
   },
   props: [],
   data() {
@@ -122,6 +128,7 @@ export default {
       licenseSnipped: false,
       buckets: [],
       parts: [],
+      uniqueParts: [],
       crateId: '',
       rootId: '',
       access: null,
@@ -135,15 +142,16 @@ export default {
     const fileId = this.$route.query.fileId;
     if (fileId) {
       setTimeout(function () {
-        console.log(fileId)
         const fileElement = document.getElementById('part-' + encodeURIComponent(fileId));
         fileElement.scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
       }, 200);
     }
-    this.membersFiltered = await this.filter({
-      '_memberOf.@id': [this.crateId],
-      'conformsTo.@id': [this.conformsToObject]
-    }, false);
+    if(this.crateId) {
+      this.membersFiltered = await this.filter({
+        '_memberOf.@id': [this.crateId],
+        'conformsTo.@id': [this.conformsToObject]
+      }, false);
+    }
     putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   async mounted() {
@@ -168,27 +176,31 @@ export default {
         metadata = await this.$elasticService.single({_id});
       }
       this.metadata = metadata?._source;
-      //console.log(this.metadata);
       await this.populate();
       initSnip({selector: '#license', button: '#readMoreLicense'});
       putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
-      this.loading = false;
     } catch (e) {
       console.error(e)
     }
   },
   methods: {
+    isEqual,
     first,
     isEmpty,
     toggleSnip,
     async populate() {
-      this.rootId = first(this.metadata['_root'])?.['@id'];
-      this.populateAccess();
-      this.populateName(this.config.name);
-      this.populateTop(this.config.top);
-      this.populateMeta(this.config.meta);
-      this.populateLicense();
-      this.populateParts();
+      try {
+        this.rootId = first(this.metadata['_root'])?.['@id'];
+        this.populateAccess();
+        this.populateName(this.config.name);
+        this.populateTop(this.config.top);
+        this.populateMeta(this.config.meta);
+        this.populateLicense();
+        this.populateParts();
+      } catch (e) {
+        console.error(e);
+      }
+      this.loading = false;
     },
     populateName(config) {
       this.name = this.metadata[config.name];
@@ -225,19 +237,22 @@ export default {
     populateLicense() {
       this.license = first(this.metadata?.license);
       if (!this.license?.['@id']) {
-        console.log('show alert! no license nono')
+        console.log('show alert! no license no!no!')
       } else {
         this.licenseText = first(this.license?.description)?.['@value'];
       }
     },
     populateParts() {
       this.parts = this.metadata.hasPart;
+      if(this.parts?.length) {
+        let uniqueParts = this.parts.map((p) => first(p.encodingFormat)?.['@value']);
+        this.uniqueParts = [...new Set(uniqueParts)];
+      }
     },
     populateAccess() {
       this.access = this.metadata._access;
     },
     isPartActive(id, index) {
-      console.log(this.$route.query.fileId, id, index)
       if (this.$route.query.fileId === id) {
         this.activePart = true;
         return true;
@@ -248,20 +263,31 @@ export default {
     },
     //TODO: refactor this integrate to multi
     async filter(filters, scroll) {
-      const items = await this.$elasticService.multi({scroll, filters, sort: 'relevance', order: 'desc'});
-      if (items?.hits?.hits.length > 0) {
+      try {
+        const items = await this.$elasticService.multi({scroll, filters, sort: 'relevance', order: 'desc'});
+        if (items?.hits?.hits.length > 0) {
+          return {
+            data: items?.hits?.hits,
+            aggregations: items?.aggregations,
+            total: items.hits?.total.value,
+            scrollId: items?._scroll_id,
+            route: null
+          }
+        }
+      } catch (e) {
+        console.error(e);
         return {
-          data: items?.hits?.hits,
-          aggregations: items?.aggregations,
-          total: items.hits?.total.value,
-          scrollId: items?._scroll_id,
+          data: [],
+          aggregations: {},
+          total: 0,
+          scrollId: null,
           route: null
         }
       }
     },
     moreObjects() {
       const filter = {
-        '_memberOf.@id': [this.crateId]
+        '_memberOf.@id': [encodeURIComponent(this.crateId)]
       };
       return encodeURIComponent(JSON.stringify(filter));
     }

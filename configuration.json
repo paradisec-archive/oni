@@ -11,6 +11,7 @@
     "splashEnabled": true,
     "splashLauncher": "Acknowledgement of Country",
     "showLogo": true,
+    "showEllipsis": true,
     "navHeight": "80px",
     "help": {
       "aboutText": "This is an Oni Data Portal publication. This portal provides access to a repository of language data, it is provided by the Language Data Commons of Australia [LDaCA](<a href='https://ldaca.edu.au'>https://ldaca.edu.au</a>).",
@@ -78,6 +79,19 @@
         "route": "/search?f=%257B%2522%2540type%2522%253A%255B%2522SoftwareApplication%2522%255D%257D",
         "display": "Notebooks"
       }],
+    "search": {
+      "sorting": [
+        {"value": "relevance", "label": "Relevance"},
+        {"value": "_isTopLevel.@value.keyword", "label": "Collections"},
+        {"value": "name", "label": "Name", "field": "name.@value.keyword"}
+      ],
+      "searchSorting": {"value": "relevance", "label": "Relevance"},
+      "ordering": [
+        {"value": "asc", "label": "Ascending"},
+        {"value": "desc", "label": "Descending"}
+      ],
+      "defaultOrder": {"value": "desc", "label": "Descending"}
+    },
     "main": {
       "fields": [
         {

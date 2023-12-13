@@ -1,53 +1,52 @@
 <template>
-  <span class="p-2">
-    <span v-if="noIcon">
-      <span class="flex justify-center" v-if="accessIcon === 'public'">
+    <span class="p-1 m-1" v-if="noIcon">
+      <span class="justify-center" v-if="accessIcon === 'public'">
         <el-tooltip
             class="box-item"
             effect="dark"
             content="You can access this data immediately and by doing so you accept the licence terms specified on the record."
             placement="bottom"
         >
-          <manku-icon name="Public" size="50" fill="grey"/>
+          <manku-icon name="Public" size="40" fill="grey"/>
         </el-tooltip>
       </span>
-      <span class="flex justify-center" v-if="accessIcon === 'login'">
+      <span class="justify-center" v-if="accessIcon === 'login'">
         <el-tooltip
             class="box-item"
             effect="dark"
             content="You can access this data after logging in. You may also have to agree to licence terms in an automatic process."
             placement="bottom"
         >
-          <manku-icon name="Login" size="50" fill="grey"/>
+          <manku-icon name="Login" size="40" fill="grey"/>
         </el-tooltip>
       </span>
-      <span class="flex justify-center" v-if="accessIcon === 'loginPlus'">
+      <span class="justify-center" v-if="accessIcon === 'loginPlus'">
         <el-tooltip
             class="box-item"
             effect="dark"
             content="There are restrictions on access to this data. Log in to get further information."
             placement="bottom"
         >
-          <manku-icon name="Login+" size="50" fill="grey"/>
+          <manku-icon name="Login+" size="40" fill="grey"/>
         </el-tooltip>
       </span>
     </span>
-    <span v-else>
-      <span class="flex justify-center">
+  <span class="p-1 m-1" v-else>
+      <span class="justify-center">
         <el-tooltip
             class="box-item"
             effect="dark"
             :content="`${field?.display}: ${item}`"
             placement="bottom"
         >
-        <font-awesome-icon
-            :icon="['fa-solid', iconType]"
-            size="2x"
-            style="color: rgba(0,0,0,0.55);"/>
+        <font-awesome-icon v-if="!special"
+                           :icon="['fa-solid', iconType]"
+                           size="2x"
+                           style="color: rgba(0,0,0,0.55);"/>
+          <manku-icon v-else :name="iconType" size="40" fill="grey"/>
       </el-tooltip>
       </span>
     </span>
-  </span>
 </template>
 <script>
 
@@ -58,7 +57,8 @@ export default {
     return {
       noIcon: false,
       iconType: 'file',
-      accessIcon: 'none'
+      accessIcon: 'none',
+      special: false
     }
   },
   mounted() {
@@ -81,9 +81,11 @@ export default {
     } else if (/application\/x-ipynb+json/.test(this.item)) {
       this.iconType = 'clipboard';
     } else if (/WrittenLanguage/.test(this.item)) {
-      this.iconType = 'fa-pencil';
+      this.iconType = 'WrittenLanguage';
+      this.special = true;
     } else if (/SpokenLanguage/.test(this.item)) {
-      this.iconType = 'fa-microphone-lines';
+      this.iconType = 'SpokenLanguage';
+      this.special = true;
     } else if (/Song/.test(this.item)) {
       this.iconType = 'fa-music';
     } else if (/Gesture/.test(this.item)) {

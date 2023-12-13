@@ -25,7 +25,7 @@
       </ul>
     </el-col>
     <el-col :xs="24" :sm="24" :md="24" :lg="14" :xl="14">
-      <file-resolve class="flex justify-center" :id="id" :resolve="resolve" :encoding="encoding" :crateId="crateId"
+      <file-resolve class="flex justify-center" :id="id" :resolve="resolve" :encodingFormat="encodingFormat" :crateId="crateId"
         :rootId="rootId" :pdfPages="1" :name="title" :parentName="parentName" previewText="Click 'View File' to see more"
         isPreview="true" :access="access" :license="license" />
     </el-col>
@@ -45,7 +45,7 @@ import MetaField from "./MetaField.component.vue";
 export default {
   inheritAttrs: false,
   components: { MetaField, FileResolve },
-  props: ['title', 'part', 'active', 'id', 'encoding', 'crateId', 'rootId', 'parentName', 'parentId', 'access', 'license'],
+  props: ['title', 'part', 'active', 'id', 'encodingFormat', 'crateId', 'rootId', 'parentName', 'parentId', 'access', 'license'],
   data() {
     return {
       more: '',

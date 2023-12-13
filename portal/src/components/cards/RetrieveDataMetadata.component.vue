@@ -4,7 +4,7 @@
       <el-link
           :underline="true"
           type="primary"
-          :href="`/api/object/meta?resolve-parts&noUrid&id=${id}`" download="ro-crate-metadata.json">
+          :href="`/api/object/meta?resolve-parts&noUrid&id=${encodeURIComponent(id)}`" download="ro-crate-metadata.json">
         Download metadata
       </el-link>
     </li>
@@ -12,7 +12,7 @@
       <el-link
           :underline="true"
           type="primary"
-          :href="`/api/object/meta?resolve-parts&noUrid&id=${id}`" target="_blank" rel="noreferrer noopener">
+          :href="`/api/object/meta?resolve-parts&noUrid&id=${encodeURIComponent(id)}`" target="_blank" rel="noreferrer noopener">
         Open metadata in a new window
       </el-link>
     </li>
