@@ -7,7 +7,7 @@
             content="You can access this data immediately and by doing so you accept the licence terms specified on the record."
             placement="bottom"
         >
-          <manku-icon name="Public" size="40" fill="grey"/>
+          <manku-icon name="public" size="40" fill="grey"/>
         </el-tooltip>
       </span>
       <span class="justify-center" v-if="accessIcon === 'login'">
@@ -17,7 +17,7 @@
             content="You can access this data after logging in. You may also have to agree to licence terms in an automatic process."
             placement="bottom"
         >
-          <manku-icon name="Login" size="40" fill="grey"/>
+          <manku-icon name="login" size="40" fill="grey"/>
         </el-tooltip>
       </span>
       <span class="justify-center" v-if="accessIcon === 'loginPlus'">
@@ -27,7 +27,7 @@
             content="There are restrictions on access to this data. Log in to get further information."
             placement="bottom"
         >
-          <manku-icon name="Login+" size="40" fill="grey"/>
+          <manku-icon name="loginplus" size="40" fill="grey"/>
         </el-tooltip>
       </span>
     </span>
@@ -43,7 +43,7 @@
                            :icon="['fa-solid', iconType]"
                            size="2x"
                            style="color: rgba(0,0,0,0.55);"/>
-          <manku-icon v-else :name="iconType" size="40" fill="grey"/>
+          <manku-icon v-else :name="iconType.toLowerCase()" size="40" fill="grey"/>
       </el-tooltip>
       </span>
     </span>
