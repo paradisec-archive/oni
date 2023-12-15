@@ -43,7 +43,7 @@
                            :icon="['fa-solid', iconType]"
                            size="2x"
                            style="color: rgba(0,0,0,0.55);"/>
-          <manku-icon v-else :name="iconType.toLowerCase()" size="40" fill="grey"/>
+          <manku-icon v-else :name="iconType" size="40" fill="grey"/>
       </el-tooltip>
       </span>
     </span>
