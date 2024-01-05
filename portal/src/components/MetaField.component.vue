@@ -57,6 +57,7 @@ export default {
     first,
     clean(text) {
       if (text) {
+        text = text.replace(/^_/, ''); // If it contains underscore
         return this.capitalizeFirstLetter(text.replace(/([a-z])([A-Z])/g, '$1 $2'));
       }
     },
