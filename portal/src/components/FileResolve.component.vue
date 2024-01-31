@@ -46,12 +46,12 @@
           </div>
         </div>
         <div v-else class="p-2">
-            <div v-show="!loading" class="flex justify-center" v-if="forbidden && !access['hasAccess']">
-              <AccessHelper :access="access" :license="license"/>
-            </div>
-            <div v-show="!loading" class="flex justify-center" v-if="error">
-              <p class="break-normal text-xl">{{ error }}</p>
-            </div>
+          <div v-show="!loading" class="flex justify-center" v-if="forbidden && !access['hasAccess']">
+            <AccessHelper :access="access" :license="license"/>
+          </div>
+          <div v-show="!loading" class="flex justify-center" v-if="error">
+            <p class="break-normal text-xl">{{ error }}</p>
+          </div>
         </div>
       </div>
     </el-col>
@@ -147,6 +147,8 @@ export default {
         this.togglePreview = true;
       }
       if (this.togglePreview) {
+        console.log('this.togglePreview')
+        console.log(this.togglePreview)
         await this.tryDownloadBlob();
       }
     },
@@ -187,20 +189,21 @@ export default {
       if (parentTitle) {
         this.parentTitle = parentTitle;
       }
-      //TODO: Ask for MIME types
-      //TODO: craete some file widgets
-      if (this.encodingFormat && (this.encodingFormat?.startsWith('text/'))) {
-        this.type = 'txt';
-        this.data = await this.responseBlob.text({type:'text/plain', endings:'native'});
-        if (this.path.endsWith(".csv")) {
-          this.tryCSV = true;
+      //TODO: get encodingFormat directly from the API and merge these two ifs
+      //TODO: issue https://github.com/Language-Research-Technology/oni-ui/issues/46
+      if (!this.encodingFormat) {
+        if (this.path && (this.path.endsWith(".txt") || this.path.endsWith(".csv") || this.path.endsWith(".eaf") || this.path.endsWith(".html") || this.path.endsWith(".xml") || this.path.endsWith(".flab"))) {
+          await this.loadTxt();
+          this.loading = false;
         }
-        this.hidePreviewText = false;
+      } else if (this.encodingFormat && (this.encodingFormat?.startsWith('text/'))) {
+        await this.loadTxt();
         this.loading = false;
       } else {
         try {
           this.data = await this.responseBlob.blob();
           this.blobURL = window.URL.createObjectURL(this.data);
+          //TODO: https://github.com/Language-Research-Technology/oni-ui/issues/46
           if (this.path && (this.path.endsWith(".mp3") || this.path.endsWith(".wav"))) {
             this.type = 'audio';
             this.data = this.blobURL;
@@ -277,6 +280,15 @@ export default {
         case 'not_authorized':
           this.notAuthorized = true;
       }
+    },
+    async loadTxt() {
+      this.type = 'txt';
+      console.log('load txt')
+      this.data = await this.responseBlob.text({type: 'text/plain', endings: 'native'});
+      if (this.path.endsWith(".csv")) {
+        this.tryCSV = true;
+      }
+      this.hidePreviewText = false;
     }
   }
 }
