@@ -42,7 +42,8 @@ const assert = require("assert");
   //Cluster settings
   const settings = {
     "persistent": {
-      "search.max_open_scroll_context": elastic?.maxScroll || 5000
+      "search.max_open_scroll_context": elastic?.maxScroll || 5000,
+      "xpack.monitoring.collection.enabled": false
     },
     "transient": {
       "search.max_open_scroll_context": elastic?.maxScroll || 5000

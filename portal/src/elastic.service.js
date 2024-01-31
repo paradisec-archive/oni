@@ -35,7 +35,7 @@ export default class ElasticService {
         }];
       } else if (sortField) {
         const sortByKeyword = {}
-        sortByKeyword[sortField] = { order: order };
+        sortByKeyword[sortField] = {order: order};
         sorting = [sortByKeyword];
       } else {
         sorting = [{
@@ -343,6 +343,53 @@ export default class ElasticService {
       }
     });
     return qS;
+  }
+
+  async map({init = true, boundingBox}) {
+    const httpService = new HTTPService({router: this.router, loginPath: '/login'});
+    let route = this.searchRoute + this.indexRoute;
+    let sorting;
+    let body = {}
+    const queryString = {match_all: {}}
+    const fields = ['_contentLocation', '_spatialCoverage'];
+    const geoAggs = esb.geoHashGridAggregation('viewport', fields[0]);
+    let topRight = {}
+    let bottomLeft = {}
+    if (init) {
+      topRight = esb.geoPoint()
+        .lat(90)
+        .lon(180);
+      bottomLeft = esb.geoPoint()
+        .lat(-90)
+        .lon(-180)
+    } else {
+      const tR = boundingBox.topRight;
+      topRight = esb.geoPoint()
+        .lat(tR.lat)
+        .lon(tR.lon);
+      const bL = boundingBox.bottomLeft;
+      bottomLeft = esb.geoPoint()
+        .lat(bL.lat)
+        .lon(bL.lon)
+    }
+    const geoQuery = esb.geoBoundingBoxQuery().field('_contentLocation')
+      .topRight(topRight)
+      .bottomLeft(bottomLeft);
+    const aggs = geoAggs.toJSON();
+    body.aggs = {...aggs};
+    const query = geoQuery.toJSON();
+    body.query = {...query};
+    console.log(body)
+    console.log(JSON.stringify(body))
+    let response = await httpService.post({route, body});
+    if (response.status !== 200) {
+      //httpService.checkAuthorised({status: response.status});
+      throw new Error(response.statusText);
+    } else {
+      const results = await response.json();
+      console.log(results);
+      return results;
+    }
   }
 }
 

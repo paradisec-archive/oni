@@ -583,7 +583,10 @@
       "mappings": {
         "date_detection": false,
         "properties": {
-          "_location": {
+          "_contentLocation": {
+            "type": "geo_shape"
+          },
+          "_spatialCoverage": {
             "type": "geo_shape"
           },
           "@id": {

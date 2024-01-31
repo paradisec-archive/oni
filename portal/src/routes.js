@@ -3,6 +3,7 @@ import UserComponent from "@/components/User.component.vue";
 import LoginComponent from "@/components/Login.component.vue";
 import LogoutComponent from "@/components/Logout.component.vue";
 import SearchComponent from "@/components/Search.component.vue";
+import MapComponent from "@/components/Map.component.vue";
 import CollectionComponent from "@/components/Collection.component.vue";
 import ObjectComponent from "@/components/Object.component.vue";
 import ObjectOpenComponent from "@/components/ObjectOpen.component.vue";
@@ -31,6 +32,10 @@ const routes = [
       path: "search",
       name: "search",
       component: SearchComponent
+    },{
+      path: "map",
+      name: "map",
+      component: MapComponent
     }, {
       path: "collection",
       name: "collection",

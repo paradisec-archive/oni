@@ -1,5 +1,6 @@
 <template>
-  <template v-if="name === '_location'">
+  <template v-if="name === '_contentLocation' || name === '_spatialCoverage'">
+    {{field}}
     <LeafletMap class="h-72 flex grow min-w-[200px] mr-4"
                 :modelValue="fieldMap"
                 :transformer="transformer"></LeafletMap>
@@ -44,7 +45,7 @@ export default {
   },
   mounted() {
     if (this.field) {
-      if (this.name === '_location') {
+      if (this.name === '_contentLocation' || this.name === '_spatialCoverage') {
         this.fieldMap = {'@type': ['Geometry'], asWKT: [this.field]};
       } else {
         this.isURL = this.testURL(this.field)
