@@ -17,11 +17,7 @@
     </el-col>
     <el-col :xs="24" :sm="24" :md="17" :lg="17" :xl="17">
       <template v-if="Array.isArray(meta?.data)">
-        <ul v-for="d of meta.data">
-          <li>
-            <elastic-field :field="d" :title="meta?.name"/>
-          </li>
-        </ul>
+        <elastic-field :field="d" :title="meta?.name" v-for="d of meta.data"/>
       </template>
       <template v-else>
         <elastic-resolve-field :name="meta?.name" :field="meta?.data" :routePath="routePath" :filePath="filePath" :parentId="parentId" :crateId="crateId"/>

@@ -21,7 +21,7 @@
           </span>
           </template>
         </manku-icon>
-      </a>
+      </a><br/>
     </template>
     <template v-else-if="value">{{ value }}</template>
     <template v-else>
