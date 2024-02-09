@@ -15,6 +15,7 @@
     "@elastic/elasticsearch": "^8.6.0",
     "@ocfl/ocfl-fs": "^0.2.0",
     "@octokit/rest": "^19.0.3",
+    "@opensearch-project/opensearch": "^2.5.0",
     "fs-extra": "^10.0.0",
     "lodash": "^4.17.20",
     "manku-icon-lib": "^1.1.2",

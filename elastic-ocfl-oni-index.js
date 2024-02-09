@@ -1,4 +1,5 @@
-const {Client} = require('@elastic/elasticsearch');
+// const {Client} = require('@elastic/elasticsearch');
+const { Client } = require('@opensearch-project/opensearch');
 const {Indexer} = require('./lib/Indexer');
 const configuration = require('./configuration.json');
 const ocfl = require("@ocfl/ocfl-fs");
@@ -24,7 +25,7 @@ const assert = require("assert");
       });
     }
   } catch (e) {
-    throw new Error(e);
+    console.log('index does not exist, creating');
   }
   // Configure mappings
   await client.indices.create({
@@ -43,7 +44,7 @@ const assert = require("assert");
   const settings = {
     "persistent": {
       "search.max_open_scroll_context": elastic?.maxScroll || 5000,
-      "xpack.monitoring.collection.enabled": false
+      // "xpack.monitoring.collection.enabled": false
     },
     "transient": {
       "search.max_open_scroll_context": elastic?.maxScroll || 5000

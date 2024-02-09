@@ -97,89 +97,83 @@
                     class="my-1 mr-2" v-show="this.totals['value']">Total: <span>{{ this.totals['value'] }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
             </el-col>
             <el-col :span="2" class="m-2" :xs="4" :sm="5" :md="5" :lg="2" :xl="4">
-              <el-button size="large" @click="toggleMap()">
-                <span v-if="!showMap"><font-awesome-icon  icon="fa-solid fa-map-location"/>&nbsp;Map view</span>
-                <span v-else><font-awesome-icon  icon="fa-solid fa-list"/>&nbsp;List view</span>
+              <el-button size="large" @click="showMap()">
+                <span><font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;Map view</span>
               </el-button>
             </el-col>
           </el-row>
         </div>
-        <template v-if="showMap">
-          <SearchMap :modelValue="items"/>
-        </template>
-        <template v-else>
-          <el-row class="pt-2">
-            <el-col :span="24" class="flex space-x-4 pb-2">
-              <el-button-group class="my-1">
-                <el-button type="default" v-on:click="this.resetSearch">RESET SEARCH</el-button>
-              </el-button-group>
-              <el-select v-model="selectedSorting" @change="sortResults" class="my-1">
-                <template #prefix>Sort by:</template>
-                <el-option
-                    v-for="item in sorting"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                />
-              </el-select>
-              <el-select v-model="selectedOrder" @change="orderResults" class="my-1">
-                <template #prefix>Order by:</template>
-                <el-option
-                    v-for="item in ordering"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                />
-              </el-select>
-            </el-col>
-          </el-row>
-          <div class="py-0 w-full pb-2">
-            <el-pagination class="items-center w-full"
-                           background layout="prev, pager, next"
-                           :total="totals['value']"
-                           v-model:page-size="pageSize"
-                           @update:page-size="pageSize"
-                           v-model:currentPage="currentPage"
-                           @current-change="updatePages($event, 'top_menu')"/>
-          </div>
-          <div v-for="item of this.items" :key="item._id"
-               class="z-0 mt-0 mb-4 w-full"
-               v-loading="loading">
-            <search-detail-element v-if="item._source" :id="item._source['@id']" :href="getSearchDetailUrl(item)"
-                                   :name="first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value']"
-                                   :conformsTo="item.conformsTo" :types="item._source?.['@type']"
-                                   :_memberOf="item._source?._memberOf" :highlight="item?.highlight"
-                                   :root="item._source?._root"
-                                   :parent="item._source?._parent" :aggregations="aggregations"
-                                   :details="item._source" :score="item._score"/>
-          </div>
-          <div v-loading="loading" v-if="!this.items.length > 0">
-            <el-row class="pb-4 items-center">
-              <h5 class="mb-2 text-2xl tracking-tight dark:text-white">
-                <span v-if="!loading">No items found</span>
-              </h5>
-            </el-row>
-            <el-row>
-              <p class="text-center">
-                <el-button type="primary" v-on:click="this.resetSearch">RESTART SEARCH</el-button>
-              </p>
-            </el-row>
-          </div>
-          <el-row v-if="noMoreResults" class="flex justify-center p-6">
-            <h5 class="mb-2 text-1xl tracking-tight dark:text-white">
-              No more items found with that filter or search query
+        <el-row class="pt-2">
+          <el-col :span="24" class="flex space-x-4 pb-2">
+            <el-button-group class="my-1">
+              <el-button type="default" v-on:click="this.resetSearch">RESET SEARCH</el-button>
+            </el-button-group>
+            <el-select v-model="selectedSorting" @change="sortResults" class="my-1">
+              <template #prefix>Sort by:</template>
+              <el-option
+                  v-for="item in sorting"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+              />
+            </el-select>
+            <el-select v-model="selectedOrder" @change="orderResults" class="my-1">
+              <template #prefix>Order by:</template>
+              <el-option
+                  v-for="item in ordering"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+              />
+            </el-select>
+          </el-col>
+        </el-row>
+        <div class="py-0 w-full pb-2">
+          <el-pagination class="items-center w-full"
+                         background layout="prev, pager, next"
+                         :total="totals['value']"
+                         v-model:page-size="pageSize"
+                         @update:page-size="pageSize"
+                         v-model:currentPage="currentPage"
+                         @current-change="updatePages($event, 'top_menu')"/>
+        </div>
+        <div v-for="item of this.items" :key="item._id"
+             class="z-0 mt-0 mb-4 w-full"
+             v-loading="loading">
+          <search-detail-element v-if="item._source" :id="item._source['@id']" :href="getSearchDetailUrl(item)"
+                                 :name="first(item._source.name)?.['@value'] || first(first(item._source.identifier)?.value)?.['@value']"
+                                 :conformsTo="item.conformsTo" :types="item._source?.['@type']"
+                                 :_memberOf="item._source?._memberOf" :highlight="item?.highlight"
+                                 :root="item._source?._root"
+                                 :parent="item._source?._parent" :aggregations="aggregations"
+                                 :details="item._source" :score="item._score"/>
+        </div>
+        <div v-loading="loading" v-if="!this.items.length > 0">
+          <el-row class="pb-4 items-center">
+            <h5 class="mb-2 text-2xl tracking-tight dark:text-white">
+              <span v-if="!loading">No items found</span>
             </h5>
           </el-row>
-          <div class="py-2 w-full">
-            <el-pagination class="items-center w-full"
-                           background layout="prev, pager, next"
-                           :total="totals['value']"
-                           v-model:page-size="pageSize"
-                           @update:page-size="pageSize"
-                           v-model:currentPage="currentPage"
-                           @current-change="updatePages($event, 'total_results')"/>
-          </div>
-        </template>
+          <el-row>
+            <p class="text-center">
+              <el-button type="primary" v-on:click="this.resetSearch">RESTART SEARCH</el-button>
+            </p>
+          </el-row>
+        </div>
+        <el-row v-if="noMoreResults" class="flex justify-center p-6">
+          <h5 class="mb-2 text-1xl tracking-tight dark:text-white">
+            No more items found with that filter or search query
+          </h5>
+        </el-row>
+        <div class="py-2 w-full">
+          <el-pagination class="items-center w-full"
+                         background layout="prev, pager, next"
+                         :total="totals['value']"
+                         v-model:page-size="pageSize"
+                         @update:page-size="pageSize"
+                         v-model:currentPage="currentPage"
+                         @current-change="updatePages($event, 'total_results')"/>
+        </div>
       </div>
     </el-col>
   </el-row>
@@ -288,8 +282,7 @@ export default {
       changedFilters: false,
       advancedSearch: false,
       advancedQueries: null,
-      resetAdvancedSearch: false,
-      showMap: false
+      resetAdvancedSearch: false
     };
   },
   watch: {
@@ -721,8 +714,8 @@ export default {
       console.log(isEmpty(this.filters))
       // this.filters = filters;
     },
-    toggleMap() {
-      this.showMap = !this.showMap;
+    showMap() {
+      this.$router.push({path: '/map'});
     }
   }
 };

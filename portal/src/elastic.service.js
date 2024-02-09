@@ -352,7 +352,8 @@ export default class ElasticService {
     let body = {}
     const queryString = {match_all: {}}
     const fields = ['_contentLocation', '_spatialCoverage'];
-    const geoAggs = esb.geoHashGridAggregation('viewport', fields[0]);
+    // const geoAggs = esb.geoHashGridAggregation('viewport', fields[0]);
+    const geoAggs = esb.geoHashGridAggregation('large-grid', '_contentLocation').precision(3);
     let topRight = {}
     let bottomLeft = {}
     if (init) {
@@ -379,8 +380,9 @@ export default class ElasticService {
     body.aggs = {...aggs};
     const query = geoQuery.toJSON();
     body.query = {...query};
-    console.log(body)
-    console.log(JSON.stringify(body))
+    body.size = 40;
+    console.log(body);
+    console.log(JSON.stringify(body));
     let response = await httpService.post({route, body});
     if (response.status !== 200) {
       //httpService.checkAuthorised({status: response.status});
