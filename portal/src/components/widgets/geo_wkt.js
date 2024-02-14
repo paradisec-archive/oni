@@ -7,14 +7,21 @@ const reBrackets = /a/;
  * @param {Object} L 
  * @param {string} wkt 
  */
-function read(L, wkt) {
+function read(L, wkt, number) {
   const m = wkt.trim().match(reRoot);
   const [, srs, type = '', data] = m ?? [];
   if (!type || !data) return;
   const points = parsePoints(data);
   switch (type.toUpperCase()) {
     case 'POINT':
-      return L.marker(points[0], { kind: 'point' });
+      if(number > 1){
+        return L.marker(points[0], {
+          icon:   new L.NumberedDivIcon({number})
+        });
+      }else{
+        return L.marker(points[0], { kind: 'point' });
+      }
+
     case 'LINESTRING':
       return L.polyline(points, { kind: 'line' });
     case 'POLYGON':

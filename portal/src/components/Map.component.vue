@@ -14,7 +14,7 @@
       </el-row>
     </div>
   </div>
-  <SearchMap :model-value="results" :viewport="viewport"/>
+  <SearchMap :model-value="results" :viewport="viewport" :buckets="buckets"/>
 </template>
 <script>
 import SearchMap from "./SearchMap.component.vue";
@@ -29,6 +29,7 @@ export default {
       items: [],
       results: [],
       viewport: {},
+      buckets: [],
       errorText: '',
       loading: false
     }
@@ -65,6 +66,7 @@ export default {
           results.push(item['_source']);
         }
         this.results = results;
+        this.buckets = this.viewport?.buckets;
       } catch (e) {
         this.errorText = e.message;
         this.loading = false;

@@ -345,7 +345,7 @@ export default class ElasticService {
     return qS;
   }
 
-  async map({init = true, boundingBox}) {
+  async map({init = true, boundingBox, precision = 5}) {
     const httpService = new HTTPService({router: this.router, loginPath: '/login'});
     let route = this.searchRoute + this.indexRoute;
     let sorting;
@@ -353,16 +353,21 @@ export default class ElasticService {
     const queryString = {match_all: {}}
     const fields = ['_contentLocation', '_spatialCoverage'];
     // const geoAggs = esb.geoHashGridAggregation('viewport', fields[0]);
-    const geoAggs = esb.geoHashGridAggregation('large-grid', '_contentLocation').precision(3);
+    const geoAggs = esb.geoHashGridAggregation('viewport', '_contentLocation')
+      .precision(precision);
     let topRight = {}
     let bottomLeft = {}
-    if (init) {
+    let geoQuery = {};
+     if (init) {
       topRight = esb.geoPoint()
         .lat(90)
         .lon(180);
       bottomLeft = esb.geoPoint()
         .lat(-90)
-        .lon(-180)
+        .lon(-180);
+      geoQuery = esb.geoBoundingBoxQuery().field('_contentLocation')
+        .topRight(topRight)
+        .bottomLeft(bottomLeft);
     } else {
       const tR = boundingBox.topRight;
       topRight = esb.geoPoint()
@@ -372,15 +377,15 @@ export default class ElasticService {
       bottomLeft = esb.geoPoint()
         .lat(bL.lat)
         .lon(bL.lon)
+      geoQuery = esb.geoBoundingBoxQuery().field('_contentLocation')
+        .topRight(topRight)
+        .bottomLeft(bottomLeft);
     }
-    const geoQuery = esb.geoBoundingBoxQuery().field('_contentLocation')
-      .topRight(topRight)
-      .bottomLeft(bottomLeft);
     const aggs = geoAggs.toJSON();
     body.aggs = {...aggs};
     const query = geoQuery.toJSON();
     body.query = {...query};
-    body.size = 40;
+    body.size = 10;
     console.log(body);
     console.log(JSON.stringify(body));
     let response = await httpService.post({route, body});
