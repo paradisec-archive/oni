@@ -5,6 +5,7 @@ const configuration = require('./configuration.json');
 const ocfl = require("@ocfl/ocfl-fs");
 const fs = require("fs-extra");
 const assert = require("assert");
+const fetch = require("node-fetch");
 
 (async () => {
   console.log('Configuring elastic');
@@ -62,6 +63,45 @@ const assert = require("assert");
     assert(Array.isArray(skipCollections), `${skipConfiguration} not an array of strings, please fix.`);
   }
   // Create an Indexer and index collections
-  const indexer = new Indexer({configuration, client});
+  const token = await getOauthToken({
+    host: configuration.api.structural.host,
+    key: configuration.api.structural.key,
+    secret: configuration.api.structural.secret
+  });
+  const indexer = new Indexer({configuration, client, token});
+  if (!token) {
+   console.log('No token, exiting');
+    process.exit(-1)
+  }
   await indexer.findOcflObjects({memberOf: null, conformsTo: indexer.conformsToCollection, skip: skipCollections});
 })();
+
+async function getOauthToken({host, key, secret}) {
+  try {
+    let url = `${host}/oauth/token`;
+    console.log(url);
+    console.log(key, secret)
+    const response = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({
+        grant_type: 'client_credentials',
+        client_id: key,
+        client_secret: secret,
+        scope: 'read'
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    if (response.status === 200) {
+      const json = await response.json();
+      return json['access_token'];
+    } else {
+      console.log(response)
+      return null;
+    }
+  } catch (e) {
+    console.log(e.message);
+    return null;
+  }
+}
