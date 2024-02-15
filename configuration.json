@@ -334,6 +334,11 @@
     }
   },
   "api": {
+    "structural": {
+      "host": "https://catalog.paradisec.org.au/api/v1/oni",
+      "key": "XXX",
+      "secret": "XXX"
+    },
     "bootstrap": false,
     "log": {
       "logFolder": "/opt/storage/oni/logs"
