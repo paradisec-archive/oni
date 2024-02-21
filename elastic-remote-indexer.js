@@ -17,30 +17,28 @@ const fetch = require("node-fetch");
   const elastic = configuration['api']['elastic'];
   // Delete
   try {
-    const index = await client.indices.exists({
+    const res = await client.indices.exists({
       index: elastic['index'] || 'items'
     });
-    if (index) {
-      await client.indices.delete({
-        index: elastic['index'] || 'items'
+    if (res['statusCode'] === 404) {
+      console.log('Creating Index')
+      await client.indices.create({
+        index: elastic['index'],
+        body: {
+          max_result_window: elastic['max_result_window'],
+          mappings: elastic['mappings']
+        }
       });
     }
   } catch (e) {
-    console.log('index does not exist, creating');
+    console.log('index exist, continue');
   }
   // Configure mappings
-  await client.indices.create({
-    index: elastic['index'],
-    body: {
-      max_result_window: elastic['max_result_window'],
-      mappings: elastic['mappings']
-    }
-  });
   // Put Settings
   await client.indices.putSettings({
     index: elastic['index'],
     body: elastic['indexConfiguration']
-  })
+  });
   //Cluster settings
   const settings = {
     "persistent": {
@@ -53,8 +51,6 @@ const fetch = require("node-fetch");
   }
   await client.cluster.putSettings({body: settings});
   const config = await client.cluster.getSettings();
-  console.log(JSON.stringify(config));
-
   // Do we need to skip some collections/objects?
   let skipCollections = [];
   const skipConfiguration = "./index.skip.json"
