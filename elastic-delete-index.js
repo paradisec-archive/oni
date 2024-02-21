@@ -27,13 +27,15 @@ function askForConfirmation() {
   // Delete
   try {
     const confirmed = await askForConfirmation();
-    const res = await client.indices.exists({
-      index: elastic['index'] || 'items'
-    });
-    if (res['statusCode'] !== 404) {
-      await client.indices.delete({
+    if (confirmed) {
+      const res = await client.indices.exists({
         index: elastic['index'] || 'items'
       });
+      if (res['statusCode'] !== 404) {
+        await client.indices.delete({
+          index: elastic['index'] || 'items'
+        });
+      }
     }
   } catch (e) {
     console.log(e)
