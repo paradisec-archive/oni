@@ -32,13 +32,13 @@ function askForConfirmation() {
         index: elastic['index'] || 'items'
       });
       if (res['statusCode'] !== 404) {
+        console.log('trying to delete the index');
         await client.indices.delete({
           index: elastic['index'] || 'items'
         });
       }
     }
   } catch (e) {
-    console.log(e)
     console.log('index does not exist');
   } finally {
     rl.close();
