@@ -335,7 +335,7 @@
   },
   "api": {
     "structural": {
-      "host": "https://catalog.paradisec.org.au/api/v1/oni",
+      "host": "https://catalog.paradisec.org.au",
       "key": "XXX",
       "secret": "XXX"
     },
