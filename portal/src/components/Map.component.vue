@@ -60,7 +60,7 @@ export default {
         const items = await this.$elasticService.map({});
         this.total = items.hits?.total.value || 0;
         this.items = items.hits?.hits || [];
-        this.viewport = items.aggregations?.viewport;
+        //this.viewport = items.aggregations?.viewport;
         const results = []
         for (let item of this.items || []) {
           results.push(item['_source']);

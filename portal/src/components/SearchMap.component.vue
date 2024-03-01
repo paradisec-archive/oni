@@ -55,29 +55,66 @@ L.SearchControl = L.Control.extend({
   }
 });
 
+L.LocationDivIcon = L.Icon.extend({
+  options: {
+    iconRetinaUrl: require('assets/marker-circle-icon-2x.png'),
+    iconUrl: require('assets/marker-circle-icon.png'),
+    shadowUrl: require('assets/marker-circle-icon.png'),
+    ref: '<a href="https://www.flaticon.com/free-icons/red" title="red icons">Red icons created by hqrloveq - Flaticon</a>',
+    iconSize: [24, 26],// size of the icon
+    shadowSize:   null, // size of the shadow
+    iconAnchor:   [0,0], // point of the icon which will correspond to marker's location
+    shadowAnchor: null,  // the same for the shadow
+    popupAnchor:  [0,0] // point from which the popup should open relative to the iconAnchor
+  }
+});
+
 L.NumberedDivIcon = L.Icon.extend({
   options: {
-    iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-    iconUrl: require('leaflet/dist/images/marker-icon.png'),
-    shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+    iconRetinaUrl: require('assets/marker-empty-icon.png'),
+    iconUrl: require('assets/marker-empty-icon.png'),
+    shadowUrl: require('assets/marker-empty-icon.png'),
     number: '',
-    iconSize: new L.Point(25, 41),
-    iconAnchor: new L.Point(13, 41),
-    popupAnchor: new L.Point(0, -33),
+    iconSize: new L.Point(25, 40),
+    iconAnchor: new L.Point(12, 16),
+    popupAnchor: new L.Point(0, -13),
     /*
-        iconAnchor: (Point)
-        popupAnchor: (Point)
-        */
+    iconAnchor: (Point)
+    popupAnchor: (Point)
+    */
     className: 'leaflet-div-icon'
   },
   createIcon: function () {
     var div = document.createElement('div');
     var img = this._createImg(this.options['iconUrl']);
     var numdiv = document.createElement('div');
-    numdiv.setAttribute ( "class", "number" );
+    numdiv.setAttribute("class", "number");
     numdiv.innerHTML = this.options['number'] || '';
-    div.appendChild ( img );
-    div.appendChild ( numdiv );
+    div.appendChild(img);
+    div.appendChild(numdiv);
+    this._setIconStyles(div, 'icon');
+    return div;
+  },
+//you could change this to add a shadow like in the normal marker if you really wanted
+  createShadow: function () {
+    return null;
+  }
+});
+
+L.CountDivIcon = L.Icon.extend({
+  options: {
+    number: '',
+    className: 'leaflet-div-icon'
+  },
+  createIcon: function () {
+    console.log('created icon');
+    var div = document.createElement('div');
+    var img = this._createImg(this.options['iconUrl']);
+    var numdiv = document.createElement('div');
+    numdiv.setAttribute("class", "number");
+    numdiv.innerHTML = this.options['number'] || '';
+    div.appendChild(img);
+    div.appendChild(numdiv);
     this._setIconStyles(div, 'icon');
     return div;
   },
@@ -106,7 +143,7 @@ export default {
   setup() {
     console.log('hello setup')
   },
-  mounted() {
+  async mounted() {
     console.log('map mounted');
     // wait so that leaflet div has a size because otherwise the tiles won't load
     //await new Promise(r => setTimeout(r, 100));
@@ -164,7 +201,8 @@ export default {
       this.map = L.map("map", {
         gestureHandling: true
       });
-      this.map.setView([-27, 140], 3);
+      //TODO: pass this via config. Center location and zoom level
+      this.map.setView([-25, 134], 3);
       L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
       }).addTo(this.map);
@@ -172,7 +210,6 @@ export default {
       this.featuresLayer.addTo(this.map);
       this.geoHashLayer.addTo(this.map);
       const control = new L.SearchControl();
-      // control.on('click', ()=>{this.search();})
       control.addTo(this.map);
     },
     updateLayerBuckets(val) {
@@ -181,8 +218,21 @@ export default {
       for (const bucket of val) {
         try {
           const latlon = Geohash.decode(bucket['key']);
-          const asWKT = `POINT ( ${latlon['lon']} ${latlon['lat']} )`;
-          const shape = _private.read(L, asWKT, bucket['doc_count']);
+          const boundingBox = this.getBoundingBox(bucket['key']);
+          console.log(boundingBox)
+          let asWKT;
+          if (bucket['doc_count'] > 1) {
+            const radius = this.geohashRadius(bucket['key']);
+            asWKT = `CIRCLE ( (${latlon['lon']} ${latlon['lat']}), ${radius} )`;
+            const count = L.marker(latlon, {
+              icon: new L.NumberedDivIcon({number: bucket['doc_count']})
+            });
+            count._data = {docCount: bucket['doc_count'], key: bucket['key'], latlng: latlon};
+            count.addTo(this.geoHashLayer);
+          } else {
+            asWKT = `POINT ( ${latlon['lon']} ${latlon['lat']} )`;
+          }
+          const shape = _private.read(L, asWKT, bucket['doc_count'],);
           shape._data = {docCount: bucket['doc_count'], key: bucket['key'], latlng: latlon};
           shape.addTo(this.geoHashLayer);
         } catch (error) {
@@ -215,9 +265,13 @@ export default {
       }
     },
     initControls() {
-
       // console.log(featuresLayer.getLayers());
-      const viewport = this.viewport?.bounds;
+      //const viewport = this.viewport?.bounds;
+      //TODO: give this INIT via config
+      const viewport = {
+        bottom_right: {lat: -11.523088, lon: 162.649886},
+        top_left: {lat: -42.811522, lon: 108.649010}
+      };
       let bounds;
       if (viewport && viewport.bottom_right && viewport.top_left) {
         var southwest = L.latLng(viewport.bottom_right.lat, viewport.bottom_right.lon);
@@ -232,24 +286,16 @@ export default {
       }
       if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: 10});
 
+      this.map.on('load', async (e) => {
+        await this.searchEvent();
+      });
+
       this.map.on('zoomend', async (e) => {
-        const zoomLevel = this.map.getZoom();
-        const precision = this.calculatePrecision(zoomLevel)
-        const result = await this.search({precision});
-        if (result.aggregations?.viewport) {
-          const viewport = result.aggregations?.viewport;
-          this.updateLayerBuckets(viewport?.buckets);
-        }
+        await this.searchEvent();
       });
 
       this.map.on('dragend', async (e) => {
-        const zoomLevel = this.map.getZoom();
-        const precision = this.calculatePrecision(zoomLevel)
-        const result = await this.search({precision});
-        if (result.aggregations?.viewport) {
-          const viewport = result.aggregations?.viewport;
-          this.updateLayerBuckets(viewport?.buckets);
-        }
+        await this.searchEvent();
       });
 
       this.geoHashLayer.on('click', async (e) => {
@@ -257,26 +303,35 @@ export default {
         //L.DomEvent.stop(e);
         let innerHHTML = '';
         this.markerSelected = false;
-        if (e.layer?._data) {
-          const data = e.layer?._data;
-          //TODO: get the one
-          const result = await this.searchGeoHash({geohash: data.key});
-          const hits = document.createElement('div');
-          for (let hit of result['hits']['hits']) {
-            const newDiv = document.createElement('div');
-            newDiv.innerHTML = this.getInnerHTMLTooltip(hit['_source']);
-            hits.appendChild(newDiv);
+        const data = e.layer?._data;
+        // TODO: ask people if they like this behaviour
+        if (data?.docCount > 4) {
+          //if there are more than X zoom in
+          console.log(e);
+          const newZoom = this.map.getZoom();
+          this.map.setView(e.latlng, newZoom + 1);
+        } else {
+          if (e.layer?._data) {
+            const data = e.layer?._data;
+            //TODO: get the one
+            const result = await this.searchGeoHash({geohash: data.key});
+            const hits = document.createElement('div');
+            for (let hit of result['hits']['hits']) {
+              const newDiv = document.createElement('div');
+              newDiv.innerHTML = this.getInnerHTMLTooltip(hit['_source']);
+              hits.appendChild(newDiv);
+            }
+            const tooltip = new L.ClickableTooltip({
+              direction: 'center',
+              permanent: false,
+              noWrap: true,
+              opacity: 1
+            });
+            tooltip.setContent(hits.innerHTML);
+            tooltip.setLatLng(e.latlng);
+            tooltip.addTo(this.map);
+            this.markerSelected = true;
           }
-          const tooltip = new L.ClickableTooltip({
-            direction: 'center',
-            permanent: false,
-            noWrap: true,
-            opacity: 1
-          });
-          tooltip.setContent(hits.innerHTML);
-          tooltip.setLatLng(e.latlng);
-          tooltip.addTo(this.map);
-          this.markerSelected = true;
         }
       });
 
@@ -373,6 +428,7 @@ export default {
       }
     },
     async search({precision}) {
+      console.log('search');
       let boundingBox;
       let items;
       const bounds = this.map.getBounds();
@@ -380,8 +436,12 @@ export default {
         topRight: {lat: bounds._northEast.lat, lon: bounds._northEast.lng},
         bottomLeft: {lat: bounds._southWest.lat, lon: bounds._southWest.lng}
       }
-      items = await this.$elasticService.map({init: false, boundingBox, precision});
-      return items;
+      if (bounds.isValid()) {
+        items = await this.$elasticService.map({init: false, boundingBox, precision});
+        return items;
+      } else {
+        return [];
+      }
     },
     async searchGeoHash({geohash}) {
       let boundingBox;
@@ -395,7 +455,7 @@ export default {
         return items;
       }
     },
-    calculatePrecision(zoomLevel){
+    calculatePrecision(zoomLevel) {
       // This is a way to match zoom levels in leaflet vs precision levels in elastic geoHashGridAggregation
       let precision = zoomLevel / 2;
       if (precision < 1) {
@@ -404,6 +464,55 @@ export default {
         precision = 7;
       }
       return precision;
+    },
+    async searchEvent() {
+      this.updateLayerBuckets();//Clear layers
+      const zoomLevel = this.map.getZoom();
+      const precision = this.calculatePrecision(zoomLevel)
+      const result = await this.search({precision});
+      if (result.aggregations?.viewport) {
+        const viewport = result.aggregations?.viewport;
+        this.updateLayerBuckets(viewport?.buckets);
+      }
+    },
+    getBoundingBox(geohashString) {
+      const {latitude, longitude} = Geohash.decode(geohashString);
+      const bounds = Geohash.bounds(geohashString);
+      return {
+        sw: {lat: bounds[0], lon: bounds[1]},
+        ne: {lat: bounds[2], lon: bounds[3]},
+        center: {lat: latitude, lon: longitude}
+      };
+    },
+    // Approximate the radius in meters of a geohash
+    geohashRadius(geohash) {
+      // Length of a degree (in meters) at the equator
+      const metersPerDegree = 111319.9;
+
+      // Length of a degree (in meters) at the given latitude
+      function degToMetersLat(latitude) {
+        return metersPerDegree * (1 / Math.cos(latitude * Math.PI / 180));
+      }
+
+      // Decode the geohash to get its bounding box
+      const bbox = Geohash.bounds(geohash);
+
+      // Calculate the center latitude and longitude of the bounding box
+      const centerLatitude = (bbox.ne.lat + bbox.sw.lat) / 2;
+      //TODO: center longitude not used?
+      const centerLongitude = (bbox.ne.lon + bbox.sw.lon) / 2;
+
+      // Calculate the width and height of the bounding box in degrees
+      const widthDeg = bbox.ne.lat - bbox.sw.lat; //bbox[1] - bbox[0];
+      const heightDeg = bbox.ne.lon - bbox.sw.lon;//bbox[3] - bbox[2];
+
+      // Convert the width and height from degrees to meters
+      const widthMeters = widthDeg * metersPerDegree;
+      const heightMeters = heightDeg * degToMetersLat(centerLatitude);
+
+      // Use the average of the width and height as the approximate radius
+      const radius = (widthMeters + heightMeters) / 2;
+      return radius;
     }
   }
 }
@@ -415,11 +524,13 @@ export default {
   width: 200px;
   white-space: normal;
 }
+
 .leaflet-div-icon {
   background: transparent;
   border: none;
 }
-.leaflet-marker-icon .number{
+
+.leaflet-marker-icon .number {
   position: relative;
   top: 0;
   font-size: 20px;
@@ -428,9 +539,26 @@ export default {
   font-weight: bold;
   color: brown;
   background-color: azure;
+  border: none;
+  border-radius: 50%;
+  padding: 1px;
 }
+
 .leaflet-tooltip .leaflet-zoom-animated .leaflet-tooltip-center {
   overflow: scroll;
 }
+
+/*.circle {*/
+/*  display: table-cell;*/
+/*  text-align: center;*/
+/*  vertical-align: middle;*/
+/*  border-radius: 50%;*/
+/*  border-style: none;*/
+/*  font-size: 16px;*/
+/*  font-weight: bold;*/
+/*  background: rgba(0, 57, 128, 0.2);*/
+/*  border-color: #3388FF;*/
+/*  color: white;*/
+/*}*/
 
 </style>
