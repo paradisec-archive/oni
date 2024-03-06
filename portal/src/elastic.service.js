@@ -358,7 +358,7 @@ export default class ElasticService {
     let topRight = {}
     let bottomLeft = {}
     let geoQuery = {};
-     if (init) {
+    if (init) {
       topRight = esb.geoPoint()
         .lat(90)
         .lon(180);
@@ -369,11 +369,21 @@ export default class ElasticService {
         .topRight(topRight)
         .bottomLeft(bottomLeft);
     } else {
-      const tR = boundingBox.topRight;
+      let tR = boundingBox.topRight;
+      tR = fixMalformedCoordinates(tR);
+      // if (tR.lat > 90) tR.lat = 90;
+      // if (tR.lat < -90) tR.lat = -90;
+      // if (tR.lon > 180) tR.lon = 180;
+      // if (tR.lon < -180) tR.lon = -180;
       topRight = esb.geoPoint()
         .lat(tR.lat)
         .lon(tR.lon);
-      const bL = boundingBox.bottomLeft;
+      let bL = boundingBox.bottomLeft;
+      bL = fixMalformedCoordinates(bL);
+      // if (bL.lat > 90) bL.lat = 90;
+      // if (bL.lat < -90) bL.lat = -90;
+      // if (bL.lon > 180) bL.lon = 180;
+      // if (bL.lon < -180) bL.lon = -180;
       bottomLeft = esb.geoPoint()
         .lat(bL.lat)
         .lon(bL.lon)
@@ -415,4 +425,17 @@ function switchFilter(operation, boolQueryObj, phraseQuery, filterTerms) {
       boolQueryObj = esb.boolQuery().should(phraseQuery).filter(filterTerms);
   }
   return boolQueryObj;
+}
+
+// https://opensearch.org/docs/latest/field-types/supported-field-types/geo-point/
+// Valid values for latitude are [-90, 90]. Valid values for longitude are [-180, 180].
+// TODO: Test send ignore_malformed=true
+function fixMalformedCoordinates(coord) {
+  if (coord.lon) {
+    coord.lon = ((coord.lon + 180) % 360) - 180;
+  }
+  if (coord.lat) {
+    coord.lat = ((coord.lat + 90) % 360) - 90;
+  }
+  return coord;
 }

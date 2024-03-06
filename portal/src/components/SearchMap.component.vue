@@ -107,7 +107,6 @@ L.CountDivIcon = L.Icon.extend({
     className: 'leaflet-div-icon'
   },
   createIcon: function () {
-    console.log('created icon');
     var div = document.createElement('div');
     var img = this._createImg(this.options['iconUrl']);
     var numdiv = document.createElement('div');
@@ -141,22 +140,21 @@ export default {
     }
   },
   setup() {
-    console.log('hello setup')
   },
   async mounted() {
-    console.log('map mounted');
+    //console.log('map mounted');
     // wait so that leaflet div has a size because otherwise the tiles won't load
     //await new Promise(r => setTimeout(r, 100));
     //setTimeout(initMap, 100);
     this.initMap();
-    this.updateLayers(this.modelValue);
+    //this.updateLayers(this.modelValue);
     this.updateLayerBuckets(this.buckets);
     this.initControls();
   },
   async updated() {
-    console.log('map updated');
+    //console.log('map updated');
     if (this.map && this.featuresLayer && this.geoHashLayer) {
-      this.updateLayers(this.modelValue);
+      //this.updateLayers(this.modelValue);
       this.updateLayerBuckets(this.buckets);
       this.initControls();
     }
@@ -185,10 +183,10 @@ export default {
     'modelValue': {
       async handler(val) {
         //todo: compare new values to existing values, only update when there is difference
-        if (this.featuresLayer) {
-          console.log('updateLayers');
-          this.updateLayers(val);
-        }
+        // if (this.featuresLayer) {
+        //   console.log('updateLayers');
+        //   this.updateLayers(val);
+        // }
       },
       flush: 'post',
       immediate: true
@@ -219,7 +217,6 @@ export default {
         try {
           const latlon = Geohash.decode(bucket['key']);
           const boundingBox = this.getBoundingBox(bucket['key']);
-          console.log(boundingBox)
           let asWKT;
           if (bucket['doc_count'] > 1) {
             const radius = this.geohashRadius(bucket['key']);
@@ -284,7 +281,7 @@ export default {
         bounds = this.featuresLayer.getBounds();
         if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: 9});
       }
-      if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: 10});
+      if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: 9});
 
       this.map.on('load', async (e) => {
         await this.searchEvent();
@@ -299,7 +296,7 @@ export default {
       });
 
       this.geoHashLayer.on('click', async (e) => {
-        console.log('geoHashLayer click', e);
+        //console.log('geoHashLayer click', e);
         //L.DomEvent.stop(e);
         let innerHHTML = '';
         this.markerSelected = false;
@@ -307,7 +304,6 @@ export default {
         // TODO: ask people if they like this behaviour
         if (data?.docCount > 4) {
           //if there are more than X zoom in
-          console.log(e);
           const newZoom = this.map.getZoom();
           this.map.setView(e.latlng, newZoom + 1);
         } else {
@@ -336,7 +332,7 @@ export default {
       });
 
       this.featuresLayer.on('click', (e) => {
-        console.log('featuresLayer click', e);
+        //console.log('featuresLayer click', e);
         //L.DomEvent.stop(e);
         let innerHHTML = '';
         let item = null;
@@ -358,7 +354,6 @@ export default {
       });
     },
     open(route) {
-      console.log('button clicked!')
       this.$router.push({path: route});
     },
     getSearchDetailUrl(item) {
@@ -428,16 +423,14 @@ export default {
       }
     },
     async search({precision}) {
-      console.log('search');
-      let boundingBox;
-      let items;
+      //console.log('search');
       const bounds = this.map.getBounds();
-      boundingBox = {
-        topRight: {lat: bounds._northEast.lat, lon: bounds._northEast.lng},
-        bottomLeft: {lat: bounds._southWest.lat, lon: bounds._southWest.lng}
-      }
       if (bounds.isValid()) {
-        items = await this.$elasticService.map({init: false, boundingBox, precision});
+        const boundingBox = {
+          topRight: {lat: bounds._northEast.lat, lon: bounds._northEast.lng},
+          bottomLeft: {lat: bounds._southWest.lat, lon: bounds._southWest.lng}
+        }
+        const items = await this.$elasticService.map({init: false, boundingBox, precision});
         return items;
       } else {
         return [];
