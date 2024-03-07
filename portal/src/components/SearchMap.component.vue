@@ -1,6 +1,78 @@
 <template>
   <el-row>
-    <el-col :span="24">
+    <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="7" offset="0"
+            class="h-full max-h-screen overflow-y-auto flex flex-col h-screen p-2">
+      <div v-show="!advancedSearch"
+           class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
+        <search-bar ref='searchBar' @populate='populate' :searchInput="searchInput"
+                    @search="search" :clearSearch="clear" :filters="this.filters" :fields="searchFields"
+                    class="grow justify-items-center items-center m-4"
+                    @advanced-search="enableAdvancedSearch" :enableAdvancedSearch="advancedSearch"
+                    @updateSearchInput="onInputChange"
+                    @basicSearch="updateRoutes" path="'map'"/>
+      </div>
+      <div class="flex-1 w-full min-w-full bg-white mt-4 mb-4 border-b-2">
+        <div class="py-3 px-2">
+          <div class="">
+            <p class="text-xl text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
+              Filters
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="flex w-full" v-for="aggs of aggregations" :key="aggs.name">
+        <ul v-if="aggs?.buckets?.length > 0 && !aggs['hide']"
+            class="flex-1 w-full min-w-full bg-white rounded p-2 mb-4 shadow-md border">
+          <li @click="aggs.active = !aggs.active"
+              class="hover:cursor-pointer py-3 flex md:flex md:flex-grow flex-row justify-between space-x-1">
+                <span class="text-xl text-gray-600 dark:text-gray-300 font-semibold py-1 px-2">
+                  {{ aggs.display }}
+                      <el-tooltip v-if="aggs.help"
+                                  class="box-item"
+                                  effect="light"
+                                  trigger="hover"
+                                  :content="aggs.help"
+                                  placement="top"
+                      >
+                      <el-button link>
+                        <font-awesome-icon icon="fa-solid fa-circle-info"/>
+                      </el-button>
+                    </el-tooltip>
+                </span>
+            <span class="py-1 px-2">
+                    <font-awesome-icon v-if="aggs.active" icon="fa fa-chevron-down"/>
+                  <span v-else>
+                    <span class="text-xs rounded-full w-32 h-32 text-white bg-purple-500 p-1">{{
+                        aggs?.buckets?.length
+                      }}</span>&nbsp;
+                    <font-awesome-icon icon="fa fa-chevron-right"/>
+                    </span>
+                </span>
+          </li>
+          <li v-if="aggs?.buckets?.length <= 0" class="w-full min-w-full">&nbsp;</li>
+          <search-aggs :buckets="aggs.buckets" :aggsName="aggs.name" :ref="aggs.name"
+                       v-show="aggs.active" @is-active="aggs.active = true"
+                       @changed-aggs="newAggs"/>
+        </ul>
+      </div>
+    </el-col>
+    <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="17" offset="0"
+            class="max-h-screen overflow-y-auto flex flex-row h-screen p-2 px-3">
+      <div class="pr-0">
+        <div class="top-20 z-10 bg-white pb-3">
+          <el-row :align="'middle'" class="mt-4 pb-2 border-0 border-b-[2px] border-solid border-red-700 text-2xl">
+            <el-col :span="20" class="m-2" :xs="18" :sm="17" :md="17" :lg="20" :xl="18">
+              <span id="total_results" class="my-1 mr-2" v-show="total">Total: <span>{{ total }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
+              <span v-if="errorText">error: {{ errorText }}</span>
+            </el-col>
+            <el-col :span="2" class="m-2" :xs="4" :sm="5" :md="5" :lg="2" :xl="4">
+              <el-button size="large" @click="showList()">
+                <span><font-awesome-icon icon="fa-solid fa-list"/>&nbsp;List view</span>
+              </el-button>
+            </el-col>
+          </el-row>
+        </div>
+      </div>
       <div id="map" class="flex-1 h-[calc(100vh-200px)]" v-once></div>
     </el-col>
   </el-row>
@@ -12,11 +84,24 @@ import * as L from "leaflet";
 import "leaflet.path.drag";
 import "leaflet-editable";
 import {GestureHandling} from "leaflet-gesture-handling";
-import {reactive, computed, ref, onMounted, onUpdated, watch, onBeforeUnmount, nextTick, toRaw} from "vue";
-import {first} from 'lodash';
+import {
+  reactive,
+  computed,
+  ref,
+  onMounted,
+  onUpdated,
+  watch,
+  onBeforeUnmount,
+  nextTick,
+  toRaw,
+  defineAsyncComponent
+} from "vue";
+import {first, isEmpty, orderBy} from 'lodash';
 import SearchDetailElement from './SearchDetailElement.component.vue';
 import Geohash from "latlon-geohash";
 import {_private} from './widgets/geo_wkt';
+import SearchAggs from "./SearchAggs.component.vue";
+import {v4 as uuid} from 'uuid';
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -26,9 +111,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-L.ClickableTooltip = L.Tooltip.extend({
+L.ClickableTooltip = L.Popup.extend({
   onAdd: function (map) {
-    L.Tooltip.prototype.onAdd.call(this, map);
+    L.Popup.prototype.onAdd.call(this, map);
     const el = this.getElement(),
         self = this;
     el.addEventListener('click', function () {
@@ -62,10 +147,10 @@ L.LocationDivIcon = L.Icon.extend({
     shadowUrl: require('assets/marker-circle-icon.png'),
     ref: '<a href="https://www.flaticon.com/free-icons/red" title="red icons">Red icons created by hqrloveq - Flaticon</a>',
     iconSize: [24, 26],// size of the icon
-    shadowSize:   null, // size of the shadow
-    iconAnchor:   [0,0], // point of the icon which will correspond to marker's location
+    shadowSize: null, // size of the shadow
+    iconAnchor: [0, 0], // point of the icon which will correspond to marker's location
     shadowAnchor: null,  // the same for the shadow
-    popupAnchor:  [0,0] // point from which the popup should open relative to the iconAnchor
+    popupAnchor: [0, 0] // point from which the popup should open relative to the iconAnchor
   }
 });
 
@@ -125,6 +210,12 @@ L.CountDivIcon = L.Icon.extend({
 
 export default {
   name: 'SearchMap',
+  components: {
+    SearchBar: defineAsyncComponent(() =>
+        import("@/components/SearchBar.component.vue")
+    ),
+    SearchAggs
+  },
   props: {
     modelValue: {type: Array},
     viewport: {},
@@ -132,14 +223,29 @@ export default {
   },
   data() {
     return {
+      total: 0,
+      errorText: '',
       item: null,
       map: null,
+      tooltipLayers: null,
       featuresLayer: null,
       geoHashLayer: null,
-      markerSelected: false
+      markerSelected: false,
+      leafletAggs: [],
+      aggregations: [],
+      advancedSearch: false,
+      searchInput: '',
+      clear: false,
+      filters: [],
+      newSearch: true
     }
   },
   setup() {
+  },
+  created() {
+    if (this.$route.query.q) {
+      this.searchInput = this.$route.query.q;
+    }
   },
   async mounted() {
     //console.log('map mounted');
@@ -148,6 +254,7 @@ export default {
     //setTimeout(initMap, 100);
     this.initMap();
     //this.updateLayers(this.modelValue);
+    this.updateTooltipLayer();
     this.updateLayerBuckets(this.buckets);
     this.initControls();
   },
@@ -190,12 +297,30 @@ export default {
       },
       flush: 'post',
       immediate: true
+    },
+    async '$route.query'() {
+      this.loading = true;
+      if (this.$route.query.s) {
+        this.isStart = true;
+        this.resetSearch();
+      } else {
+        await this.updateFilters({});
+        this.onInputChange(this.$route.query.q);
+        this.currentPage = 1;
+        if (this.$route.query.a) {
+          this.updateAdvancedQueries();
+        }
+        await this.search();
+      }
+      this.loading = false;
     }
   },
   methods: {
     initMap() {
+      this.searchFields = this.$store.state.configuration.ui.searchFields;
       this.featuresLayer = L.featureGroup();
       this.geoHashLayer = L.featureGroup();
+      this.tooltipLayers = L.layerGroup()
       this.map = L.map("map", {
         gestureHandling: true
       });
@@ -207,8 +332,12 @@ export default {
       L.control.scale().addTo(this.map);
       this.featuresLayer.addTo(this.map);
       this.geoHashLayer.addTo(this.map);
+      this.tooltipLayers.addTo(this.map);
       const control = new L.SearchControl();
       control.addTo(this.map);
+    },
+    updateTooltipLayer() {
+      this.tooltipLayers.clearLayers();
     },
     updateLayerBuckets(val) {
       this.geoHashLayer.clearLayers();
@@ -218,7 +347,7 @@ export default {
           const latlon = Geohash.decode(bucket['key']);
           const boundingBox = this.getBoundingBox(bucket['key']);
           let asWKT;
-          if (bucket['doc_count'] > 1) {
+          if (bucket['doc_count'] > 0) { // TODO: clean if we are doing radius for everything or setup > 1 so you can have a single icon no circle
             const radius = this.geohashRadius(bucket['key']);
             asWKT = `CIRCLE ( (${latlon['lon']} ${latlon['lat']}), ${radius} )`;
             const count = L.marker(latlon, {
@@ -284,15 +413,15 @@ export default {
       if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: 9});
 
       this.map.on('load', async (e) => {
-        await this.searchEvent();
+        await this.searchEvent({clearPopup: false});
       });
 
       this.map.on('zoomend', async (e) => {
-        await this.searchEvent();
+        await this.searchEvent({clearPopup: true});
       });
 
       this.map.on('dragend', async (e) => {
-        await this.searchEvent();
+        await this.searchEvent({clearPopup: false});
       });
 
       this.geoHashLayer.on('click', async (e) => {
@@ -302,10 +431,17 @@ export default {
         this.markerSelected = false;
         const data = e.layer?._data;
         // TODO: ask people if they like this behaviour
-        if (data?.docCount > 4) {
+        if (data?.docCount > 10) {
           //if there are more than X zoom in
           const newZoom = this.map.getZoom();
-          this.map.setView(e.latlng, newZoom + 1);
+          let nextZoom = 1;
+          if (data?.docCount >= 30) {
+            nextZoom = 4;
+          }
+          if (data?.docCount >= 10) {
+            nextZoom = 2;
+          }
+          this.map.setView(e.latlng, newZoom + nextZoom);
         } else {
           if (e.layer?._data) {
             const data = e.layer?._data;
@@ -317,15 +453,17 @@ export default {
               newDiv.innerHTML = this.getInnerHTMLTooltip(hit['_source']);
               hits.appendChild(newDiv);
             }
+
             const tooltip = new L.ClickableTooltip({
-              direction: 'center',
+              direction: 'right',
               permanent: false,
               noWrap: true,
-              opacity: 1
+              maxWidth: 400,
+              maxHeight: 400
             });
             tooltip.setContent(hits.innerHTML);
             tooltip.setLatLng(e.latlng);
-            tooltip.addTo(this.map);
+            tooltip.addTo(this.tooltipLayers);
             this.markerSelected = true;
           }
         }
@@ -408,7 +546,7 @@ export default {
             <a href="${href}">${title}</a></h3>
             <h4>Type: ${type}</h4>
             <div :align="'middle'" v-if="" class="">
-            <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+            <p class="font-normal text-gray-700">
                 Member of:&nbsp;
             </p>
             <div class="flex flex-wrap">
@@ -418,6 +556,7 @@ export default {
             <a href="${href}">See more</a>
           </div>
         </div>
+        <hr class="divide-y divide-gray-500"/>
       `;
         return innerHHTML;
       }
@@ -431,6 +570,10 @@ export default {
           bottomLeft: {lat: bounds._southWest.lat, lon: bounds._southWest.lng}
         }
         const items = await this.$elasticService.map({init: false, boundingBox, precision});
+        this.leafletAggs = items.aggregations['_geohash'];
+        this.aggregations = this.populateAggregations(items.aggregations);
+        const total = items.hits?.total;
+        this.total = total?.value || 0;
         return items;
       } else {
         return [];
@@ -458,15 +601,17 @@ export default {
       }
       return precision;
     },
-    async searchEvent() {
+    async searchEvent({clearPopup}) {
+      if (clearPopup) {
+        this.updateTooltipLayer();
+      }
       this.updateLayerBuckets();//Clear layers
       const zoomLevel = this.map.getZoom();
       const precision = this.calculatePrecision(zoomLevel)
-      const result = await this.search({precision});
-      if (result.aggregations?.viewport) {
-        const viewport = result.aggregations?.viewport;
-        this.updateLayerBuckets(viewport?.buckets);
-      }
+      await this.search({precision});
+      const viewport = this.leafletAggs;
+      this.updateLayerBuckets(viewport?.buckets);
+
     },
     getBoundingBox(geohashString) {
       const {latitude, longitude} = Geohash.decode(geohashString);
@@ -506,6 +651,142 @@ export default {
       // Use the average of the width and height as the approximate radius
       const radius = (widthMeters + heightMeters) / 2;
       return radius;
+    },
+    showList() {
+      this.$router.push({path: '/search'});
+    },
+    newAggs({query, aggsName}) {
+      if (query.f) {
+        //In here we need to merge the filters
+        const decodedFilters = JSON.parse(decodeURIComponent(query.f));
+        this.mergeFilters(decodedFilters, aggsName);
+      }
+      if (query.q) {
+        this.searchInput = decodeURIComponent(query.q);
+      }
+      console.log(isEmpty(this.filters))
+      this.changedFilters = true;
+    },
+    populate({items, newSearch, aggregations}) {
+      this.items = [];
+      if (newSearch) {
+        this.newSearch = true;
+
+      }
+      if (items?.['hits']) {
+        const thisItems = items['hits']['hits'];
+        this.totals = items['hits']['total'];
+        if (thisItems.length > 0) {
+          for (let item of thisItems) {
+            this.items.push(item);
+          }
+          this.more = true;
+        } else {
+          this.more = false;
+        }
+      }
+      if (items?.['aggregations']) {
+        this.aggregations = this.populateAggregations(items['aggregations']);
+        this.memberOfBuckets = items['aggregations']?.['_memberOf.name.@value'];
+      }
+    },
+    populateAggregations(aggregations) {
+      const a = {};
+      //Note: below is converted to an ordered array not an object.
+      const aggInfo = this.$store.state.configuration.ui.aggregations;
+      for (let agg of Object.keys(aggregations)) {
+        const info = aggInfo.find((a) => a['name'] === agg);
+        const display = info?.display;
+        const order = info?.order;
+        const name = info?.name;
+        const hide = info?.hide;
+        const active = info?.active;
+        const help = info?.help;
+        a[agg] = {
+          buckets: aggregations[agg]?.buckets || aggregations[agg]?.values?.buckets,
+          display: display || agg,
+          order: order || 0,
+          name: name || agg,
+          hide: hide,
+          active: active,
+          help: help || ''
+        };
+      }
+      return orderBy(a, 'order');
+    },
+    enableAdvancedSearch() {
+      alert('not enabled for Map Search yet, coming soon!')
+    },
+    onInputChange() {
+
+    },
+    async updateRoutes({queries, updateFilters}) {
+      let filters;
+      const query = {};
+      let localFilterUpdate = false;
+      if (!isEmpty(this.filters) || updateFilters) {
+        filters = toRaw(this.filters);
+        filters = encodeURIComponent(JSON.stringify(filters));
+        query.f = filters;
+        localFilterUpdate = true;
+      } else {
+        delete query.f;
+      }
+      if (this.$route.query.f && !localFilterUpdate) {
+        query.f = this.$route.query.f;
+      }
+      let localSearchGroupUpdate = false;
+      if (queries?.searchGroup) {
+        this.advancedQueries = queries;
+        delete query.q;
+        query.a = queries.searchGroup;
+        this.currentPage = 1;
+        //this.selectedSorting = this.sorting[0];
+        localSearchGroupUpdate = true;
+      }
+      if (this.$route.query.a && !localSearchGroupUpdate) {
+        query.a = this.$route.query.a;
+        delete query.q;
+        this.updateAdvancedQueries();
+      } else {
+        this.advancedQueries = null; //clear advanced search
+        query.q = this.searchInput;
+      }
+      query.r = uuid();
+      await this.$router.push({path: 'map', query, replace: true});
+    },
+    async updateFilters({clear, empty}) {
+      try {
+        // updating filters from command
+        if (clear?.f && clear?.filterKey) {
+          if (this.filters[clear.filterKey]) {
+            this.filters[clear.filterKey].splice(this.filters[clear.filterKey].indexOf(clear.f), 1);
+            if (isEmpty(this.filters[clear.filterKey])) {
+              delete this.filters[clear.filterKey];
+            }
+            //if there is an update on the filter the site will do another search.
+            await this.updateRoutes({updateFilters: true});
+          }
+        } else {
+          // or updating filters from routes
+          if (isEmpty(this.$route.query.f)) {
+            this.filters = {};
+          } else {
+            let filterQuery;
+            const filters = decodeURIComponent(this.$route.query.f);
+            filterQuery = JSON.parse(filters);
+            this.filters = {};
+            for (let [key, val] of Object.entries(filterQuery)) {
+              this.filters[key] = val;
+              if (this.filters[key].length === 0) {
+                delete this.filters[key];
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 }
@@ -531,13 +812,17 @@ export default {
   text-align: center;
   font-weight: bold;
   color: brown;
-  background-color: azure;
+  background-color: transparent;
   border: none;
   border-radius: 50%;
   padding: 1px;
 }
 
 .leaflet-tooltip .leaflet-zoom-animated .leaflet-tooltip-center {
+  overflow: scroll;
+}
+
+.leaflet-tooltip .leaflet-zoom-animated .leaflet-tooltip-right {
   overflow: scroll;
 }
 

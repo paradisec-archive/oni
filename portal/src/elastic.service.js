@@ -353,7 +353,7 @@ export default class ElasticService {
     const queryString = {match_all: {}}
     const fields = ['_contentLocation', '_spatialCoverage'];
     // const geoAggs = esb.geoHashGridAggregation('viewport', fields[0]);
-    const geoAggs = esb.geoHashGridAggregation('viewport', '_contentLocation')
+    const geoAggs = esb.geoHashGridAggregation('_geohash', '_contentLocation')
       .precision(precision);
     let topRight = {}
     let bottomLeft = {}
@@ -392,7 +392,8 @@ export default class ElasticService {
         .bottomLeft(bottomLeft);
     }
     const aggs = geoAggs.toJSON();
-    body.aggs = {...aggs};
+
+    body.aggs = {...aggs, ...this.aggs};
     const query = geoQuery.toJSON();
     body.query = {...query};
     body.size = 10;

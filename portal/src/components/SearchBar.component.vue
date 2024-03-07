@@ -49,7 +49,7 @@ import {Close} from '@element-plus/icons-vue'
 import {isEmpty} from 'lodash';
 
 export default {
-  props: ['searchInput', 'clearSearch', 'filters', 'search', 'fields', 'showFields', 'enableAdvancedSearch'],
+  props: ['searchInput', 'clearSearch', 'filters', 'search', 'fields', 'showFields', 'enableAdvancedSearch', 'path'],
   components: {},
   created() {
     this.searchQuery = this.searchInput;
@@ -77,7 +77,7 @@ export default {
         query = {...query, f: this.$route.query.f};
       }
       if (!isEmpty(query)) {
-        await this.$router.push({path: 'search', query});
+        await this.$router.push({path: this.path, query});
       }
     },
     async searchInputField(e) {
@@ -102,7 +102,7 @@ export default {
         query = {...query, f: this.$route.query.f};
       }
       this.$emit('basicSearch', {});
-      // await this.$router.push({path: 'search', query});
+      // await this.$router.push({path: this.path, query});
     },
     showAdvancedSearch() {
       this.$emit('advanced-search');
