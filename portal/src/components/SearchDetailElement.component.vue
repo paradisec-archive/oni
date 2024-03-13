@@ -16,22 +16,24 @@
             <span class="m-2" v-for="type of types">{{ type }}</span>
           </div>
         </el-row>
-        <el-row v-if="types && types.includes('RepositoryCollection')">
-          <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-            Language:&nbsp;
-          </p>
-          <AggregationHelper :asIcons=false
-                             :aggregations="aggregations"
-                             :field="{ 'name': 'inLanguage.name.@value', 'display': 'Languages' }"
-                             :id="id"/>
-        </el-row>
-        <el-row v-else v-if="details?.inLanguage">
-          <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-            Language:&nbsp;
-          </p>
-          <span v-for="l of details?.inLanguage">{{ first(l?.name)?.['@value'] }}</span>
-          <p>{{ first(details?.inLanguage)?.['@value'] }}</p>
-        </el-row>
+        <template v-for="special of searchDetails">
+          <el-row v-if="types && types.includes('RepositoryCollection')">
+            <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+              {{ special.label }}:&nbsp;
+            </p>
+            <AggregationHelper :asIcons=false
+                               :aggregations="aggregations"
+                               :field="{ 'name': special.name, 'display': special.label }"
+                               :id="id"/>
+          </el-row>
+          <el-row v-else v-if="details?.[special.field]">
+            <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
+              {{ special.label }}:
+            </p>
+            <span v-for="l of details?.[special.field]">{{ first(l?.name)?.['@value'] }}</span>
+            <p>{{ first(details?.[special.field])?.['@value'] }}</p>
+          </el-row>
+        </template>
         <el-row :align="'middle'" v-if="Array.isArray(_memberOf) && _memberOf.length > 0" class="">
           <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
             Member of:&nbsp;
@@ -153,7 +155,8 @@ export default {
       subCollections: [],
       licenses: this.$store.state.configuration.ui?.licenses || [],
       _uuid: uuid(),
-      aggConfig: this.$store.state.configuration.ui.aggregations
+      aggConfig: this.$store.state.configuration.ui.aggregations,
+      searchDetails: this.$store.state.configuration.ui.search.searchDetails || []
     }
   },
   watch: {
