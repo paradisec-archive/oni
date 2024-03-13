@@ -28,7 +28,7 @@
           </el-row>
           <el-row v-else v-if="details?.[special.field]">
             <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
-              {{ special.label }}:
+              {{ special.label }}:&nbsp;
             </p>
             <span v-for="l of details?.[special.field]">{{ first(l?.name)?.['@value'] }}</span>
             <p>{{ first(details?.[special.field])?.['@value'] }}</p>
