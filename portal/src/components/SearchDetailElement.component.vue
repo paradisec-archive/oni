@@ -22,15 +22,15 @@
           </p>
           <AggregationHelper :asIcons=false
                              :aggregations="aggregations"
-                             :field="{ 'name': 'language.name.@value', 'display': 'Languages' }"
+                             :field="{ 'name': 'inLanguage.name.@value', 'display': 'Languages' }"
                              :id="id"/>
         </el-row>
-        <el-row v-else v-if="details?.language">
+        <el-row v-else v-if="details?.inLanguage">
           <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
             Language:&nbsp;
           </p>
-          <span v-for="l of details?.language">{{ first(l?.name)?.['@value'] }}</span>
-          <p>{{ first(details?.language)?.['@value'] }}</p>
+          <span v-for="l of details?.inLanguage">{{ first(l?.name)?.['@value'] }}</span>
+          <p>{{ first(details?.inLanguage)?.['@value'] }}</p>
         </el-row>
         <el-row :align="'middle'" v-if="Array.isArray(_memberOf) && _memberOf.length > 0" class="">
           <p class="font-normal text-gray-700 dark:text-gray-400 dark:text-white">
