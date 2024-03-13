@@ -1,6 +1,5 @@
 const reRoot = /^(<.+>\s+)?(\w+)\s*(\(.+\))$/s;
 const reBrackets = /a/;
-import Geohash from "latlon-geohash";
 
 /**
  * Read a WKT formatted string and return a leaflet layer object

@@ -99,7 +99,6 @@ import {
 import {first, isEmpty, orderBy} from 'lodash';
 import SearchDetailElement from './SearchDetailElement.component.vue';
 import Geohash from "latlon-geohash";
-import {_private} from './widgets/geo_wkt';
 import SearchAggs from "./SearchAggs.component.vue";
 import {v4 as uuid} from 'uuid';
 
@@ -253,7 +252,6 @@ export default {
     //await new Promise(r => setTimeout(r, 100));
     //setTimeout(initMap, 100);
     this.initMap();
-    //this.updateLayers(this.modelValue);
     this.updateTooltipLayer();
     this.updateLayerBuckets(this.buckets);
     this.initControls();
@@ -261,7 +259,6 @@ export default {
   async updated() {
     //console.log('map updated');
     if (this.map && this.featuresLayer && this.geoHashLayer) {
-      //this.updateLayers(this.modelValue);
       this.updateLayerBuckets(this.buckets);
       this.initControls();
     }
@@ -279,10 +276,10 @@ export default {
   watch: {
     'buckets': {
       async handler(val) {
-        if (this.geoHashLayer) {
-          console.log('updateLayerBuckets');
-          this.updateLayerBuckets(val);
-        }
+        // if (this.geoHashLayer) {
+        //   console.log('updateLayerBuckets');
+        //   this.updateLayerBuckets(val);
+        // }
       },
       flush: 'post',
       immediate: true
@@ -290,10 +287,6 @@ export default {
     'modelValue': {
       async handler(val) {
         //todo: compare new values to existing values, only update when there is difference
-        // if (this.featuresLayer) {
-        //   console.log('updateLayers');
-        //   this.updateLayers(val);
-        // }
       },
       flush: 'post',
       immediate: true
@@ -344,49 +337,46 @@ export default {
       if (!val) return;
       for (const bucket of val) {
         try {
-          const latlon = Geohash.decode(bucket['key']);
-          const boundingBox = this.getBoundingBox(bucket['key']);
+          const geohash = bucket['key'];
+          const latlon = Geohash.decode(geohash);
+          const bounds = Geohash.bounds(geohash);
           let asWKT;
-          if (bucket['doc_count'] > 0) { // TODO: clean if we are doing radius for everything or setup > 1 so you can have a single icon no circle
-            const radius = this.geohashRadius(bucket['key']);
-            asWKT = `CIRCLE ( (${latlon['lon']} ${latlon['lat']}), ${radius} )`;
+          let shape;
+          if (bucket['doc_count'] > 0) {
+            // TODO: clean if we are doing radius for everything or setup > 1 so you can have a single icon no circle
+            // These next 2 lines will create a CIRCLE and
+            // const radius = this.geohashRadius(geohash);
+            // asWKT = `CIRCLE ( (${latlon['lon']} ${latlon['lat']}), ${radius} )`;
             const count = L.marker(latlon, {
               icon: new L.NumberedDivIcon({number: bucket['doc_count']})
             });
-            count._data = {docCount: bucket['doc_count'], key: bucket['key'], latlng: latlon};
+            count._data = {docCount: bucket['doc_count'], key: geohash, latlng: latlon};
             count.addTo(this.geoHashLayer);
+            let color = '#ffffff';
+            const docCount = bucket['doc_count'];
+            if (docCount <= 1)
+              color = '#ffea1f';
+            if (docCount > 1 && docCount <= 10)
+              color = '#4470a2';
+            if (docCount > 10 && docCount <= 30)
+              color = '#14a848';
+            if (docCount > 30)
+              color = '#ff0000';
+
+            shape = L.rectangle(
+                [[bounds.sw.lat, bounds.sw.lon], [bounds.ne.lat, bounds.ne.lon]],
+                {color, weight: 1, opacity: 0.7}
+            );
           } else {
-            asWKT = `POINT ( ${latlon['lon']} ${latlon['lat']} )`;
+            //TODO decide whether to use single marker or no
+            shape = L.marker(latlon, {
+              icon: new L.LocationDivIcon()
+            });
           }
-          const shape = _private.read(L, asWKT, bucket['doc_count'],);
-          shape._data = {docCount: bucket['doc_count'], key: bucket['key'], latlng: latlon};
+          shape._data = {docCount: bucket['doc_count'], key: geohash, latlng: latlon};
           shape.addTo(this.geoHashLayer);
         } catch (error) {
           console.log(error);
-        }
-      }
-    },
-    updateLayers(val) {
-      this.featuresLayer.clearLayers();
-      if (!val) return;
-      for (const item of val) {
-        if (item?.['_contentLocation']) {
-          try {
-            const shape = _private.read(L, item['_contentLocation'])
-            shape._data = toRaw(item);
-            // shape.addTo(featuresLayer);
-          } catch (error) {
-            console.log(error);
-          }
-        }
-        if (item?.['_spatialCoverage']) {
-          try {
-            const shape = _private.read(L, item['_spatialCoverage'])
-            shape._data = toRaw(item);
-            // shape.addTo(featuresLayer);
-          } catch (error) {
-            console.log(error);
-          }
         }
       }
     },
@@ -582,7 +572,7 @@ export default {
     async searchGeoHash({geohash}) {
       let boundingBox;
       if (geohash) {
-        const bounds = Geohash.bounds(geohash)
+        const bounds = Geohash.bounds(geohash);
         boundingBox = {
           topRight: {lat: bounds.ne.lat, lon: bounds.ne.lon},
           bottomLeft: {lat: bounds.sw.lat, lon: bounds.sw.lon}
@@ -612,15 +602,6 @@ export default {
       const viewport = this.leafletAggs;
       this.updateLayerBuckets(viewport?.buckets);
 
-    },
-    getBoundingBox(geohashString) {
-      const {latitude, longitude} = Geohash.decode(geohashString);
-      const bounds = Geohash.bounds(geohashString);
-      return {
-        sw: {lat: bounds[0], lon: bounds[1]},
-        ne: {lat: bounds[2], lon: bounds[3]},
-        center: {lat: latitude, lon: longitude}
-      };
     },
     // Approximate the radius in meters of a geohash
     geohashRadius(geohash) {
@@ -787,6 +768,9 @@ export default {
       } catch (e) {
         console.error(e);
       }
+    },
+    resetSearch() {
+      console.log('TODO: reset search');
     }
   }
 }
