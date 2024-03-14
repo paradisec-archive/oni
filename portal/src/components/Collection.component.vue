@@ -143,7 +143,7 @@ export default {
       id: null,
       config: this.$store.state.configuration.ui.collection,
       fields: this.$store.state.configuration.ui.main.fields,
-      helpers: this.$store.state.configuration.ui.helpers,
+      helpers: this.$store.state.configuration.ui.helpers || [],
       metadata: {},
       name: '',
       license: [],
