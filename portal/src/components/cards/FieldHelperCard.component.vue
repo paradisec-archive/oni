@@ -47,12 +47,11 @@ export default {
       this.loading = true;
       let id;
       if (this.meta.id) {
-        id = `https://purl.archive.org/language-data-commons/terms#${this.meta.id}`;
         const content = await this.$elasticService.single({index: 'vocabs', id});
         if (content && content['_source']) {
           const source = content['_source'];
           this.definition = source?.['rdfs:comment'];
-          this.url = id;
+          this.url = content._source['@id'] || content['_id'];
         } else {
           id = `schema:${this.meta.id}`;
           const content = await this.$elasticService.single({index: 'vocabs', _id: id});
