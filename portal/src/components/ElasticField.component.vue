@@ -16,7 +16,7 @@
          target="_blank" rel="nofollow noreferrer">
         <manku-icon :name="title" height="30">
           <template #notFound>
-          <span>
+          <span class="break-all">
             {{ name || id }}
           </span>
           </template>
