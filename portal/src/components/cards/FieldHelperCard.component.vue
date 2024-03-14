@@ -38,7 +38,7 @@ export default {
       loading: false,
       definition: '',
       url: '',
-      baseVocab: this.$store.state.configuration.ui?.helpers.baseVocab || ""
+      baseVocab: this.$store.state.configuration.ui?.baseVocab || ""
     }
   },
   mounted() {
