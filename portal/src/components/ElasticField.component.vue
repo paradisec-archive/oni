@@ -23,7 +23,7 @@
         </manku-icon>
       </a><br/>
     </template>
-    <template v-else-if="value">{{ value }}</template>
+    <template v-else-if="value"><span class="pr-1">{{ value }}</span></template>
     <template v-else>
       <p>
         {{ name }}
