@@ -12,7 +12,7 @@
     </template>
     <template v-else>
     <el-col :xs="24" :sm="24" :md="7" :lg="7" :xl="7" class="mt-1">
-      <span class="font-bold break-words break-all">{{ clean(meta?.name) }}</span>
+      <span class="font-bold break-words">{{ clean(meta?.name) }}</span>
       <span v-if="meta?.help"><FieldHelperCard :meta="meta?.help"/></span>
     </el-col>
     <el-col :xs="24" :sm="24" :md="17" :lg="17" :xl="17">

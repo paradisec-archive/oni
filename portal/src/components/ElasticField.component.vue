@@ -16,14 +16,14 @@
          target="_blank" rel="nofollow noreferrer">
         <manku-icon :name="title" height="30">
           <template #notFound>
-          <span>
+          <span class="break-all">
             {{ name || id }}
           </span>
           </template>
         </manku-icon>
       </a><br/>
     </template>
-    <template v-else-if="value">{{ value }}</template>
+    <template v-else-if="value"><div class="break-words">{{ value }}</div></template>
     <template v-else>
       <p>
         {{ name }}
