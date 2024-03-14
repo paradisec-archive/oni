@@ -49,7 +49,7 @@ export default {
       let id;
       if (this.meta.id) {
         id = `${this.baseVocab}${this.meta.id}`;
-        const content = await this.$elasticService.single({index: 'vocabs', id});
+        const content = await this.$elasticService.single({index: 'vocabs', _id: id});
         if (content && content['_source']) {
           const source = content['_source'];
           this.definition = source?.['rdfs:comment'];
