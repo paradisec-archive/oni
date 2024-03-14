@@ -284,54 +284,9 @@
         "displayHasPart": false
       }
     },
-    "helpers": [
-      {
-        "id": "@id",
-        "display": "ID",
-        "url": "",
-        "definition": "The identifier in LDaCA"
-      },
-      {
-        "id": "speaker",
-        "display": "Speaker",
-        "url": "https://github.com/Language-Research-Technology/language-data-node-tools/blob/master/ontology.md#speaker",
-        "definition": "The participant was a principal speaker in a resource that consists of a recording, a film, or a transcription of a recorded resource."
-      },
-      {
-        "id": "language",
-        "display": "Language",
-        "url": "https://schema.org/Language",
-        "definition": "Natural languages such as Spanish, Tamil, Hindi, English, etc."
-      },
-      {
-        "id": "linguisticGenre",
-        "display": "Linguistic Genre",
-        "url": "https://purl.archive.org/textcommons/terms#LinguisticGenre",
-        "definition": "Any form or type of communication in any mode with socially-agreed-upon conventions developed over time."
-      },
-      {
-        "id": "modality",
-        "display": "Modality",
-        "url": "https://purl.archive.org/textcommons/terms#ModalityValues",
-        "definition": ""
-      },
-      {
-        "id": "encodingFormat",
-        "display": "File Format",
-        "url": "https://schema.org/encodingFormat",
-        "definition": ""
-      },
-      {
-        "id": "annotationType",
-        "display": "Annotation Type",
-        "url": "https://schema.org/annotationType",
-        "definition": "Dear Data Team, please add description"
-      },
-      {
-        "id": "_collectionStack",
-        "display": "Collection Hierarchy"
-      }
-    ],
+    "helpers": {
+      "baseVocab": "https://w3id.org/ldac/terms#"
+    },
     "analytics": {
       "gaMeasurementId": "G-XXX"
     }

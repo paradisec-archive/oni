@@ -37,7 +37,8 @@ export default {
     return {
       loading: false,
       definition: '',
-      url: ''
+      url: '',
+      baseVocab: this.$store.state.configuration.ui?.helpers.baseVocab || ""
     }
   },
   mounted() {
@@ -47,11 +48,12 @@ export default {
       this.loading = true;
       let id;
       if (this.meta.id) {
+        id = `${this.baseVocab}${this.meta.id}`;
         const content = await this.$elasticService.single({index: 'vocabs', id});
         if (content && content['_source']) {
           const source = content['_source'];
           this.definition = source?.['rdfs:comment'];
-          this.url = content._source['@id'] || content['_id'];
+          this.url = id;
         } else {
           id = `schema:${this.meta.id}`;
           const content = await this.$elasticService.single({index: 'vocabs', _id: id});
