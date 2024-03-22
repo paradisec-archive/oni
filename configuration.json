@@ -16,7 +16,7 @@
     "help": {
       "aboutText": "This is an Oni Data Portal publication. This portal provides access to a repository of language data, it is provided by the Language Data Commons of Australia [LDaCA](<a href='https://ldaca.edu.au'>https://ldaca.edu.au</a>).",
       "helpUrl": "https://www.example.com",
-      "citationText": "CITE AS: Arkisto Platform. A project with co-investment from Australian Research Data Commons, The University of Queensland, The University of Melbourne, The University of Sydney, Monash University, First Languages Australia and AARNet."
+      "citationText": "CITE AS: Oni Platform. A project with co-investment from Australian Research Data Commons, The University of Queensland, The University of Melbourne, The University of Sydney, Monash University, First Languages Australia and AARNet."
     },
     "subHelpLinks": [
       {"name": "Example Link", "href":"https://www.example.com", "target":"_blank"}
@@ -90,7 +90,10 @@
         {"value": "asc", "label": "Ascending"},
         {"value": "desc", "label": "Descending"}
       ],
-      "defaultOrder": {"value": "desc", "label": "Descending"}
+      "defaultOrder": {"value": "desc", "label": "Descending"},
+      "searchDetails": [
+        {"field": "language", "label": "Language", "name": "language.name.@value"}
+      ]
     },
     "main": {
       "fields": [
@@ -281,54 +284,8 @@
         "displayHasPart": false
       }
     },
-    "helpers": [
-      {
-        "id": "@id",
-        "display": "ID",
-        "url": "",
-        "definition": "The identifier in LDaCA"
-      },
-      {
-        "id": "speaker",
-        "display": "Speaker",
-        "url": "https://github.com/Language-Research-Technology/language-data-node-tools/blob/master/ontology.md#speaker",
-        "definition": "The participant was a principal speaker in a resource that consists of a recording, a film, or a transcription of a recorded resource."
-      },
-      {
-        "id": "language",
-        "display": "Language",
-        "url": "https://schema.org/Language",
-        "definition": "Natural languages such as Spanish, Tamil, Hindi, English, etc."
-      },
-      {
-        "id": "linguisticGenre",
-        "display": "Linguistic Genre",
-        "url": "https://purl.archive.org/textcommons/terms#LinguisticGenre",
-        "definition": "Any form or type of communication in any mode with socially-agreed-upon conventions developed over time."
-      },
-      {
-        "id": "modality",
-        "display": "Modality",
-        "url": "https://purl.archive.org/textcommons/terms#ModalityValues",
-        "definition": ""
-      },
-      {
-        "id": "encodingFormat",
-        "display": "File Format",
-        "url": "https://schema.org/encodingFormat",
-        "definition": ""
-      },
-      {
-        "id": "annotationType",
-        "display": "Annotation Type",
-        "url": "https://schema.org/annotationType",
-        "definition": "Dear Data Team, please add description"
-      },
-      {
-        "id": "_collectionStack",
-        "display": "Collection Hierarchy"
-      }
-    ],
+    "helpers": [],
+    "baseVocab": "https://w3id.org/ldac/terms#",
     "analytics": {
       "gaMeasurementId": "G-XXX"
     }
@@ -617,9 +574,9 @@
       "indexRoutes": true
     },
     "conformsTo": {
-      "collection": "https://purl.archive.org/language-data-commons/profile#Collection",
-      "object": "https://purl.archive.org/language-data-commons/profile#Object",
-      "notebook": "https://purl.archive.org/language-data-commons/profile#Notebook"
+      "collection": "https://w3id.org/ldac/profile#Collection",
+      "object": "https://w3id.org/ldac/profile#Object",
+      "notebook": "https://w3id.org/ldac/profile#Notebook"
     },
     "skipByMatch": [
     ]

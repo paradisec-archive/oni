@@ -52,7 +52,7 @@ export default {
       meta: [],
       metadata: [],
       resolve: false,
-      helpers: this.$store.state.configuration.ui.helpers,
+      helpers: this.$store.state.configuration.ui.helpers || [],
       config: this.$store.state.configuration.ui.file
     }
   },

@@ -9,5 +9,6 @@ const vocabs = {
 
 (async () => {
   const index = new VocabsIndexer({elasticUrl: host, log: true});
+  await index.delete();
   await index.load({vocabs});
 })();

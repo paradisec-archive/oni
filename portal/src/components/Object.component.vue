@@ -118,7 +118,7 @@ export default {
       id: null,
       config: this.$store.state.configuration.ui.object,
       fields: this.$store.state.configuration.ui.main.fields,
-      helpers: this.$store.state.configuration.ui.helpers,
+      helpers: this.$store.state.configuration.ui.helpers || [],
       metadata: {},
       name: '',
       tops: [],
