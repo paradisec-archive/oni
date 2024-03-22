@@ -16,7 +16,7 @@
     "help": {
       "aboutText": "This is an Oni Data Portal publication. This portal provides access to a repository of language data, it is provided by the Language Data Commons of Australia [LDaCA](<a href='https://ldaca.edu.au'>https://ldaca.edu.au</a>).",
       "helpUrl": "https://www.example.com",
-      "citationText": "CITE AS: Arkisto Platform. A project with co-investment from Australian Research Data Commons, The University of Queensland, The University of Melbourne, The University of Sydney, Monash University, First Languages Australia and AARNet."
+      "citationText": "CITE AS: Oni Platform. A project with co-investment from Australian Research Data Commons, The University of Queensland, The University of Melbourne, The University of Sydney, Monash University, First Languages Australia and AARNet."
     },
     "subHelpLinks": [
       {"name": "Example Link", "href":"https://www.example.com", "target":"_blank"}
@@ -571,9 +571,9 @@
       "indexRoutes": true
     },
     "conformsTo": {
-      "collection": "https://purl.archive.org/language-data-commons/profile#Collection",
-      "object": "https://purl.archive.org/language-data-commons/profile#Object",
-      "notebook": "https://purl.archive.org/language-data-commons/profile#Notebook"
+      "collection": "https://w3id.org/ldac/profile#Collection",
+      "object": "https://w3id.org/ldac/profile#Object",
+      "notebook": "https://w3id.org/ldac/profile#Notebook"
     },
     "skipByMatch": [
     ]
