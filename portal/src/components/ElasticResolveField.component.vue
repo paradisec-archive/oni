@@ -1,5 +1,5 @@
 <template>
-  <template v-if="name === '_contentLocation' || name === '_spatialCoverage'">
+  <template v-if="name === '_contentLocation'">
     {{field}}
     <LeafletMap class="h-72 flex grow min-w-[200px] mr-4"
                 :modelValue="fieldMap"

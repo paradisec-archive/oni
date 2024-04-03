@@ -235,8 +235,10 @@ export default {
       advancedSearch: false,
       searchInput: '',
       clear: false,
-      filters: [],
-      newSearch: true
+      filters: {},
+      newSearch: true,
+      selectedOperation: 'must',
+      searchFields: this.$store.state.configuration.ui.searchFields, // Comes from merged API configuration
     }
   },
   setup() {
@@ -303,7 +305,11 @@ export default {
         if (this.$route.query.a) {
           this.updateAdvancedQueries();
         }
-        await this.search();
+        let precision;
+        if (this.$route.query.p) {
+          precision = this.$route.query.p;
+        }
+        await this.search({precision});
       }
       this.loading = false;
     }
@@ -421,9 +427,10 @@ export default {
         this.markerSelected = false;
         const data = e.layer?._data;
         // TODO: ask people if they like this behaviour
-        if (data?.docCount > 10) {
+        const currentZoom = this.map.getZoom();
+        console.log("currentZoom", currentZoom);
+        if (data?.docCount > 10 && currentZoom <= 10) {
           //if there are more than X zoom in
-          const newZoom = this.map.getZoom();
           let nextZoom = 1;
           if (data?.docCount >= 30) {
             nextZoom = 4;
@@ -431,7 +438,7 @@ export default {
           if (data?.docCount >= 10) {
             nextZoom = 2;
           }
-          this.map.setView(e.latlng, newZoom + nextZoom);
+          this.map.setView(e.latlng, currentZoom + nextZoom);
         } else {
           if (e.layer?._data) {
             const data = e.layer?._data;
@@ -530,26 +537,30 @@ export default {
         </a>
       `;
         }
-        const innerHHTML = `
+      }
+      let innerHHTML = `
         <div>
             <h3 class="text-2xl">
             <a href="${href}">${title}</a></h3>
-            <h4>Type: ${type}</h4>
+            <h4>Type: ${type}</h4>`;
+      if (innerHTMLMemberOf) {
+        innerHHTML += `
             <div :align="'middle'" v-if="" class="">
             <p class="font-normal text-gray-700">
                 Member of:&nbsp;
-            </p>
             <div class="flex flex-wrap">
                 ${innerHTMLMemberOf}
             </div>
+             </p>`;
+      }
+      innerHHTML += `
           <div>
             <a href="${href}">See more</a>
           </div>
         </div>
         <hr class="divide-y divide-gray-500"/>
       `;
-        return innerHHTML;
-      }
+      return innerHHTML;
     },
     async search({precision}) {
       //console.log('search');
@@ -559,7 +570,14 @@ export default {
           topRight: {lat: bounds._northEast.lat, lon: bounds._northEast.lng},
           bottomLeft: {lat: bounds._southWest.lat, lon: bounds._southWest.lng}
         }
-        const items = await this.$elasticService.map({init: false, boundingBox, precision});
+        const items = await this.$elasticService.map({
+          init: false,
+          boundingBox, precision,
+          multi: this.searchInput,
+          filters: toRaw(this.filters),
+          searchFields: this.searchFields,
+          operation: this.selectedOperation,
+        });
         this.leafletAggs = items.aggregations['_geohash'];
         this.aggregations = this.populateAggregations(items.aggregations);
         const total = items.hits?.total;
@@ -698,8 +716,8 @@ export default {
     enableAdvancedSearch() {
       alert('not enabled for Map Search yet, coming soon!')
     },
-    onInputChange() {
-
+    onInputChange(value) {
+      this.searchInput = value;
     },
     async updateRoutes({queries, updateFilters}) {
       let filters;

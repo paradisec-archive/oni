@@ -291,6 +291,11 @@
     }
   },
   "api": {
+    "structural": {
+      "host": "https://catalog.paradisec.org.au",
+      "key": "XXX",
+      "secret": "XXX"
+    },
     "bootstrap": false,
     "log": {
       "logFolder": "/opt/storage/oni/logs"
@@ -543,7 +548,7 @@
           "_contentLocation": {
             "type": "geo_shape"
           },
-          "_spatialCoverage": {
+          "_centroid": {
             "type": "geo_shape"
           },
           "@id": {

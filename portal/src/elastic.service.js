@@ -171,7 +171,7 @@ export default class ElasticService {
     }
     const esbQuery = esb.requestBodySearch().query(boolQueryObj)
     const query = esbQuery.toJSON().query;
-    // console.log(JSON.stringify({query: query}))
+    console.log(JSON.stringify({query: query}))
     return query;
   }
 
@@ -296,21 +296,23 @@ export default class ElasticService {
 
   termsQuery(filters) {
     let filterTerms = [];
-    //console.log(JSON.stringify(filters));
-    for (let bucket of Object.keys(filters)) {
-      if (filters[bucket].length > 0 || (filters[bucket]?.v && filters[bucket].v.length > 0)) {
-        //TODO: send the type of field in the filters
-        let field = '';
-        let type;
-        if (!filters[bucket]?.t) {
-          field = bucket.concat('.keyword');
-        } else {
-          type = filters[bucket]?.t;
-          field = bucket.concat('.' + type);
+    if (!isEmpty(filters)) {
+      //console.log(JSON.stringify(filters));
+      for (let bucket of Object.keys(filters)) {
+        if (filters[bucket].length > 0 || (filters[bucket]?.v && filters[bucket].v.length > 0)) {
+          //TODO: send the type of field in the filters
+          let field = '';
+          let type;
+          if (!filters[bucket]?.t) {
+            field = bucket.concat('.keyword');
+          } else {
+            type = filters[bucket]?.t;
+            field = bucket.concat('.' + type);
+          }
+          let values = filters[bucket]?.v || filters[bucket];
+          //console.log(values)
+          filterTerms.push(esb.termsQuery(field, values));
         }
-        let values = filters[bucket]?.v || filters[bucket];
-        //console.log(values)
-        filterTerms.push(esb.termsQuery(field, values));
       }
     }
     return filterTerms;
@@ -345,15 +347,15 @@ export default class ElasticService {
     return qS;
   }
 
-  async map({init = true, boundingBox, precision = 5}) {
+  async map({init = true, boundingBox, precision = 5, multi, searchFields, filters, operation}) {
     const httpService = new HTTPService({router: this.router, loginPath: '/login'});
     let route = this.searchRoute + this.indexRoute;
     let sorting;
     let body = {}
     const queryString = {match_all: {}}
-    const fields = ['_contentLocation', '_spatialCoverage'];
+    const fields = ['_centroid'];
     // const geoAggs = esb.geoHashGridAggregation('viewport', fields[0]);
-    const geoAggs = esb.geoHashGridAggregation('_geohash', '_contentLocation')
+    const geoAggs = esb.geoHashGridAggregation('_geohash', '_centroid')
       .precision(precision);
     let topRight = {}
     let bottomLeft = {}
@@ -365,37 +367,46 @@ export default class ElasticService {
       bottomLeft = esb.geoPoint()
         .lat(-90)
         .lon(-180);
-      geoQuery = esb.geoBoundingBoxQuery().field('_contentLocation')
+      geoQuery = esb.geoBoundingBoxQuery().field('_centroid')
         .topRight(topRight)
         .bottomLeft(bottomLeft);
     } else {
       let tR = boundingBox.topRight;
       tR = fixMalformedCoordinates(tR);
-      // if (tR.lat > 90) tR.lat = 90;
-      // if (tR.lat < -90) tR.lat = -90;
-      // if (tR.lon > 180) tR.lon = 180;
-      // if (tR.lon < -180) tR.lon = -180;
       topRight = esb.geoPoint()
         .lat(tR.lat)
         .lon(tR.lon);
       let bL = boundingBox.bottomLeft;
       bL = fixMalformedCoordinates(bL);
-      // if (bL.lat > 90) bL.lat = 90;
-      // if (bL.lat < -90) bL.lat = -90;
-      // if (bL.lon > 180) bL.lon = 180;
-      // if (bL.lon < -180) bL.lon = -180;
       bottomLeft = esb.geoPoint()
         .lat(bL.lat)
         .lon(bL.lon)
-      geoQuery = esb.geoBoundingBoxQuery().field('_contentLocation')
+      geoQuery = esb.geoBoundingBoxQuery().field('_centroid')
         .topRight(topRight)
         .bottomLeft(bottomLeft);
     }
     const aggs = geoAggs.toJSON();
 
     body.aggs = {...aggs, ...this.aggs};
-    const query = geoQuery.toJSON();
-    body.query = {...query};
+    const geoQueryJson = geoQuery.toJSON();
+    body.query = geoQueryJson;
+    // const boolQuery = this.boolQuery({
+    //   searchQuery: multi,
+    //   fields: searchFields,
+    //   filters,
+    //   operation
+    // });
+    // //boolQuery.filter.push(geoQueryJson);
+    // body.query = {};
+    // body.query = boolQuery;
+    // if(!body.query.bool){
+    //   body.query.bool = {};
+    // }
+    // if (!body.query.bool?.filter) {
+    //   body.query.bool.filter = [geoQueryJson];
+    // } else {
+    //   body.query.bool.filter.push(geoQueryJson);
+    // }
     body.size = 10;
     console.log(body);
     console.log(JSON.stringify(body));
