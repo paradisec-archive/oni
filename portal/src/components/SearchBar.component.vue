@@ -49,7 +49,7 @@ import {Close} from '@element-plus/icons-vue'
 import {isEmpty} from 'lodash';
 
 export default {
-  props: ['searchInput', 'clearSearch', 'filters', 'search', 'fields', 'showFields', 'enableAdvancedSearch', 'path'],
+  props: ['searchInput', 'clearSearch', 'filters', 'search', 'fields', 'showFields', 'enableAdvancedSearch', 'searchPath'],
   components: {},
   created() {
     this.searchQuery = this.searchInput;
@@ -76,9 +76,10 @@ export default {
         console.log(this.$route.query.f);
         query = {...query, f: this.$route.query.f};
       }
-      if (!isEmpty(query)) {
-        await this.$router.push({path: this.path, query});
-      }
+      //Why did we have this if?
+      //if (!isEmpty(query)) {
+        await this.$router.push({path: this.searchPath, query});
+      //}
     },
     async searchInputField(e) {
       if (typeof e === 'string') {

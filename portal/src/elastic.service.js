@@ -127,7 +127,7 @@ export default class ElasticService {
     }
 
     // const query = this.boolQuery({ fields: this.fields, filters:[] });
-    console.log(JSON.stringify(body.query));
+    //console.log(JSON.stringify(body.query));
     // body.highlight = this.highlights(this.highlightFields);
     // body.query.bool.must.push(query);
 
@@ -137,7 +137,7 @@ export default class ElasticService {
       throw new Error(response.statusText);
     } else {
       const results = await response.json();
-      console.log(first(results?.hits?.hits));
+      //console.log(first(results?.hits?.hits));
       return first(results?.hits?.hits);
     }
   }
@@ -167,11 +167,11 @@ export default class ElasticService {
       let phraseQuery = esb.multiMatchQuery(multiFields, searchQuery).type('best_fields');
       boolQueryObj = switchFilter(operation, boolQueryObj, phraseQuery, filterTerms);
     } else if (isEmpty(searchQuery) && filterTerms.length <= 0) {
-      boolQueryObj = esb.matchAllQuery();
+      boolQueryObj = esb.boolQuery().must(esb.matchAllQuery());
     }
     const esbQuery = esb.requestBodySearch().query(boolQueryObj)
     const query = esbQuery.toJSON().query;
-    console.log(JSON.stringify({query: query}))
+    //console.log(JSON.stringify({query: query}))
     return query;
   }
 
@@ -352,7 +352,6 @@ export default class ElasticService {
     let route = this.searchRoute + this.indexRoute;
     let sorting;
     let body = {}
-    const queryString = {match_all: {}}
     const fields = ['_centroid'];
     // const geoAggs = esb.geoHashGridAggregation('viewport', fields[0]);
     const geoAggs = esb.geoHashGridAggregation('_geohash', '_centroid')
@@ -389,27 +388,24 @@ export default class ElasticService {
 
     body.aggs = {...aggs, ...this.aggs};
     const geoQueryJson = geoQuery.toJSON();
-    body.query = geoQueryJson;
-    // const boolQuery = this.boolQuery({
-    //   searchQuery: multi,
-    //   fields: searchFields,
-    //   filters,
-    //   operation
-    // });
-    // //boolQuery.filter.push(geoQueryJson);
-    // body.query = {};
-    // body.query = boolQuery;
-    // if(!body.query.bool){
-    //   body.query.bool = {};
-    // }
-    // if (!body.query.bool?.filter) {
-    //   body.query.bool.filter = [geoQueryJson];
-    // } else {
-    //   body.query.bool.filter.push(geoQueryJson);
-    // }
+    const geoBoundingBox = geoQueryJson.geo_bounding_box;
+    const boolQuery = this.boolQuery({
+      searchQuery: multi,
+      fields: searchFields,
+      filters,
+      operation
+    });
+    //Its a hack for now!
+    if (!boolQuery.bool.filter) boolQuery.bool.filter = {}
+    if(boolQuery.bool.filter.terms) {
+      boolQuery.bool.must = {terms: boolQuery.bool.filter.terms};
+    }
+    boolQuery.bool.filter = {geo_bounding_box: geoBoundingBox};
+    body.query = boolQuery;
     body.size = 10;
-    console.log(body);
-    console.log(JSON.stringify(body));
+    console.log("body", JSON.stringify(body));
+    //console.log(body);
+    //console.log(JSON.stringify(body));
     let response = await httpService.post({route, body});
     if (response.status !== 200) {
       //httpService.checkAuthorised({status: response.status});

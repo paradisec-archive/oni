@@ -10,7 +10,7 @@
                     class="grow justify-items-center items-center m-4"
                     @advanced-search="enableAdvancedSearch" :enableAdvancedSearch="advancedSearch"
                     @updateSearchInput="onInputChange"
-                    @basicSearch="updateRoutes" path="'search'"/>
+                    @basicSearch="updateRoutes" :searchPath="'search'"/>
       </div>
       <div class="flex-1 w-full min-w-full bg-white mt-4 mb-4 border-b-2">
         <div class="py-3 px-2">

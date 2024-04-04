@@ -1,6 +1,6 @@
 <template>
   <el-row>
-    <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="7" offset="0"
+    <el-col :xs="24" :sm="9" :md="9" :lg="7" :xl="7" :offset="0"
             class="h-full max-h-screen overflow-y-auto flex flex-col h-screen p-2">
       <div v-show="!advancedSearch"
            class="flex-1 w-full min-w-full bg-white rounded mt-4 mb-4 shadow-md border">
@@ -9,7 +9,7 @@
                     class="grow justify-items-center items-center m-4"
                     @advanced-search="enableAdvancedSearch" :enableAdvancedSearch="advancedSearch"
                     @updateSearchInput="onInputChange"
-                    @basicSearch="updateRoutes" path="'map'"/>
+                    @basicSearch="updateRoutes" :searchPath="'map'"/>
       </div>
       <div class="flex-1 w-full min-w-full bg-white mt-4 mb-4 border-b-2">
         <div class="py-3 px-2">
@@ -56,12 +56,33 @@
         </ul>
       </div>
     </el-col>
-    <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="17" offset="0"
+    <el-col :xs="24" :sm="15" :md="15" :lg="17" :xl="17" :offset="0"
             class="max-h-screen overflow-y-auto flex flex-row h-screen p-2 px-3">
       <div class="pr-0">
         <div class="top-20 z-10 bg-white pb-3">
           <el-row :align="'middle'" class="mt-4 pb-2 border-0 border-b-[2px] border-solid border-red-700 text-2xl">
             <el-col :span="20" class="m-2" :xs="18" :sm="17" :md="17" :lg="20" :xl="18">
+              <el-button-group class="mr-1">
+                <el-button type="warning" v-show="changedFilters" @click="updateRoutes({updateFilters: true})">Apply
+                  Filters
+                </el-button>
+              </el-button-group>
+              <span class="my-1 mr-1" v-show="!changedFilters" v-if="!isEmpty(this.filters)">Filtering by:</span>
+              <el-button-group v-show="!changedFilters"
+                               class="my-1 mr-2" v-for="(filter, filterKey) of this.filters" :key="filterKey"
+                               v-model="this.filters">
+                <el-button plain>{{ clean(filterKey) }}</el-button>
+                <el-button v-if="filter && filter.length > 0" v-for="f of filter" :key="f" color="#626aef" plain
+                           @click="this.updateFilters({clear: {f, filterKey }})" class="text-2xl">
+                  {{ clean(f) }}
+                  <el-icon class="el-icon--right">
+                    <CloseBold/>
+                  </el-icon>
+                </el-button>
+              </el-button-group>
+              <el-button-group class="mr-1">
+                <el-button v-show="!isEmpty(this.filters)" @click="clearFilters()">Clear Filters</el-button>
+              </el-button-group>
               <span id="total_results" class="my-1 mr-2" v-show="total">Total: <span>{{ total }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
               <span v-if="errorText">error: {{ errorText }}</span>
             </el-col>
@@ -76,6 +97,30 @@
       <div id="map" class="flex-1 h-[calc(100vh-200px)]" v-once></div>
     </el-col>
   </el-row>
+  <el-dialog v-model="errorDialogVisible" width="40%" center>
+    <el-alert title="Error" type="warning" :closable="false">
+      <p class="break-normal">{{ this.errorDialogText }}</p>
+    </el-alert>
+    <template #footer>
+        <span class="dialog-footer">
+          <el-button type="primary" @click="errorDialogVisible = false">Close</el-button>
+        </span>
+    </template>
+  </el-dialog>
+  <el-row v-show="changedFilters"
+          class="bg-white rounded m-4 p-4 px-8 shadow-md border"
+          role="alert"
+          style="bottom: 16px; z-index: 2044; position: fixed">
+    <el-row class="p-2">
+      <div class="w-full">
+        <el-button-group class="self-center">
+          <el-button @click="clearFilters()">Clear Filters</el-button>
+          <el-button type="warning" @click="updateRoutes({updateFilters: true})">Apply Filters</el-button>
+        </el-button-group>
+      </div>
+    </el-row>
+  </el-row>
+  <el-row></el-row>
 </template>
 <script>
 import "leaflet/dist/leaflet.css";
@@ -84,6 +129,7 @@ import * as L from "leaflet";
 import "leaflet.path.drag";
 import "leaflet-editable";
 import {GestureHandling} from "leaflet-gesture-handling";
+import {CloseBold} from "@element-plus/icons-vue";
 import {
   reactive,
   computed,
@@ -100,7 +146,20 @@ import {first, isEmpty, orderBy} from 'lodash';
 import SearchDetailElement from './SearchDetailElement.component.vue';
 import Geohash from "latlon-geohash";
 import SearchAggs from "./SearchAggs.component.vue";
+import {putLocalStorage, getLocalStorage, removeLocalStorage} from '@/storage';
+
 import {v4 as uuid} from 'uuid';
+
+//This is to fix a leaflet bug
+//https://salesforce.stackexchange.com/questions/180977/leaflet-error-when-zoom-after-close-popup-in-lightning-component
+L.Popup.prototype._animateZoom = function (e) {
+  if (!this._map) {
+    return
+  }
+  var pos = this._map._latLngToNewLayerPoint(this._latlng, e.zoom, e.center),
+      anchor = this._getAnchor()
+  L.DomUtil.setPosition(this._container, pos.add(anchor))
+}
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -128,12 +187,14 @@ L.SearchControl = L.Control.extend({
     //control position - allowed: 'topleft', 'topright', 'bottomleft', 'bottomright'
   },
   onAdd: function (map) {
-    var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-bottomcenter');
-    var button = L.DomUtil.create('a', '', container);
-    button.innerHTML = '<div><h3 class="text-2xl">S</h3></div>';
+    const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-bottomcenter');
+    const button = L.DomUtil.create('a', '', container);
+    button.innerHTML = '<div><h3 class="text-2xl">R</h3></div>';
     button.className = 'leaflet-control-button-search'
     L.DomEvent.disableClickPropagation(button);
-    //L.DomEvent.on(button, 'click', this._click);
+    L.DomEvent.on(button, 'click', () => {
+      alert('TODO reset search')
+    });
     container.title = "Search Area";
     return container;
   }
@@ -213,7 +274,8 @@ export default {
     SearchBar: defineAsyncComponent(() =>
         import("@/components/SearchBar.component.vue")
     ),
-    SearchAggs
+    SearchAggs,
+    CloseBold
   },
   props: {
     modelValue: {type: Array},
@@ -227,7 +289,7 @@ export default {
       item: null,
       map: null,
       tooltipLayers: null,
-      featuresLayer: null,
+      //featuresLayer: null,
       geoHashLayer: null,
       markerSelected: false,
       leafletAggs: [],
@@ -239,6 +301,23 @@ export default {
       newSearch: true,
       selectedOperation: 'must',
       searchFields: this.$store.state.configuration.ui.searchFields, // Comes from merged API configuration
+      currentPrecision: undefined,
+      changedFilters: false,
+      errorDialogVisible: false,
+      errorDialogText: '',
+      boundingBox: {
+        "topRight": {
+          "lat": 37.160316546736766,
+          "lon": -174.19921875
+        },
+        "bottomLeft": {
+          "lat": -69.90011762668541,
+          "lon": 85.60546875
+        },
+        bottomRight: {lat: -11.523088, lon: 162.649886},
+        topLeft: {lat: -42.811522, lon: 108.649010}
+      },
+      zoomLevel: 9
     }
   },
   setup() {
@@ -260,7 +339,7 @@ export default {
   },
   async updated() {
     //console.log('map updated');
-    if (this.map && this.featuresLayer && this.geoHashLayer) {
+    if (this.map && this.geoHashLayer) {
       this.updateLayerBuckets(this.buckets);
       this.initControls();
     }
@@ -276,23 +355,6 @@ export default {
     }
   },
   watch: {
-    'buckets': {
-      async handler(val) {
-        // if (this.geoHashLayer) {
-        //   console.log('updateLayerBuckets');
-        //   this.updateLayerBuckets(val);
-        // }
-      },
-      flush: 'post',
-      immediate: true
-    },
-    'modelValue': {
-      async handler(val) {
-        //todo: compare new values to existing values, only update when there is difference
-      },
-      flush: 'post',
-      immediate: true
-    },
     async '$route.query'() {
       this.loading = true;
       if (this.$route.query.s) {
@@ -305,23 +367,82 @@ export default {
         if (this.$route.query.a) {
           this.updateAdvancedQueries();
         }
-        let precision;
         if (this.$route.query.p) {
-          precision = this.$route.query.p;
+          this.currentPrecision = this.$route.query.p;
         }
-        await this.search({precision});
+        if (this.$route.query.bb) {
+          this.boundingBox = JSON.parse(decodeURIComponent(this.$route.query.bb));
+        }
+        if (this.$route.query.z) {
+          this.zoomLevel = this.$route.query.z;
+        }
+        await this.search();
       }
       this.loading = false;
     }
   },
   methods: {
+    isEmpty,
+    async created() {
+      console.log('created');
+      this.isStart = true;
+      await this.updateFilters({});
+      if (this.$route.query.q) {
+        this.searchInput = this.$route.query.q;
+      }
+      if (this.$route.query.a) {
+        this.updateAdvancedQueries();
+      } else {
+        this.advancedSearch = false;
+        removeLocalStorage({key: 'advancedQueries'});
+      }
+      this.loading = true;
+      // const aggregations = await this.$elasticService.multi({
+      //   multi: '',
+      //   filters: {},
+      //   sort: this.sorting[0].value,
+      //   order: 'desc',
+      //   operation: 'must',
+      //   pageSize: 10,
+      //   searchFrom: 0
+      // });
+      // this.aggregations = this.populateAggregations(aggregations['aggregations']);
+      await this.search();
+      this.loading = false;
+      putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
+    },
+    async mounted() {
+      console.log('mounted');
+      await this.updateFilters({});
+      if (this.$route.query.o) {
+        this.selectedOperation = this.$route.query.o;
+      }
+      if (!this.$route.query.sf) {
+        this.searchFields = this.$store.state.configuration.ui.searchFields;
+      }
+      if (this.$route.query.a) {
+        this.updateAdvancedQueries()
+      } else {
+        this.advancedSearch = false;
+      }
+    },
+    async updated() {
+      console.log('updated');
+      if (this.$route.query.q) {
+        this.advancedSearch = false;
+      }
+      // await this.updateFilters({});
+      putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
+    },
     initMap() {
       this.searchFields = this.$store.state.configuration.ui.searchFields;
-      this.featuresLayer = L.featureGroup();
+      //this.featuresLayer = L.featureGroup();
       this.geoHashLayer = L.featureGroup();
       this.tooltipLayers = L.layerGroup()
       this.map = L.map("map", {
-        gestureHandling: true
+        gestureHandling: true,
+        minZoom: 3, //Why does it stop working below 3?
+        maxZoom: 18 //18 is the max
       });
       //TODO: pass this via config. Center location and zoom level
       this.map.setView([-25, 134], 3);
@@ -329,7 +450,7 @@ export default {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
       }).addTo(this.map);
       L.control.scale().addTo(this.map);
-      this.featuresLayer.addTo(this.map);
+      //this.featuresLayer.addTo(this.map);
       this.geoHashLayer.addTo(this.map);
       this.tooltipLayers.addTo(this.map);
       const control = new L.SearchControl();
@@ -387,32 +508,28 @@ export default {
       }
     },
     initControls() {
-      // console.log(featuresLayer.getLayers());
-      //const viewport = this.viewport?.bounds;
-      //TODO: give this INIT via config
-      const viewport = {
-        bottom_right: {lat: -11.523088, lon: 162.649886},
-        top_left: {lat: -42.811522, lon: 108.649010}
-      };
-      let bounds;
-      if (viewport && viewport.bottom_right && viewport.top_left) {
-        var southwest = L.latLng(viewport.bottom_right.lat, viewport.bottom_right.lon);
-        var northeast = L.latLng(viewport.top_left.lat, viewport.top_left.lon);
-        bounds = L.latLngBounds(southwest, northeast);
-      } else if (this.geoHashLayer) {
-        bounds = this.geoHashLayer.getBounds();
-        if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: 9});
-      } else {
-        bounds = this.featuresLayer.getBounds();
-        if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: 9});
-      }
-      if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: 9});
+      // if (this.$route.query.p) {
+      //   this.currentPrecision = parseInt(this.$route.query.p);
+      // }
+      // if (this.$route.query.bb) {
+      //   this.boundingBox = toRaw(JSON.parse(decodeURIComponent(this.$route.query.bb)));
+      //   this.setMapBounds()
+      // }
+      // if (this.$route.query.z) {
+      //   this.zoomLevel = parseInt(this.$route.query.z);
+      // }
+      const topLeft = L.latLng(this.boundingBox.topLeft);
+      const bottomRight = L.latLng(this.boundingBox.bottomRight);
+      const bounds = L.latLngBounds(bottomRight, topLeft);
+      console.log("bounds", JSON.stringify(bounds))
+      if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: this.zoomLevel});
 
       this.map.on('load', async (e) => {
         await this.searchEvent({clearPopup: false});
       });
 
       this.map.on('zoomend', async (e) => {
+        console.log("zoomend", e)
         await this.searchEvent({clearPopup: true});
       });
 
@@ -427,9 +544,9 @@ export default {
         this.markerSelected = false;
         const data = e.layer?._data;
         // TODO: ask people if they like this behaviour
-        const currentZoom = this.map.getZoom();
-        console.log("currentZoom", currentZoom);
-        if (data?.docCount > 10 && currentZoom <= 10) {
+        this.zoomLevel = this.map.getZoom();
+        console.log("currentZoom", this.zoomLevel);
+        if (data?.docCount > 10 && this.zoomLevel <= 10) {
           //if there are more than X zoom in
           let nextZoom = 1;
           if (data?.docCount >= 30) {
@@ -438,19 +555,31 @@ export default {
           if (data?.docCount >= 10) {
             nextZoom = 2;
           }
-          this.map.setView(e.latlng, currentZoom + nextZoom);
+          this.map.setView(e.latlng, this.zoomLevel + nextZoom);
         } else {
           if (e.layer?._data) {
             const data = e.layer?._data;
             //TODO: get the one
             const result = await this.searchGeoHash({geohash: data.key});
             const hits = document.createElement('div');
+            const total = result['hits']['total'];
             for (let hit of result['hits']['hits']) {
               const newDiv = document.createElement('div');
-              newDiv.innerHTML = this.getInnerHTMLTooltip(hit['_source']);
+              newDiv.innerHTML = this.getInnerHTMLTooltip(hit['_source'], total);
               hits.appendChild(newDiv);
             }
-
+            const totalDiv = document.createElement('div');
+            totalDiv.innerHTML = `
+            <div class="m-2">
+              <p>Total: ${total?.value}</p>
+            </div>
+            `;
+            hits.appendChild(totalDiv);
+            if (total?.value > 10) {
+              const moreResultsDiv = document.createElement('div');
+              moreResultsDiv.innerHTML = `<p><a href="/search">Show More Results (TODO)</a></p>`;
+              hits.appendChild(moreResultsDiv)
+            }
             const tooltip = new L.ClickableTooltip({
               direction: 'right',
               permanent: false,
@@ -466,27 +595,27 @@ export default {
         }
       });
 
-      this.featuresLayer.on('click', (e) => {
-        //console.log('featuresLayer click', e);
-        //L.DomEvent.stop(e);
-        let innerHHTML = '';
-        let item = null;
-        this.markerSelected = false;
-        if (e.layer?._data) {
-          item = e.layer._data;
-          innerHHTML = this.getInnerHTMLTooltip(item);
-          const tooltip = new L.ClickableTooltip({
-            direction: 'center',
-            permanent: false,
-            noWrap: true,
-            opacity: 1
-          });
-          tooltip.setContent(innerHHTML);
-          tooltip.setLatLng(e.latlng);
-          tooltip.addTo(this.map);
-          this.markerSelected = true;
-        }
-      });
+      //   this.featuresLayer.on('click', (e) => {
+      //     //console.log('featuresLayer click', e);
+      //     //L.DomEvent.stop(e);
+      //     let innerHHTML = '';
+      //     let item = null;
+      //     this.markerSelected = false;
+      //     if (e.layer?._data) {
+      //       item = e.layer._data;
+      //       innerHHTML = this.getInnerHTMLTooltip(item);
+      //       const tooltip = new L.ClickableTooltip({
+      //         direction: 'center',
+      //         permanent: false,
+      //         noWrap: true,
+      //         opacity: 1
+      //       });
+      //       tooltip.setContent(innerHHTML);
+      //       tooltip.setLatLng(e.latlng);
+      //       tooltip.addTo(this.map);
+      //       this.markerSelected = true;
+      //     }
+      //   });
     },
     open(route) {
       this.$router.push({path: route});
@@ -538,13 +667,13 @@ export default {
       `;
         }
       }
-      let innerHHTML = `
+      let innerHTML = `
         <div>
             <h3 class="text-2xl">
             <a href="${href}">${title}</a></h3>
             <h4>Type: ${type}</h4>`;
       if (innerHTMLMemberOf) {
-        innerHHTML += `
+        innerHTML += `
             <div :align="'middle'" v-if="" class="">
             <p class="font-normal text-gray-700">
                 Member of:&nbsp;
@@ -553,55 +682,69 @@ export default {
             </div>
              </p>`;
       }
-      innerHHTML += `
+      innerHTML += `
           <div>
             <a href="${href}">See more</a>
           </div>
         </div>
         <hr class="divide-y divide-gray-500"/>
       `;
-      return innerHHTML;
+      return innerHTML;
     },
-    async search({precision}) {
+    async search() {
       //console.log('search');
-      const bounds = this.map.getBounds();
-      if (bounds.isValid()) {
-        const boundingBox = {
-          topRight: {lat: bounds._northEast.lat, lon: bounds._northEast.lng},
-          bottomLeft: {lat: bounds._southWest.lat, lon: bounds._southWest.lng}
+      if (isEmpty(this.boundingBox)) {
+        this.setMapBounds();
+      }
+      if (this.map.getZoom() !== this.zoomLevel) {
+        this.map.setZoom(this.zoomLevel);
+      }
+      this.changedFilters = false;
+      let filters = {};
+      if (!isEmpty(this.filters)) {
+        filters = this.filters;
+      } else {
+        filters = {};
+      }
+      const items = await this.$elasticService.map({
+        init: false,
+        boundingBox: this.boundingBox,
+        precision: this.currentPrecision,
+        multi: this.searchInput,
+        filters: toRaw(this.filters),
+        searchFields: this.searchFields,
+        operation: this.selectedOperation,
+      });
+      this.leafletAggs = items.aggregations['_geohash'];
+      const viewport = this.leafletAggs;
+      this.updateLayerBuckets(viewport?.buckets);
+      this.aggregations = this.populateAggregations(items.aggregations);
+      const total = items.hits?.total;
+      this.total = total?.value || 0;
+      return items;
+    },
+    async searchGeoHash({geohash}) {
+      if (geohash) {
+        const bounds = Geohash.bounds(geohash);
+        this.boundingBox = {
+          topRight: {lat: bounds.ne.lat, lon: bounds.ne.lon},
+          bottomLeft: {lat: bounds.sw.lat, lon: bounds.sw.lon}
         }
+        // const items = await this.$elasticService.map({init: false, boundingBox});
         const items = await this.$elasticService.map({
           init: false,
-          boundingBox, precision,
+          boundingBox: this.boundingBox,
           multi: this.searchInput,
           filters: toRaw(this.filters),
           searchFields: this.searchFields,
           operation: this.selectedOperation,
-        });
-        this.leafletAggs = items.aggregations['_geohash'];
-        this.aggregations = this.populateAggregations(items.aggregations);
-        const total = items.hits?.total;
-        this.total = total?.value || 0;
-        return items;
-      } else {
-        return [];
-      }
-    },
-    async searchGeoHash({geohash}) {
-      let boundingBox;
-      if (geohash) {
-        const bounds = Geohash.bounds(geohash);
-        boundingBox = {
-          topRight: {lat: bounds.ne.lat, lon: bounds.ne.lon},
-          bottomLeft: {lat: bounds.sw.lat, lon: bounds.sw.lon}
-        }
-        const items = await this.$elasticService.map({init: false, boundingBox});
+        })
         return items;
       }
     },
     calculatePrecision(zoomLevel) {
-      // This is a way to match zoom levels in leaflet vs precision levels in elastic geoHashGridAggregation
-      let precision = zoomLevel / 2;
+      // This is a way to match zoom levels in leaflet vs precision levels in elastic/opensearch geoHashGridAggregation
+      let precision = Math.floor(parseInt(zoomLevel) / 2);
       if (precision < 1) {
         precision = 1;
       } else if (precision > 7) {
@@ -613,13 +756,11 @@ export default {
       if (clearPopup) {
         this.updateTooltipLayer();
       }
-      this.updateLayerBuckets();//Clear layers
-      const zoomLevel = this.map.getZoom();
-      const precision = this.calculatePrecision(zoomLevel)
-      await this.search({precision});
-      const viewport = this.leafletAggs;
-      this.updateLayerBuckets(viewport?.buckets);
-
+      this.updateLayerBuckets(); // Clear layers
+      this.zoomLevel = this.map.getZoom();
+      this.currentPrecision = this.calculatePrecision(this.zoomLevel);
+      this.setMapBounds();
+      await this.updateRoutes({});
     },
     // Approximate the radius in meters of a geohash
     geohashRadius(geohash) {
@@ -670,7 +811,6 @@ export default {
       this.items = [];
       if (newSearch) {
         this.newSearch = true;
-
       }
       if (items?.['hits']) {
         const thisItems = items['hits']['hits'];
@@ -719,41 +859,6 @@ export default {
     onInputChange(value) {
       this.searchInput = value;
     },
-    async updateRoutes({queries, updateFilters}) {
-      let filters;
-      const query = {};
-      let localFilterUpdate = false;
-      if (!isEmpty(this.filters) || updateFilters) {
-        filters = toRaw(this.filters);
-        filters = encodeURIComponent(JSON.stringify(filters));
-        query.f = filters;
-        localFilterUpdate = true;
-      } else {
-        delete query.f;
-      }
-      if (this.$route.query.f && !localFilterUpdate) {
-        query.f = this.$route.query.f;
-      }
-      let localSearchGroupUpdate = false;
-      if (queries?.searchGroup) {
-        this.advancedQueries = queries;
-        delete query.q;
-        query.a = queries.searchGroup;
-        this.currentPage = 1;
-        //this.selectedSorting = this.sorting[0];
-        localSearchGroupUpdate = true;
-      }
-      if (this.$route.query.a && !localSearchGroupUpdate) {
-        query.a = this.$route.query.a;
-        delete query.q;
-        this.updateAdvancedQueries();
-      } else {
-        this.advancedQueries = null; //clear advanced search
-        query.q = this.searchInput;
-      }
-      query.r = uuid();
-      await this.$router.push({path: 'map', query, replace: true});
-    },
     async updateFilters({clear, empty}) {
       try {
         // updating filters from command
@@ -787,8 +892,92 @@ export default {
         console.error(e);
       }
     },
+    async updateRoutes({queries, updateFilters}) {
+      let filters;
+      const query = {};
+      let localFilterUpdate = false;
+      if (!isEmpty(this.filters) || updateFilters) {
+        filters = toRaw(this.filters);
+        filters = encodeURIComponent(JSON.stringify(filters));
+        query.f = filters;
+        localFilterUpdate = true;
+      } else {
+        delete query.f;
+      }
+      if (this.$route.query.f && !localFilterUpdate) {
+        query.f = this.$route.query.f;
+      }
+      let localSearchGroupUpdate = false;
+      if (queries?.searchGroup) {
+        this.advancedQueries = queries;
+        delete query.q;
+        query.a = queries.searchGroup;
+        this.currentPage = 1;
+        //this.selectedSorting = this.sorting[0];
+        localSearchGroupUpdate = true;
+      }
+      if (this.$route.query.a && !localSearchGroupUpdate) {
+        query.a = this.$route.query.a;
+        delete query.q;
+        this.updateAdvancedQueries();
+      } else {
+        this.advancedQueries = null; //clear advanced search
+        query.q = this.searchInput;
+      }
+      query.z = this.zoomLevel;
+      query.p = this.currentPrecision;
+      query.bb = encodeURIComponent(JSON.stringify(this.boundingBox));
+      query.r = uuid();
+      await this.$router.push({path: 'map', query, replace: false});
+    },
+    async bucketSelected({checkedBuckets, id}) {
+      // this.filters[id] = checkedBuckets.map((k) => {
+      //   return {key: k}
+      // });
+      this.filters[id] = checkedBuckets;
+      await this.updateRoutes({updateFilters: true});
+    },
     resetSearch() {
       console.log('TODO: reset search');
+    },
+    async clearFilters() {
+      this.filters = {};
+      await this.updateRoutes({updateFilters: true});
+    },
+    mergeFilters(newFilters, aggsName) {
+      let filters = toRaw(this.filters);
+      if (isEmpty(this.filters)) {
+        this.filters = newFilters;
+      } else {
+        this.filters[aggsName] = newFilters[aggsName] || [];
+        if (isEmpty(this.filters[aggsName])) {
+          delete this.filters[aggsName];
+        }
+      }
+      console.log('is this.filters empty?');
+      console.log(isEmpty(this.filters))
+      // this.filters = filters;
+    },
+    clean(string) {
+      if (string === 'true') {
+        return 'Yes';
+      } else if (string === 'false') {
+        return 'No';
+      } else {
+        string = string.replace(/@|_|(\..*)/g, "")
+        return string;
+      }
+    },
+    setMapBounds() {
+      const bounds = this.map.getBounds();
+      if (bounds.isValid()) {
+        this.boundingBox = {
+          topRight: {lat: bounds._northEast.lat, lon: bounds._northEast.lng},
+          bottomLeft: {lat: bounds._southWest.lat, lon: bounds._southWest.lng}
+        }
+      } else {
+        alert('Bounds not valid')
+      }
     }
   }
 }
