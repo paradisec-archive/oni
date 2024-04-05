@@ -83,7 +83,11 @@
               <el-button-group class="mr-1">
                 <el-button v-show="!isEmpty(this.filters)" @click="clearFilters()">Clear Filters</el-button>
               </el-button-group>
-              <span id="total_results" class="my-1 mr-2" v-show="total">Total: <span>{{ total }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
+              <span id="total_results" class="my-1 mr-2" v-show="total">
+                <span v-if="totalRelation === 'eq'">Total</span>
+                <span v-else-if="totalRelation === 'gte'">More than</span>
+                <span>:&nbsp;{{ total }} Index entries (Collections, Objects, Files and Notebooks)</span>
+              </span>
               <span v-if="errorText">error: {{ errorText }}</span>
             </el-col>
             <el-col :span="2" class="m-2" :xs="4" :sm="5" :md="5" :lg="2" :xl="4">
@@ -285,6 +289,7 @@ export default {
   data() {
     return {
       total: 0,
+      totalRelation: 'eq',
       errorText: '',
       item: null,
       map: null,
@@ -721,6 +726,7 @@ export default {
       this.aggregations = this.populateAggregations(items.aggregations);
       const total = items.hits?.total;
       this.total = total?.value || 0;
+      this.totalRelation = total?.relation || 'eq';
       return items;
     },
     async searchGeoHash({geohash}) {

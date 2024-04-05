@@ -403,6 +403,7 @@ export default class ElasticService {
     boolQuery.bool.filter = {geo_bounding_box: geoBoundingBox};
     body.query = boolQuery;
     body.size = 10;
+    body['track_total_hits'] = true;
     console.log("body", JSON.stringify(body));
     //console.log(body);
     //console.log(JSON.stringify(body));
