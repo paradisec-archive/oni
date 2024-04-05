@@ -84,7 +84,7 @@
                 <el-button v-show="!isEmpty(this.filters)" @click="clearFilters()">Clear Filters</el-button>
               </el-button-group>
               <span id="total_results" class="my-1 mr-2" v-show="total">
-                <span v-if="totalRelation === 'eq'">Total</span>
+                <span v-if="totalRelation === 'eq'">Showing</span>
                 <span v-else-if="totalRelation === 'gte'">More than</span>
                 <span>:&nbsp;{{ total }} Index entries (Collections, Objects, Files and Notebooks)</span>
               </span>
