@@ -382,7 +382,8 @@ export default class ElasticService {
         .lon(bL.lon)
       geoQuery = esb.geoBoundingBoxQuery().field('_centroid')
         .topRight(topRight)
-        .bottomLeft(bottomLeft);
+        .bottomLeft(bottomLeft)
+        .validationMethod("COERCE")
     }
     const aggs = geoAggs.toJSON();
 
@@ -404,16 +405,16 @@ export default class ElasticService {
     body.query = boolQuery;
     body.size = 10;
     body['track_total_hits'] = true;
-    console.log("body", JSON.stringify(body));
+    //console.log("body", JSON.stringify(body));
     //console.log(body);
-    //console.log(JSON.stringify(body));
+    console.log(JSON.stringify(body));
     let response = await httpService.post({route, body});
     if (response.status !== 200) {
       //httpService.checkAuthorised({status: response.status});
       throw new Error(response.statusText);
     } else {
       const results = await response.json();
-      console.log(results);
+      //console.log(results);
       return results;
     }
   }

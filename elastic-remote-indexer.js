@@ -33,24 +33,6 @@ const fetch = require("node-fetch");
   } catch (e) {
     console.log('index exist, continue');
   }
-  // Configure mappings
-  // Put Settings
-  await client.indices.putSettings({
-    index: elastic['index'],
-    body: elastic['indexConfiguration']
-  });
-  //Cluster settings
-  const settings = {
-    "persistent": {
-      "search.max_open_scroll_context": elastic?.maxScroll || 5000,
-      // "xpack.monitoring.collection.enabled": false
-    },
-    "transient": {
-      "search.max_open_scroll_context": elastic?.maxScroll || 5000
-    }
-  }
-  await client.cluster.putSettings({body: settings});
-  const config = await client.cluster.getSettings();
   // Do we need to skip some collections/objects?
   let skipCollections = [];
   const skipConfiguration = "./index.skip.json"

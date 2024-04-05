@@ -21,7 +21,7 @@
         </div>
       </div>
       <div class="flex w-full" v-for="aggs of aggregations" :key="aggs.name">
-        <ul v-if="aggs?.buckets?.length > 0 && !aggs['hide']"
+        <ul v-if="aggs?.buckets?.length > 0 && !aggs['hide'] && aggs['name'] !== '_geohash'"
             class="flex-1 w-full min-w-full bg-white rounded p-2 mb-4 shadow-md border">
           <li @click="aggs.active = !aggs.active"
               class="hover:cursor-pointer py-3 flex md:flex md:flex-grow flex-row justify-between space-x-1">
@@ -281,13 +281,10 @@ export default {
     SearchAggs,
     CloseBold
   },
-  props: {
-    modelValue: {type: Array},
-    viewport: {},
-    buckets: {type: Array}
-  },
+  props: {},
   data() {
     return {
+      buckets: [],
       total: 0,
       totalRelation: 'eq',
       errorText: '',
@@ -338,7 +335,7 @@ export default {
     //await new Promise(r => setTimeout(r, 100));
     //setTimeout(initMap, 100);
     this.initMap();
-    this.updateTooltipLayer();
+    this.clearLayers();
     this.updateLayerBuckets(this.buckets);
     this.initControls();
   },
@@ -443,16 +440,20 @@ export default {
       this.searchFields = this.$store.state.configuration.ui.searchFields;
       //this.featuresLayer = L.featureGroup();
       this.geoHashLayer = L.featureGroup();
-      this.tooltipLayers = L.layerGroup()
+      this.tooltipLayers = L.layerGroup();
       this.map = L.map("map", {
         gestureHandling: true,
         minZoom: 3, //Why does it stop working below 3?
-        maxZoom: 18 //18 is the max
+        maxZoom: 18, //18 is the max
+        worldCopyJump: false // this is weird if true
       });
+      //This below is a bit annoying because of the squares in the geohash some popups will not be visible
+      //this.map.setMaxBounds([[84.67351256610522, -174.0234375], [-58.995311187950925, 223.2421875]]);
       //TODO: pass this via config. Center location and zoom level
       this.map.setView([-25, 134], 3);
       L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+        continuousWorld: true // this doesnt seem to work
       }).addTo(this.map);
       L.control.scale().addTo(this.map);
       //this.featuresLayer.addTo(this.map);
@@ -461,18 +462,18 @@ export default {
       const control = new L.SearchControl();
       control.addTo(this.map);
     },
-    updateTooltipLayer() {
+    clearLayers() {
+      this.geoHashLayer.clearLayers();
       this.tooltipLayers.clearLayers();
     },
     updateLayerBuckets(val) {
-      this.geoHashLayer.clearLayers();
+      this.clearLayers();
       if (!val) return;
       for (const bucket of val) {
         try {
           const geohash = bucket['key'];
           const latlon = Geohash.decode(geohash);
           const bounds = Geohash.bounds(geohash);
-          let asWKT;
           let shape;
           if (bucket['doc_count'] > 0) {
             // TODO: clean if we are doing radius for everything or setup > 1 so you can have a single icon no circle
@@ -508,7 +509,7 @@ export default {
           shape._data = {docCount: bucket['doc_count'], key: geohash, latlng: latlon};
           shape.addTo(this.geoHashLayer);
         } catch (error) {
-          console.log(error);
+          console.log('ERROR GEOHASH BUCKET', error);
         }
       }
     },
@@ -530,16 +531,16 @@ export default {
       if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: this.zoomLevel});
 
       this.map.on('load', async (e) => {
-        await this.searchEvent({clearPopup: false});
+        await this.searchEvent();
       });
 
       this.map.on('zoomend', async (e) => {
-        console.log("zoomend", e)
-        await this.searchEvent({clearPopup: true});
+        this.clearLayers();
+        await this.searchEvent();
       });
 
       this.map.on('dragend', async (e) => {
-        await this.searchEvent({clearPopup: false});
+        await this.searchEvent();
       });
 
       this.geoHashLayer.on('click', async (e) => {
@@ -596,6 +597,7 @@ export default {
             tooltip.setLatLng(e.latlng);
             tooltip.addTo(this.tooltipLayers);
             this.markerSelected = true;
+            console.log('added to map')
           }
         }
       });
@@ -697,37 +699,42 @@ export default {
       return innerHTML;
     },
     async search() {
-      //console.log('search');
-      if (isEmpty(this.boundingBox)) {
-        this.setMapBounds();
+      try {
+        //console.log('search');
+        if (isEmpty(this.boundingBox)) {
+          this.setMapBounds();
+        }
+        if (this.map.getZoom() !== this.zoomLevel) {
+          this.map.setZoom(this.zoomLevel);
+        }
+        this.changedFilters = false;
+        let filters = {};
+        if (!isEmpty(this.filters)) {
+          filters = this.filters;
+        } else {
+          filters = {};
+        }
+        const items = await this.$elasticService.map({
+          init: false,
+          boundingBox: this.boundingBox,
+          precision: this.currentPrecision,
+          multi: this.searchInput,
+          filters: toRaw(this.filters),
+          searchFields: this.searchFields,
+          operation: this.selectedOperation,
+        });
+        this.leafletAggs = items.aggregations['_geohash'];
+        const viewport = this.leafletAggs;
+        this.updateLayerBuckets(viewport?.buckets);
+        this.aggregations = this.populateAggregations(items.aggregations);
+        const total = items.hits?.total;
+        this.total = total?.value || 0;
+        this.totalRelation = total?.relation || 'eq';
+        return items;
+      } catch (e) {
+        console.log("error", e);
+        return [];
       }
-      if (this.map.getZoom() !== this.zoomLevel) {
-        this.map.setZoom(this.zoomLevel);
-      }
-      this.changedFilters = false;
-      let filters = {};
-      if (!isEmpty(this.filters)) {
-        filters = this.filters;
-      } else {
-        filters = {};
-      }
-      const items = await this.$elasticService.map({
-        init: false,
-        boundingBox: this.boundingBox,
-        precision: this.currentPrecision,
-        multi: this.searchInput,
-        filters: toRaw(this.filters),
-        searchFields: this.searchFields,
-        operation: this.selectedOperation,
-      });
-      this.leafletAggs = items.aggregations['_geohash'];
-      const viewport = this.leafletAggs;
-      this.updateLayerBuckets(viewport?.buckets);
-      this.aggregations = this.populateAggregations(items.aggregations);
-      const total = items.hits?.total;
-      this.total = total?.value || 0;
-      this.totalRelation = total?.relation || 'eq';
-      return items;
     },
     async searchGeoHash({geohash}) {
       if (geohash) {
@@ -758,11 +765,7 @@ export default {
       }
       return precision;
     },
-    async searchEvent({clearPopup}) {
-      if (clearPopup) {
-        this.updateTooltipLayer();
-      }
-      this.updateLayerBuckets(); // Clear layers
+    async searchEvent() {
       this.zoomLevel = this.map.getZoom();
       this.currentPrecision = this.calculatePrecision(this.zoomLevel);
       this.setMapBounds();
@@ -810,7 +813,7 @@ export default {
       if (query.q) {
         this.searchInput = decodeURIComponent(query.q);
       }
-      console.log(isEmpty(this.filters))
+      //console.log(isEmpty(this.filters))
       this.changedFilters = true;
     },
     populate({items, newSearch, aggregations}) {
@@ -984,6 +987,7 @@ export default {
       } else {
         alert('Bounds not valid')
       }
+      //console.log("boundingBox", JSON.stringify(this.boundingBox))
     }
   }
 }
