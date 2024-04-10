@@ -84,9 +84,9 @@
                 <el-button v-show="!isEmpty(this.filters)" @click="clearFilters()">Clear Filters</el-button>
               </el-button-group>
               <span id="total_results" class="my-1 mr-2" v-show="total">
-                <span v-if="totalRelation === 'eq'">Showing</span>
-                <span v-else-if="totalRelation === 'gte'">More than</span>
-                <span>:&nbsp;{{ total }} Index entries (Collections, Objects, Files and Notebooks)</span>
+                <span>{{ total }} Index entries (Collections, Objects, Files and Notebooks)</span>
+              <span v-if="outOfBounds > 0" class="my-1" v-show="total">, some ({{ outOfBounds }}) result(s) are out of bounds; move your map to see them.
+              </span>
               </span>
               <span v-if="errorText">error: {{ errorText }}</span>
             </el-col>
@@ -319,7 +319,8 @@ export default {
         bottomRight: {lat: -11.523088, lon: 162.649886},
         topLeft: {lat: -42.811522, lon: 108.649010}
       },
-      zoomLevel: 9
+      zoomLevel: 9,
+      outOfBounds: 0
     }
   },
   setup() {
@@ -445,7 +446,7 @@ export default {
         gestureHandling: true,
         minZoom: 3, //Why does it stop working below 3?
         maxZoom: 18, //18 is the max
-        worldCopyJump: false // this is weird if true
+        worldCopyJump: false // this is weird if true because it jumps
       });
       //This below is a bit annoying because of the squares in the geohash some popups will not be visible
       //this.map.setMaxBounds([[84.67351256610522, -174.0234375], [-58.995311187950925, 223.2421875]]);
@@ -465,6 +466,7 @@ export default {
     clearLayers() {
       this.geoHashLayer.clearLayers();
       this.tooltipLayers.clearLayers();
+      this.outOfBounds = 0;
     },
     updateLayerBuckets(val) {
       this.clearLayers();
@@ -472,8 +474,21 @@ export default {
       for (const bucket of val) {
         try {
           const geohash = bucket['key'];
-          const latlon = Geohash.decode(geohash);
-          const bounds = Geohash.bounds(geohash);
+          let latlon = Geohash.decode(geohash);
+          const newPosition = this.fitBounds(L.latLng(latlon.lat, latlon.lon));
+          if (newPosition) {
+            latlon = newPosition
+          }
+          let bounds = Geohash.bounds(geohash);
+          const newNEBounds = this.fitBounds(L.latLng(bounds.ne.lat, bounds.ne.lon));
+          const newSWBounds = this.fitBounds(L.latLng(bounds.sw.lat, bounds.sw.lon));
+          if (newNEBounds && newSWBounds) {
+            bounds.ne.lat = newNEBounds.lat;
+            bounds.ne.lon = newNEBounds.lng
+            bounds.sw.lat = newSWBounds.lat;
+            bounds.sw.lon = newSWBounds.lng
+          }
+
           let shape;
           if (bucket['doc_count'] > 0) {
             // TODO: clean if we are doing radius for everything or setup > 1 so you can have a single icon no circle
@@ -508,6 +523,11 @@ export default {
           }
           shape._data = {docCount: bucket['doc_count'], key: geohash, latlng: latlon};
           shape.addTo(this.geoHashLayer);
+
+          if (!this.map.getBounds().contains(latlon)) {
+            console.log('shape is out of bounds', shape);
+            this.outOfBounds += parseInt(bucket['doc_count'] || 0);
+          }
         } catch (error) {
           console.log('ERROR GEOHASH BUCKET', error);
         }
@@ -988,7 +1008,40 @@ export default {
         alert('Bounds not valid')
       }
       //console.log("boundingBox", JSON.stringify(this.boundingBox))
-    }
+    },
+    fitBounds(position) {
+      //From: https://stackoverflow.com/a/78175342/1470833
+      //If the point does not fit the bounds try to flip the degrees
+      const visibleBounds = this.map.getBounds();
+      const west = visibleBounds.getWest();
+      const east = visibleBounds.getEast();
+      let isVisible = visibleBounds.contains(position);
+      if (isVisible) {
+        return undefined;
+      } else {
+        const initialPos = L.latLng([position.lat, position.lng]);
+        if (west < -180) {
+          const d = parseInt((west - 180) / 360);
+          position.lng += 360 * d;
+          isVisible = visibleBounds.contains(position);
+          if (d < -1 && !isVisible) { // this part it hard to explain for me so easiest thing to do to understand how it work is to remove it and go far past 180
+            position = initialPos;
+            position.lng += 360 * (d + 1);
+            isVisible = visibleBounds.contains(position);
+          }
+        } else if (east > 180) {
+          const d = parseInt((east + 180) / 360);
+          position.lng += 360 * d;
+          isVisible = visibleBounds.contains(position);
+          if (d > 1 && !flag) {
+            position = initialPos;
+            position.lng += 360 * (d - 1);
+            isVisible = visibleBounds.contains(position);
+          }
+        }
+      }
+      return position;
+    },
   }
 }
 
