@@ -1,10 +1,10 @@
 <template>
   <p>
-    The information entered in the Advanced Search box(es) is treated as part of a 'mini-language'.
+    The information entered in the Advanced Search text field is treated as part of a 'mini-language':
   </p>
   <ul class="px-2 list-disc list-inside">
-    <li class="px-3 py-1">The query string is parsed into a series of terms and operators.</li>
-    <li class="px-3 py-1">In general, the search functions are not case-sensitive. Exceptions to this are Boolean
+    <li class="px-3 py-1">The query string is parsed into a series of search terms and operators.</li>
+    <li class="px-3 py-1">In general, the search text is not case-sensitive. Exceptions to this are Boolean
       operators (see below).
     </li>
   </ul>
@@ -12,9 +12,8 @@
   <p>
     The standard Boolean operators <code class="literal backdrop-blur">AND</code>, <code
       class="literal backdrop-blur">OR</code>
-    and <code class="literal backdrop-blur">NOT</code> are supported in advanced search. These can either be added in
-    the dropdown menu when <i>Add New Line</i> is selected, or included within the search text field, but parentheses
-    should be used whenever multiple operators occur together.
+    and <code class="literal backdrop-blur">NOT</code> are supported in Advanced Search. These can either be added in
+    the dropdown menu between fields when <i>Add New Line</i> is selected, or included within the search text field, using parentheses whenever multiple operators occur together.
   </p>
   <p>
     For instance, to search for items that contain both 'public' and 'house' or 'government' and 'house' but not
@@ -25,8 +24,8 @@
   </p>
   <p>
     To search for the literal words AND, OR and NOT, add a backward slash (<code class="literal backdrop-blur">\</code>)
-    before that word to escape it, e.g. <code class="literal backdrop-blur">\OR</code>. Note that this is a situation
-    where the search is case-sensitive; 'and' does not need to be escaped, but 'AND' does. Escaping will not return
+    before that word to 'escape' it, e.g. <code class="literal backdrop-blur">\OR</code>. Note that this is a situation
+    where the search text is case-sensitive; 'and' does not need to be escaped, but 'AND' does. Escaping will not return
     case-sensitive matches; it will just prevent its use as a Boolean operator.
   </p>
   <p class="py-2 font-bold">Query String Syntax</p>
@@ -48,29 +47,24 @@
     <tr class="bg-gray-50">
       <td><code>^</code></td>
       <td>Boost operator that makes one term more relevant than another, e.g. <code class="literal backdrop-blur">quick^2
-        fox</code></td>
+        fox</code>. The default boost value is 1, but can be any positive floating point number. Boosts between 0 and 1 reduce relevance.</td>
     </tr>
     <tr>
       <td><code>~</code></td>
       <td>Creates a fuzzy query to return results similar to the search term by changing, removing, inserting or
-        transposing one character. Can also be applied to phrase searches allowing the specified words to be further
-        apart or in a different order. Add a number following this to increase the number of variations, e.g. <code
+        transposing one character. Can also be applied to phrasal searches allowing the specified words to be further
+        apart or in a different order. Add a number following this operator to increase the number of variations, e.g. <code
             class="literal backdrop-blur">brwn~2</code> and <code class="literal backdrop-blur">"house home"~3</code>
       </td>
     </tr>
     <tr class="bg-gray-50">
       <td><code>?</code></td>
-      <td>Wildcard to replace zero or one of the previous character. Wildcards cannot be included in a phrase search.
+      <td>Wildcard to replace a single character. Wildcards cannot be included in a phrasal search. e.g. <code class="literal backdrop-blur">qu?ck</code> will find instances of 'quick' and 'quack'.
       </td>
     </tr>
     <tr>
       <td><code>*</code></td>
-      <td>Wildcard to replace zero or more of the previous character. Wildcards cannot be included in a phrase search.
-      </td>
-    </tr>
-    <tr class="bg-gray-50">
-      <td><code>+</code></td>
-      <td>Wildcard to replace one or more of the previous character. Wildcards cannot be included in a phrase search.
+      <td>Wildcard to replace zero or more characters. Wildcards cannot be included in a phrasal search. e.g. <code class="literal backdrop-blur">gre*</code> will find instances of 'green', 'grew', 'greater', etc.
       </td>
     </tr>
     <tr>
@@ -85,8 +79,8 @@
   <p>
     Some regular expression patterns can be used within the query string by surrounding the pattern in forward slashes,
     e.g. <code class="literal backdrop-blur">/gr[ae]y/</code> or <code class="literal backdrop-blur">/honou*r/</code>.
-    Currently, regular expressions can only be used for full-word searches and not phrases. This search engine does not
-    support full Perl-compatible regex syntax, for more information see:
+    Currently, regular expressions can only be used for complete word searches and not for partial words or phrases. This search function does not
+    support full Perl-compatible regex syntax. For more information see:
     <a class="underline" title="RegExp Syntax"
        href="https://www.elastic.co/guide/en/elasticsearch/reference/current/regexp-syntax.html">
       RegExp Syntax</a>.
@@ -95,6 +89,8 @@
     Reserved Characters: &nbsp;
   </p>
   <p class="py-2">
+  <p></p>  
+    The following are reserved characters that can have specific search functions and may need 'escaping' with \ if you want to search for the literal characters.
     <code>
       &plus;&#x20;&minus;&#x20;&equals;&#x20;&amp;&amp;&#x20;&semi;&#x20;&vert;&vert;&#x20;&gt;&#x20;&lt;&#x20;&excl;&#x20;&lpar;&#x20;&rpar;&#x20;&lcub;&#x20;&rcub;&#x20;&lsqb;&#x20;&rsqb;&#x20;&Hat;&#x20;&quot;&#x20;&#x7E;&#x20;&ast;&#x20;&quest;&#x20;&colon;&#x20;&bsol;&#x20;&sol;
     </code>
