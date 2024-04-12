@@ -86,7 +86,7 @@
       RegExp Syntax</a>.
   </p>
   <p class="py-2 font-bold">
-    Reserved Characters: &nbsp;
+    Reserved Characters
   </p>
   <p class="py-2">
   <p></p>  
