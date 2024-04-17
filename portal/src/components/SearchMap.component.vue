@@ -83,7 +83,7 @@
               <el-button-group class="mr-1">
                 <el-button v-show="!isEmpty(this.filters)" @click="clearFilters()">Clear Filters</el-button>
               </el-button-group>
-              <span id="total_results" class="my-1 mr-2" v-show="total">
+              <span id="total_results" class="my-1 mr-2">
                 <span>{{ total }} Index entries (Collections, Objects, Files and Notebooks)</span>
               <span v-if="outOfBounds > 0" class="my-1" v-show="total">, some ({{ outOfBounds }}) result(s) are out of bounds; move your map to see them.
               </span>
@@ -604,6 +604,7 @@ export default {
             const data = e.layer?._data;
             //TODO: get the one
             this.tooltipTotal = 0;
+            this.currentPage = 0;
             const result = await this.searchGeoHash({
               geohash: data.key,
               pageSize: this.pageSize,
