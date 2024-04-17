@@ -176,8 +176,8 @@ L.Icon.Default.mergeOptions({
 L.ClickableTooltip = L.Popup.extend({
   onAdd: function (map) {
     L.Popup.prototype.onAdd.call(this, map);
-    const el = this.getElement(),
-        self = this;
+    const el = this.getElement();
+    const self = this;
     el.addEventListener('click', function () {
       self.fire("click");
     });
@@ -291,7 +291,6 @@ export default {
       item: null,
       map: null,
       tooltipLayers: null,
-      //featuresLayer: null,
       geoHashLayer: null,
       markerSelected: false,
       leafletAggs: [],
@@ -320,7 +319,11 @@ export default {
         topLeft: {lat: -42.811522, lon: 108.649010}
       },
       zoomLevel: 9,
-      outOfBounds: 0
+      outOfBounds: 0,
+      tooltip: undefined,
+      pageSize: 10,
+      currentPage: 1,
+      tooltipTotal: 0
     }
   },
   setup() {
@@ -339,12 +342,14 @@ export default {
     this.clearLayers();
     this.updateLayerBuckets(this.buckets);
     this.initControls();
+    //The next line makes the methods availalble outsite vue
+    window.oni_ui = this;
   },
   async updated() {
     //console.log('map updated');
     if (this.map && this.geoHashLayer) {
       this.updateLayerBuckets(this.buckets);
-      this.initControls();
+      //this.initControls();
     }
   },
   onBeforeUnmount() {
@@ -439,14 +444,13 @@ export default {
     },
     initMap() {
       this.searchFields = this.$store.state.configuration.ui.searchFields;
-      //this.featuresLayer = L.featureGroup();
       this.geoHashLayer = L.featureGroup();
       this.tooltipLayers = L.layerGroup();
       this.map = L.map("map", {
         gestureHandling: true,
         minZoom: 3, //Why does it stop working below 3?
         maxZoom: 18, //18 is the max
-        worldCopyJump: false // this is weird if true because it jumps
+        worldCopyJump: false, // this is weird if true because it jumps
       });
       //This below is a bit annoying because of the squares in the geohash some popups will not be visible
       //this.map.setMaxBounds([[84.67351256610522, -174.0234375], [-58.995311187950925, 223.2421875]]);
@@ -457,15 +461,20 @@ export default {
         continuousWorld: true // this doesnt seem to work
       }).addTo(this.map);
       L.control.scale().addTo(this.map);
-      //this.featuresLayer.addTo(this.map);
       this.geoHashLayer.addTo(this.map);
       this.tooltipLayers.addTo(this.map);
       const control = new L.SearchControl();
       control.addTo(this.map);
+      //Set initial bounds
+      const topLeft = L.latLng(this.boundingBox.topLeft);
+      const bottomRight = L.latLng(this.boundingBox.bottomRight);
+      const bounds = L.latLngBounds(bottomRight, topLeft);
+      console.log("bounds", JSON.stringify(bounds))
+      if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: this.zoomLevel});
+
     },
     clearLayers() {
       this.geoHashLayer.clearLayers();
-      this.tooltipLayers.clearLayers();
       this.outOfBounds = 0;
     },
     updateLayerBuckets(val) {
@@ -544,34 +553,42 @@ export default {
       // if (this.$route.query.z) {
       //   this.zoomLevel = parseInt(this.$route.query.z);
       // }
-      const topLeft = L.latLng(this.boundingBox.topLeft);
-      const bottomRight = L.latLng(this.boundingBox.bottomRight);
-      const bounds = L.latLngBounds(bottomRight, topLeft);
-      console.log("bounds", JSON.stringify(bounds))
-      if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: this.zoomLevel});
 
       this.map.on('load', async (e) => {
+        this.clearLayers();
         await this.searchEvent();
       });
 
       this.map.on('zoomend', async (e) => {
         this.clearLayers();
+        this.tooltipLayers.clearLayers();
+        this.tooltip = undefined;
         await this.searchEvent();
       });
 
       this.map.on('dragend', async (e) => {
+        this.clearLayers();
         await this.searchEvent();
       });
 
       this.geoHashLayer.on('click', async (e) => {
-        //console.log('geoHashLayer click', e);
-        //L.DomEvent.stop(e);
+        L.DomEvent.stopPropagation(e);
+        L.DomEvent.preventDefault(e);
+        console.log('geoHashLayer click');
+        console.log(e);
+        console.log('id', e.propagatedFrom._leaflet_id);
+        console.log('from', e.sourceTarget._leaflet_id);
+        this.tooltip = new L.Popup({
+          permanent: true,
+          noWrap: true,
+          maxWidth: 400,
+          maxHeight: 400
+        });
         let innerHHTML = '';
         this.markerSelected = false;
         const data = e.layer?._data;
         // TODO: ask people if they like this behaviour
         this.zoomLevel = this.map.getZoom();
-        console.log("currentZoom", this.zoomLevel);
         if (data?.docCount > 10 && this.zoomLevel <= 10) {
           //if there are more than X zoom in
           let nextZoom = 1;
@@ -586,8 +603,14 @@ export default {
           if (e.layer?._data) {
             const data = e.layer?._data;
             //TODO: get the one
-            const result = await this.searchGeoHash({geohash: data.key});
+            this.tooltipTotal = 0;
+            const result = await this.searchGeoHash({
+              geohash: data.key,
+              pageSize: this.pageSize,
+              currentPage: this.currentPage
+            });
             const hits = document.createElement('div');
+            hits.id = 'tooltip_open';
             const total = result['hits']['total'];
             for (let hit of result['hits']['hits']) {
               const newDiv = document.createElement('div');
@@ -599,50 +622,23 @@ export default {
             <div class="m-2">
               <p>Total: ${total?.value}</p>
             </div>
+            <div>
+                pageSize: ${this.pageSize}, tooltipTotal ${this.tooltipTotal}, total: ${total?.value}
+            </div>
             `;
             hits.appendChild(totalDiv);
-            if (total?.value > 10) {
+            if (total?.value > this.pageSize) {
               const moreResultsDiv = document.createElement('div');
-              moreResultsDiv.innerHTML = `<p><a href="/search">Show More Results (TODO)</a></p>`;
-              hits.appendChild(moreResultsDiv)
+              moreResultsDiv.innerHTML = `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${data.key}', pageSize: ${this.pageSize}, currentPage: ${this.currentPage}, tooltipTotal: ${this.tooltipTotal + this.pageSize}})">Show More Results</a></p>`;
+              hits.appendChild(moreResultsDiv);
             }
-            const tooltip = new L.ClickableTooltip({
-              direction: 'right',
-              permanent: false,
-              noWrap: true,
-              maxWidth: 400,
-              maxHeight: 400
-            });
-            tooltip.setContent(hits.innerHTML);
-            tooltip.setLatLng(e.latlng);
-            tooltip.addTo(this.tooltipLayers);
+            this.tooltip.setContent(hits.outerHTML);
+            this.tooltip.setLatLng(e.latlng);
+            this.tooltip.addTo(this.tooltipLayers);
             this.markerSelected = true;
-            console.log('added to map')
           }
         }
       });
-
-      //   this.featuresLayer.on('click', (e) => {
-      //     //console.log('featuresLayer click', e);
-      //     //L.DomEvent.stop(e);
-      //     let innerHHTML = '';
-      //     let item = null;
-      //     this.markerSelected = false;
-      //     if (e.layer?._data) {
-      //       item = e.layer._data;
-      //       innerHHTML = this.getInnerHTMLTooltip(item);
-      //       const tooltip = new L.ClickableTooltip({
-      //         direction: 'center',
-      //         permanent: false,
-      //         noWrap: true,
-      //         opacity: 1
-      //       });
-      //       tooltip.setContent(innerHHTML);
-      //       tooltip.setLatLng(e.latlng);
-      //       tooltip.addTo(this.map);
-      //       this.markerSelected = true;
-      //     }
-      //   });
     },
     open(route) {
       this.$router.push({path: route});
@@ -756,7 +752,9 @@ export default {
         return [];
       }
     },
-    async searchGeoHash({geohash}) {
+    async searchGeoHash({geohash, pageSize, currentPage}) {
+      this.currentPage = 1;
+      this.tooltipTotal = pageSize;
       if (geohash) {
         const bounds = Geohash.bounds(geohash);
         this.boundingBox = {
@@ -764,6 +762,7 @@ export default {
           bottomLeft: {lat: bounds.sw.lat, lon: bounds.sw.lon}
         }
         // const items = await this.$elasticService.map({init: false, boundingBox});
+
         const items = await this.$elasticService.map({
           init: false,
           boundingBox: this.boundingBox,
@@ -771,6 +770,8 @@ export default {
           filters: toRaw(this.filters),
           searchFields: this.searchFields,
           operation: this.selectedOperation,
+          page: pageSize,
+          searchFrom: currentPage * pageSize
         })
         return items;
       }
@@ -1042,6 +1043,52 @@ export default {
       }
       return position;
     },
+    async updateGeoHashSearch({geohash, pageSize, currentPage, tooltipTotal}) {
+      if (currentPage < 0) {
+        currentPage = 0;
+      }
+      const result = await window.oni_ui.searchGeoHash({
+        geohash,
+        pageSize,
+        currentPage
+      });
+      const hits = document.getElementById('tooltip_open');
+      hits.innerHTML = '';
+      hits.scrollTop = 0;
+      const total = result['hits']['total'];
+      for (let hit of result['hits']['hits']) {
+        const newDiv = document.createElement('div');
+        newDiv.innerHTML = this.getInnerHTMLTooltip(hit['_source'], total);
+        hits.appendChild(newDiv);
+      }
+      const totalDiv = document.createElement('div');
+      totalDiv.innerHTML = `
+            <div class="m-2">
+              <p>Total: ${total?.value}</p>
+            </div>
+            <div>
+            pageSize: ${pageSize}, tooltipTotal ${tooltipTotal}, total: ${total?.value}
+</div>
+            `;
+      hits.appendChild(totalDiv);
+
+      console.log(total.value)
+      console.log(tooltipTotal)
+      console.log(total?.value > tooltipTotal)
+      const moreResultsDiv = document.createElement('div');
+
+      if (total?.value > pageSize) {
+        if (tooltipTotal - pageSize > 0 || currentPage >= 1) {
+          moreResultsDiv.innerHTML = `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${geohash}', pageSize: ${pageSize}, currentPage: ${currentPage--}, tooltipTotal: ${tooltipTotal - result['hits']['hits'].length || 0}})">Previous Results</a></p>`;
+        }
+      }
+      if (total?.value > pageSize) {
+        if ((total?.value) > (tooltipTotal)) {
+          moreResultsDiv.innerHTML += `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${geohash}', pageSize: ${pageSize}, currentPage: ${currentPage++}, tooltipTotal: ${tooltipTotal + result['hits']['hits'].length || 0}})">Next Results</a></p>`;
+        }
+      }
+      hits.appendChild(moreResultsDiv);
+    }
   }
 }
 

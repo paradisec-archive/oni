@@ -290,7 +290,7 @@ export default class ElasticService {
     boolQuery.minimumShouldMatch(0);
     const esbQuery = esb.requestBodySearch().query(boolQuery)
     const query = esbQuery.toJSON().query;
-    console.log(JSON.stringify({query: query}))
+    //console.log(JSON.stringify({query: query}))
     return query;
   }
 
@@ -347,7 +347,7 @@ export default class ElasticService {
     return qS;
   }
 
-  async map({init = true, boundingBox, precision = 5, multi, searchFields, filters, operation}) {
+  async map({init = true, boundingBox, precision = 5, multi, searchFields, filters, operation, pageSize, searchFrom}) {
     const httpService = new HTTPService({router: this.router, loginPath: '/login'});
     let route = this.searchRoute + this.indexRoute;
     let sorting;
@@ -403,11 +403,12 @@ export default class ElasticService {
     }
     boolQuery.bool.filter = {geo_bounding_box: geoBoundingBox};
     body.query = boolQuery;
-    body.size = 10;
+    body['size'] = pageSize;
+    body['from'] = searchFrom;
     body['track_total_hits'] = true;
     //console.log("body", JSON.stringify(body));
     //console.log(body);
-    console.log(JSON.stringify(body));
+    //console.log(JSON.stringify(body));
     let response = await httpService.post({route, body});
     if (response.status !== 200) {
       //httpService.checkAuthorised({status: response.status});
