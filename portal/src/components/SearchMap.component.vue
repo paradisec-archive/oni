@@ -622,9 +622,6 @@ export default {
             <div class="m-2">
               <p>Total: ${total?.value}</p>
             </div>
-            <div>
-                pageSize: ${this.pageSize}, tooltipTotal ${this.tooltipTotal}, total: ${total?.value}
-            </div>
             `;
             hits.appendChild(totalDiv);
             if (total?.value > this.pageSize) {
@@ -1063,13 +1060,10 @@ export default {
       }
       const totalDiv = document.createElement('div');
       totalDiv.innerHTML = `
-            <div class="m-2">
-              <p>Total: ${total?.value}</p>
-            </div>
-            <div>
-            pageSize: ${pageSize}, tooltipTotal ${tooltipTotal}, total: ${total?.value}
-</div>
-            `;
+      <div class="m-2">
+        <p>Total: ${total?.value}</p>
+      </div>
+        `;
       hits.appendChild(totalDiv);
 
       console.log(total.value)
