@@ -5,6 +5,7 @@
                 :modelValue="fieldMap"
                 :transformer="transformer"
                 :enableDrawing="false"></LeafletMap>
+    <p class="text-sm">Not to be used for native title claims</p>
   </template>
   <template v-else>
     <template v-if="isURL">
