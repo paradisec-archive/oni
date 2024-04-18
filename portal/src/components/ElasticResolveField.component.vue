@@ -3,7 +3,8 @@
     {{field}}
     <LeafletMap class="h-72 flex grow min-w-[200px] mr-4"
                 :modelValue="fieldMap"
-                :transformer="transformer"></LeafletMap>
+                :transformer="transformer"
+                :enableDrawing="false"></LeafletMap>
   </template>
   <template v-else>
     <template v-if="isURL">
