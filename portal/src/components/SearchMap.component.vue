@@ -602,7 +602,6 @@ export default {
         } else {
           if (e.layer?._data) {
             const data = e.layer?._data;
-            //TODO: get the one
             this.tooltipTotal = 0;
             this.currentPage = 0;
             const result = await this.searchGeoHash({
@@ -681,8 +680,8 @@ export default {
       if (Array.isArray(_memberOf) && _memberOf.length > 0) {
         for (let mO of _memberOf) {
           innerHTMLMemberOf += `
-        <a class="text-sm m-2 text-gray-700 dark:text-gray-300 underline"
-               href="/collection?id=${mO?.['@id']}&_crateId=${encodeURIComponent(mO?.['@id'])}">
+        <a class="text-sm m-1 text-gray-700 dark:text-gray-300 underline"
+               href="/collection?id=${encodeURIComponent(mO?.['@id'])}&_crateId=${encodeURIComponent(mO?.['@id'])}">
         ${first(mO?.name)?.['@value'] || mO?.['@id']}
         </a>
       `;
@@ -690,7 +689,7 @@ export default {
       }
       let innerHTML = `
         <div>
-            <h3 class="text-2xl">
+            <h3 class="mb-2 mt-1 text-2xl">
             <a href="${href}">${title}</a></h3>
             <h4>Type: ${type}</h4>`;
       if (innerHTMLMemberOf) {
@@ -704,9 +703,9 @@ export default {
              </p>`;
       }
       innerHTML += `
-          <div>
+          <p class="justify-self-end">
             <a href="${href}">See more</a>
-          </div>
+          </p>
         </div>
         <hr class="divide-y divide-gray-500"/>
       `;
@@ -1066,14 +1065,10 @@ export default {
       </div>
         `;
       hits.appendChild(totalDiv);
-
-      console.log(total.value)
-      console.log(tooltipTotal)
-      console.log(total?.value > tooltipTotal)
       const moreResultsDiv = document.createElement('div');
 
       if (total?.value > pageSize) {
-        if (tooltipTotal - pageSize > 0 || currentPage >= 1) {
+        if (tooltipTotal - pageSize > 0 || currentPage > 1) {
           moreResultsDiv.innerHTML = `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${geohash}', pageSize: ${pageSize}, currentPage: ${currentPage--}, tooltipTotal: ${tooltipTotal - result['hits']['hits'].length || 0}})">Previous Results</a></p>`;
         }
       }
