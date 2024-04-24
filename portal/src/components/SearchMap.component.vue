@@ -322,8 +322,7 @@ export default {
       outOfBounds: 0,
       tooltip: undefined,
       pageSize: 10,
-      currentPage: 1,
-      tooltipTotal: 0
+      currentPage: 0
     }
   },
   setup() {
@@ -371,7 +370,7 @@ export default {
       } else {
         await this.updateFilters({});
         this.onInputChange(this.$route.query.q);
-        this.currentPage = 1;
+        this.currentPage = 0;
         if (this.$route.query.a) {
           this.updateAdvancedQueries();
         }
@@ -574,10 +573,6 @@ export default {
       this.geoHashLayer.on('click', async (e) => {
         L.DomEvent.stopPropagation(e);
         L.DomEvent.preventDefault(e);
-        console.log('geoHashLayer click');
-        console.log(e);
-        console.log('id', e.propagatedFrom._leaflet_id);
-        console.log('from', e.sourceTarget._leaflet_id);
         this.tooltip = new L.Popup({
           permanent: true,
           noWrap: true,
@@ -602,7 +597,6 @@ export default {
         } else {
           if (e.layer?._data) {
             const data = e.layer?._data;
-            this.tooltipTotal = 0;
             this.currentPage = 0;
             const result = await this.searchGeoHash({
               geohash: data.key,
@@ -626,7 +620,7 @@ export default {
             hits.appendChild(totalDiv);
             if (total?.value > this.pageSize) {
               const moreResultsDiv = document.createElement('div');
-              moreResultsDiv.innerHTML = `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${data.key}', pageSize: ${this.pageSize}, currentPage: ${this.currentPage}, tooltipTotal: ${this.tooltipTotal + this.pageSize}})">Show More Results</a></p>`;
+              moreResultsDiv.innerHTML = `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${data.key}', pageSize: ${this.pageSize}, currentPage: 1, nextPage: true})">Show More Results</a></p>`;
               hits.appendChild(moreResultsDiv);
             }
             this.tooltip.setContent(hits.outerHTML);
@@ -750,8 +744,7 @@ export default {
       }
     },
     async searchGeoHash({geohash, pageSize, currentPage}) {
-      this.currentPage = 1;
-      this.tooltipTotal = pageSize;
+      this.currentPage = 0;
       if (geohash) {
         const bounds = Geohash.bounds(geohash);
         this.boundingBox = {
@@ -939,7 +932,7 @@ export default {
         this.advancedQueries = queries;
         delete query.q;
         query.a = queries.searchGroup;
-        this.currentPage = 1;
+        this.currentPage = 0;
         //this.selectedSorting = this.sorting[0];
         localSearchGroupUpdate = true;
       }
@@ -1040,8 +1033,8 @@ export default {
       }
       return position;
     },
-    async updateGeoHashSearch({geohash, pageSize, currentPage, tooltipTotal}) {
-      if (currentPage < 0) {
+    async updateGeoHashSearch({geohash, pageSize, currentPage, nextPage}) {
+      if (currentPage <= 0) {
         currentPage = 0;
       }
       const result = await window.oni_ui.searchGeoHash({
@@ -1053,11 +1046,19 @@ export default {
       hits.innerHTML = '';
       hits.scrollTop = 0;
       const total = result['hits']['total'];
-      for (let hit of result['hits']['hits']) {
-        const newDiv = document.createElement('div');
-        newDiv.innerHTML = this.getInnerHTMLTooltip(hit['_source'], total);
-        hits.appendChild(newDiv);
+      console.log(result['hits']['hits'].length)
+      if (result['hits']['hits'].length === 0) {
+        const noResults = document.createElement('div');
+        noResults.innerHTML = `<div>No More Results</div>`;
+        hits.appendChild(noResults)
+      } else {
+        for (let hit of result['hits']['hits']) {
+          const newDiv = document.createElement('div');
+          newDiv.innerHTML = this.getInnerHTMLTooltip(hit['_source'], total);
+          hits.appendChild(newDiv);
+        }
       }
+
       const totalDiv = document.createElement('div');
       totalDiv.innerHTML = `
       <div class="m-2">
@@ -1066,16 +1067,11 @@ export default {
         `;
       hits.appendChild(totalDiv);
       const moreResultsDiv = document.createElement('div');
-
-      if (total?.value > pageSize) {
-        if (tooltipTotal - pageSize > 0 || currentPage > 1) {
-          moreResultsDiv.innerHTML = `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${geohash}', pageSize: ${pageSize}, currentPage: ${currentPage--}, tooltipTotal: ${tooltipTotal - result['hits']['hits'].length || 0}})">Previous Results</a></p>`;
-        }
+      if (total?.value > pageSize && currentPage !== 0) {
+        moreResultsDiv.innerHTML = `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${geohash}', pageSize: ${pageSize}, currentPage: ${currentPage - 1}, nextPage: false})">Previous Results</a></p>`;
       }
-      if (total?.value > pageSize) {
-        if ((total?.value) > (tooltipTotal)) {
-          moreResultsDiv.innerHTML += `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${geohash}', pageSize: ${pageSize}, currentPage: ${currentPage++}, tooltipTotal: ${tooltipTotal + result['hits']['hits'].length || 0}})">Next Results</a></p>`;
-        }
+      if(result['hits']['hits'].length !== 0) {
+        moreResultsDiv.innerHTML += `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${geohash}', pageSize: ${pageSize}, currentPage: ${currentPage + 1}, nextPage: true})">Next Results</a></p>`;
       }
       hits.appendChild(moreResultsDiv);
     }
