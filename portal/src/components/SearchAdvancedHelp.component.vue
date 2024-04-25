@@ -7,7 +7,7 @@
       The information entered in the Advanced Search text field is treated as part of a 'mini-language':
     </p>
     <p>
-      - The query string is parsed into a series of search terms and operators.
+      - Your query specifications across multiple lines will be compiled as a single query string consisting of a series of search terms and operators which can be viewed by clicking the <i>Show Query</i> button.
     </p>
     <p>
       - In general, the search text is not case-sensitive. Exceptions to this are Boolean operators (see below).<br />
@@ -68,7 +68,7 @@
         <tr class="bg-gray-50">
           <td><code>^</code></td>
           <td>Boost operator that makes one term more relevant than another, e.g. <code class="literal backdrop-blur">quick^2
-        fox</code> to increase the relevance of “quick” or <code class="literal backdrop-blur">quick^0.5 fox</code> to
+        fox</code> to increase the relevance of 'quick' or <code class="literal backdrop-blur">quick^0.5 fox</code> to
             reduce it. The default boost value is 1, but can be any positive floating point number. Boosts between 0 and
             1
             reduce relevance.</td>
@@ -94,7 +94,7 @@
         <tr>
           <td><code>*</code></td>
           <td>Wildcard to replace zero or more characters. Wildcards cannot be included in a phrasal search. e.g. <code
-              class="literal backdrop-blur">gre*</code> will find instances of 'green', 'grew', 'greater', etc.
+              class="literal backdrop-blur">gre*</code> will find instances of 'green', 'grew', 'greater', etc. This wildcard can also be used to find related word forms e.g. <code>ask*</code> will find instances of 'ask', 'asks', 'asked' and 'asking'.
           </td>
         </tr>
         <tr>
