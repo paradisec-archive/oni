@@ -603,27 +603,37 @@ export default {
               pageSize: this.pageSize,
               currentPage: this.currentPage
             });
+            const total = result['hits']['total'];
+            const tooltipView = document.createElement('div');
+            const totalDiv = document.createElement('div');
+            totalDiv.innerHTML = `<div class="m-2"><p>Total: ${total?.value}</p></div>`;
+            tooltipView.appendChild(totalDiv);
+            const pages = Math.ceil((total?.value || 0) / this.pageSize);
+            const moreResultsDiv = document.createElement('div');
+            if (total?.value > this.pageSize) {
+              moreResultsDiv.className = 'inline-flex rounded-md shadow-sm';
+              for (let i = 0; i < pages; i++) {
+                moreResultsDiv.innerHTML += `<a class="px-4 py-2 text-sm font-medium text-blue-700 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${data.key}', pageSize: ${this.pageSize}, currentPage: ${i}, nextPage: ${i + 1}})">${i + 1}</a>`;
+              }
+              tooltipView.appendChild(moreResultsDiv);
+            }
+            const divider = document.createElement('div');
+            divider.className = 'my-2';
+            divider.innerHTML = '<hr class="divide-y divide-gray-500"/>';
+            tooltipView.appendChild(divider);
             const hits = document.createElement('div');
             hits.id = 'tooltip_open';
-            const total = result['hits']['total'];
             for (let hit of result['hits']['hits']) {
               const newDiv = document.createElement('div');
               newDiv.innerHTML = this.getInnerHTMLTooltip(hit['_source'], total);
               hits.appendChild(newDiv);
             }
-            const totalDiv = document.createElement('div');
-            totalDiv.innerHTML = `
-            <div class="m-2">
-              <p>Total: ${total?.value}</p>
-            </div>
-            `;
-            hits.appendChild(totalDiv);
+            tooltipView.appendChild(hits);
+            tooltipView.appendChild(totalDiv.cloneNode(true));
             if (total?.value > this.pageSize) {
-              const moreResultsDiv = document.createElement('div');
-              moreResultsDiv.innerHTML = `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${data.key}', pageSize: ${this.pageSize}, currentPage: 1, nextPage: true})">Show More Results</a></p>`;
-              hits.appendChild(moreResultsDiv);
+              tooltipView.appendChild(moreResultsDiv.cloneNode(true));
             }
-            this.tooltip.setContent(hits.outerHTML);
+            this.tooltip.setContent(tooltipView.outerHTML);
             this.tooltip.setLatLng(e.latlng);
             this.tooltip.addTo(this.tooltipLayers);
             this.markerSelected = true;
@@ -1059,21 +1069,21 @@ export default {
         }
       }
 
-      const totalDiv = document.createElement('div');
-      totalDiv.innerHTML = `
-      <div class="m-2">
-        <p>Total: ${total?.value}</p>
-      </div>
-        `;
-      hits.appendChild(totalDiv);
-      const moreResultsDiv = document.createElement('div');
-      if (total?.value > pageSize && currentPage !== 0) {
-        moreResultsDiv.innerHTML = `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${geohash}', pageSize: ${pageSize}, currentPage: ${currentPage - 1}, nextPage: false})">Previous Results</a></p>`;
-      }
-      if(result['hits']['hits'].length !== 0) {
-        moreResultsDiv.innerHTML += `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${geohash}', pageSize: ${pageSize}, currentPage: ${currentPage + 1}, nextPage: true})">Next Results</a></p>`;
-      }
-      hits.appendChild(moreResultsDiv);
+      // const totalDiv = document.createElement('div');
+      // totalDiv.innerHTML = `
+      // <div class="m-2">
+      //   <p>Total: ${total?.value}</p>
+      // </div>
+      //   `;
+      // hits.appendChild(totalDiv);
+      // const moreResultsDiv = document.createElement('div');
+      // if (total?.value > pageSize && currentPage !== 0) {
+      //   moreResultsDiv.innerHTML = `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${geohash}', pageSize: ${pageSize}, currentPage: ${currentPage - 1}, nextPage: false})">Previous Results</a></p>`;
+      // }
+      // if(result['hits']['hits'].length !== 0) {
+      //   moreResultsDiv.innerHTML += `<p><a class="cursor-pointer" onclick="oni_ui.updateGeoHashSearch({geohash: '${geohash}', pageSize: ${pageSize}, currentPage: ${currentPage + 1}, nextPage: true})">Next Results</a></p>`;
+      // }
+      // hits.appendChild(moreResultsDiv);
     }
   }
 }
