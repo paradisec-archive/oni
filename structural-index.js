@@ -10,7 +10,10 @@ const fetch = require('node-fetch');
     },
   };
   const structuralIndex = await fetch(`${apiHost}/admin/index/structural`, {method: 'POST', ...options});
-  console.log(structuralIndex.status);
-  const res = await structuralIndex.json();
-  console.log(res);
+  if (structuralIndex.status === 404) {
+    console.log('Cannot index');
+  } else {
+    const res = await structuralIndex.json();
+    console.log(res);
+  }
 })();
