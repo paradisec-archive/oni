@@ -441,7 +441,7 @@
         },
         "max_result_window": 100000,
         "highlight": {
-          "max_analyzed_offset": 1000000
+          "max_analyzer_offset": 1000000
         }
       },
       "fields": {

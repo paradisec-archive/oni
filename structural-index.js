@@ -9,7 +9,8 @@ const fetch = require('node-fetch');
       'Authorization': `Bearer ${adminToken}`,
     },
   };
-  const structuralIndex = await fetch(`${apiHost}/admin/database/index`, options);
+  const structuralIndex = await fetch(`${apiHost}/admin/index/structural`, {method: 'POST', ...options});
+  console.log(structuralIndex.status);
   const res = await structuralIndex.json();
   console.log(res);
 })();
