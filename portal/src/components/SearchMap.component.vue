@@ -146,7 +146,7 @@ import {
   toRaw,
   defineAsyncComponent
 } from "vue";
-import {first, isEmpty, orderBy} from 'lodash';
+import {clone, first, isEmpty, orderBy} from 'lodash';
 import SearchDetailElement from './SearchDetailElement.component.vue';
 import Geohash from "latlon-geohash";
 import SearchAggs from "./SearchAggs.component.vue";
@@ -193,13 +193,28 @@ L.SearchControl = L.Control.extend({
   onAdd: function (map) {
     const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-bottomcenter');
     const button = L.DomUtil.create('a', '', container);
-    button.innerHTML = '<div><h3 class="text-2xl">R</h3></div>';
+    button.innerHTML = '<div class="cursor-pointer">' +
+        '<?xml version="1.0" encoding="utf-8"?>\n' +
+        '\n' +
+        '<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->\n' +
+        '<svg width="30px" height="30px" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">\n' +
+        '\n' +
+        '<g fill="none" fill-rule="evenodd" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" transform="matrix(0 1 1 0 2.5 2.5)">\n' +
+        '\n' +
+        '<path d="m3.98652376 1.07807068c-2.38377179 1.38514556-3.98652376 3.96636605-3.98652376 6.92192932 0 4.418278 3.581722 8 8 8s8-3.581722 8-8-3.581722-8-8-8"/>\n' +
+        '\n' +
+        '<path d="m4 1v4h-4" transform="matrix(1 0 0 -1 0 6)"/>\n' +
+        '\n' +
+        '</g>\n' +
+        '\n' +
+        '</svg>' +
+        '</div>';
     button.className = 'leaflet-control-button-search'
     L.DomEvent.disableClickPropagation(button);
     L.DomEvent.on(button, 'click', () => {
-      alert('TODO reset search')
+      window.oni_ui.resetSearch();
     });
-    container.title = "Search Area";
+    container.title = "Reset Search";
     return container;
   }
 });
@@ -306,7 +321,8 @@ export default {
       changedFilters: false,
       errorDialogVisible: false,
       errorDialogText: '',
-      boundingBox: {
+      boundingBox: {},
+      initBoundingBox: {
         "topRight": {
           "lat": 37.160316546736766,
           "lon": -174.19921875
@@ -318,7 +334,11 @@ export default {
         bottomRight: {lat: -11.523088, lon: 162.649886},
         topLeft: {lat: -42.811522, lon: 108.649010}
       },
-      zoomLevel: 9,
+      initView: [-25, 134],
+      initZoom: 4,
+      minZoom: 3,
+      maxZoom: 18,
+      zoomLevel: 8,
       outOfBounds: 0,
       tooltip: undefined,
       pageSize: 10,
@@ -442,19 +462,20 @@ export default {
       putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
     },
     initMap() {
+      this.boundingBox = clone(this.initBoundingBox);
       this.searchFields = this.$store.state.configuration.ui.searchFields;
       this.geoHashLayer = L.featureGroup();
       this.tooltipLayers = L.layerGroup();
       this.map = L.map("map", {
         gestureHandling: true,
-        minZoom: 3, //Why does it stop working below 3?
-        maxZoom: 18, //18 is the max
+        minZoom: this.minZoom, //Why does it stop working below 3?
+        maxZoom: this.maxZoom, //18 is the max
         worldCopyJump: false, // this is weird if true because it jumps
       });
       //This below is a bit annoying because of the squares in the geohash some popups will not be visible
       //this.map.setMaxBounds([[84.67351256610522, -174.0234375], [-58.995311187950925, 223.2421875]]);
       //TODO: pass this via config. Center location and zoom level
-      this.map.setView([-25, 134], 3);
+      this.map.setView(this.initView, this.initZoom);
       L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
         continuousWorld: true // this doesnt seem to work
@@ -469,8 +490,7 @@ export default {
       const bottomRight = L.latLng(this.boundingBox.bottomRight);
       const bounds = L.latLngBounds(bottomRight, topLeft);
       console.log("bounds", JSON.stringify(bounds))
-      if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: this.zoomLevel});
-
+      if (bounds.isValid()) this.map.flyToBounds(bounds, {maxZoom: this.maxZoom});
     },
     clearLayers() {
       this.geoHashLayer.clearLayers();
@@ -567,6 +587,8 @@ export default {
 
       this.map.on('dragend', async (e) => {
         this.clearLayers();
+        this.tooltipLayers.clearLayers();
+        this.tooltip = undefined;
         await this.searchEvent();
       });
 
@@ -786,11 +808,11 @@ export default {
       }
       return precision;
     },
-    async searchEvent() {
+    async searchEvent(init) {
       this.zoomLevel = this.map.getZoom();
       this.currentPrecision = this.calculatePrecision(this.zoomLevel);
-      this.setMapBounds();
-      await this.updateRoutes({});
+      this.setMapBounds(init);
+      await this.updateRoutes({updateFilters: init});
     },
     // Approximate the radius in meters of a geohash
     geohashRadius(geohash) {
@@ -884,7 +906,7 @@ export default {
       return orderBy(a, 'order');
     },
     enableAdvancedSearch() {
-      alert('not enabled for Map Search yet, coming soon!')
+      alert('Advanced Search is not available for Map Search')
     },
     onInputChange(value) {
       this.searchInput = value;
@@ -957,6 +979,7 @@ export default {
       query.z = this.zoomLevel;
       query.p = this.currentPrecision;
       query.bb = encodeURIComponent(JSON.stringify(this.boundingBox));
+      console.log(JSON.stringify(this.boundingBox));
       query.r = uuid();
       await this.$router.push({path: 'map', query, replace: false});
     },
@@ -967,8 +990,20 @@ export default {
       this.filters[id] = checkedBuckets;
       await this.updateRoutes({updateFilters: true});
     },
-    resetSearch() {
-      console.log('TODO: reset search');
+    async resetSearch() {
+      console.log(this.boundingBox)
+      this.map.setZoom(this.initZoom);
+      this.map.setView(this.initView, this.initZoom);
+      this.zoomLevel = this.initZoom;
+      this.boundingBox = this.initBoundingBox;
+      this.currentPrecision = undefined;
+      const topLeft = L.latLng(this.boundingBox.topLeft);
+      const bottomRight = L.latLng(this.boundingBox.bottomRight);
+      const bounds = L.latLngBounds(bottomRight, topLeft);
+      this.map.fitBounds(bounds, {maxZoom: this.maxZoom});
+      this.filters = {};
+      this.searchInput = '';
+      await this.searchEvent(true);
     },
     async clearFilters() {
       this.filters = {};
@@ -998,7 +1033,11 @@ export default {
         return string;
       }
     },
-    setMapBounds() {
+    setMapBounds(init) {
+      if (init) {
+        this.boundingBox = this.initBoundingBox;
+        console.log('init bounds', init)
+      }
       const bounds = this.map.getBounds();
       if (bounds.isValid()) {
         this.boundingBox = {
