@@ -22,6 +22,7 @@
     "octokit": "^2.0.5",
     "ro-crate": "^3.2.1",
     "sanitize-filename": "^1.6.3",
+    "vue-head": "^2.2.0",
     "winston": "^3.3.3"
   }
 }

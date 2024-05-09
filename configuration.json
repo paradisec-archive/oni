@@ -19,7 +19,11 @@
       "citationText": "CITE AS: Oni Platform. A project with co-investment from Australian Research Data Commons, The University of Queensland, The University of Melbourne, The University of Sydney, Monash University, First Languages Australia and AARNet."
     },
     "subHelpLinks": [
-      {"name": "Example Link", "href":"https://www.example.com", "target":"_blank"}
+      {
+        "name": "Example Link",
+        "href": "https://www.example.com",
+        "target": "_blank"
+      }
     ],
     "terms": {
       "text": "Example terms of service",
@@ -28,7 +32,7 @@
     },
     "privacy": {
       "text": "Example privacy notice",
-      "href":"/privacy",
+      "href": "/privacy",
       "title": "Privacy Notice"
     },
     "email": {
@@ -68,31 +72,60 @@
       "enforced": false,
       "URL": "https://registry-test.ldaca.edu.au/registry/co_petitions/start/coef:9"
     },
-    "topNavItems": [ {
-      "route": "search?f=%257B%2522%2540type%2522%253A%255B%2522RepositoryCollection%2522%255D%252C%2522_isTopLevel.%2540value%2522%253A%255B%2522true%2522%255D%257D",
-      "display": "Top Collections"
-    }, {
-      "route": "search?f=%257B%2522%2540type%2522%253A%255B%2522RepositoryCollection%2522%255D%257D",
-      "display": "Collections"
-    },
+    "topNavItems": [
+      {
+        "route": "search?f=%257B%2522%2540type%2522%253A%255B%2522RepositoryCollection%2522%255D%252C%2522_isTopLevel.%2540value%2522%253A%255B%2522true%2522%255D%257D",
+        "display": "Top Collections"
+      },
+      {
+        "route": "search?f=%257B%2522%2540type%2522%253A%255B%2522RepositoryCollection%2522%255D%257D",
+        "display": "Collections"
+      },
       {
         "route": "/search?f=%257B%2522%2540type%2522%253A%255B%2522SoftwareApplication%2522%255D%257D",
         "display": "Notebooks"
-      }],
+      }
+    ],
     "search": {
       "sorting": [
-        {"value": "relevance", "label": "Relevance"},
-        {"value": "_isTopLevel.@value.keyword", "label": "Collections"},
-        {"value": "name", "label": "Name", "field": "name.@value.keyword"}
+        {
+          "value": "relevance",
+          "label": "Relevance"
+        },
+        {
+          "value": "_isTopLevel.@value.keyword",
+          "label": "Collections"
+        },
+        {
+          "value": "name",
+          "label": "Name",
+          "field": "name.@value.keyword"
+        }
       ],
-      "searchSorting": {"value": "relevance", "label": "Relevance"},
+      "searchSorting": {
+        "value": "relevance",
+        "label": "Relevance"
+      },
       "ordering": [
-        {"value": "asc", "label": "Ascending"},
-        {"value": "desc", "label": "Descending"}
+        {
+          "value": "asc",
+          "label": "Ascending"
+        },
+        {
+          "value": "desc",
+          "label": "Descending"
+        }
       ],
-      "defaultOrder": {"value": "desc", "label": "Descending"},
+      "defaultOrder": {
+        "value": "desc",
+        "label": "Descending"
+      },
       "searchDetails": [
-        {"field": "language", "label": "Language", "name": "language.name.@value"}
+        {
+          "field": "language",
+          "label": "Language",
+          "name": "language.name.@value"
+        }
       ]
     },
     "main": {
@@ -126,6 +159,66 @@
         "speaker",
         "author",
         "citation"
+      ]
+    },
+    "head": {
+      "meta": [
+        {
+          "name": "dc.title",
+          "content": "name"
+        },
+        {
+          "name": "dc.description",
+          "content": "description"
+        },
+        {
+          "name": "dc.creator",
+          "content": "creator"
+        },
+        {
+          "name": "dc.contributor",
+          "content": "contributor"
+        },
+        {
+          "name": "dc.date",
+          "content": "datePublished"
+        },
+        {
+          "name": "dc.coverage",
+          "content": "temporalCoverage"
+        },
+        {
+          "name": "dc.language",
+          "content": "language"
+        },
+        {
+          "name": "dc.identifier",
+          "content": "@id"
+        },
+        {
+          "name": "dc.publisher",
+          "content": "publisher"
+        },
+        {
+          "name": "dc.description",
+          "content": "description"
+        },
+        {
+          "name": "dc.type",
+          "content": "@type"
+        },
+        {
+          "name": "dc.type",
+          "content": "materialType"
+        },
+        {
+          "name": "dc.license",
+          "content": "license"
+        },
+        {
+          "name": "dc.date",
+          "content": "dateCreated"
+        }
       ]
     },
     "collection": {
@@ -175,7 +268,13 @@
         "displayHasMember": false,
         "displayHasPart": true
       },
-      "relationships": [{"name":"notebook", "display":"Notebooks", "type":"SoftwareApplication"}]
+      "relationships": [
+        {
+          "name": "notebook",
+          "display": "Notebooks",
+          "type": "SoftwareApplication"
+        }
+      ]
     },
     "object": {
       "name": {
@@ -333,8 +432,10 @@
     "authorization": {
       "provider": "rems",
       "enrollment": {
-        "enforced":  false,
-        "groups": ["CO:Members:all"],
+        "enforced": false,
+        "groups": [
+          "CO:Members:all"
+        ],
         "URL": "https://registry-test.ldaca.edu.au/registry/co_petitions/start/coef:9"
       },
       "rems": {
@@ -440,13 +541,34 @@
         }
       },
       "fields": {
-        "name.@value": {"label": "Name", "checked": true},
-        "description.@value": {"label": "Description", "checked": true},
-        "language.name.@value": {"label": "Language", "checked": true},
-        "language.alternateName.@value": {"label": "Alternate Language Name", "checked": true},
-        "contributor.@value": {"label": "Contributor", "checked": true},
-        "creator.@value": {"label": "Creator", "checked": true},
-        "_text": {"label": "Text", "checked": true}
+        "name.@value": {
+          "label": "Name",
+          "checked": true
+        },
+        "description.@value": {
+          "label": "Description",
+          "checked": true
+        },
+        "language.name.@value": {
+          "label": "Language",
+          "checked": true
+        },
+        "language.alternateName.@value": {
+          "label": "Alternate Language Name",
+          "checked": true
+        },
+        "contributor.@value": {
+          "label": "Contributor",
+          "checked": true
+        },
+        "creator.@value": {
+          "label": "Creator",
+          "checked": true
+        },
+        "_text": {
+          "label": "Text",
+          "checked": true
+        }
       },
       "aggregations": [
         {
@@ -575,7 +697,6 @@
       "object": "https://w3id.org/ldac/profile#Object",
       "notebook": "https://w3id.org/ldac/profile#Notebook"
     },
-    "skipByMatch": [
-    ]
+    "skipByMatch": []
   }
 }
