@@ -255,9 +255,7 @@ export default {
         let value;
         if (this.metadata[field.content]) {
           value = this.metadata[field.content];
-        } else {
-          value = [{ '@value': 'Not Defined' }];
-        }
+        } 
         this.metaTags.push({
           name: field.name,
           value: value,
