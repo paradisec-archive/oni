@@ -652,6 +652,9 @@ export default {
               hits.appendChild(newDiv);
             }
             tooltipView.appendChild(hits);
+            if (total?.value > this.pageSize) {
+              tooltipView.appendChild(moreResultsDiv.cloneNode(true));
+            }
             this.tooltip.setContent(tooltipView.outerHTML);
             this.tooltip.setLatLng(e.latlng);
             this.tooltip.addTo(this.tooltipLayers);
