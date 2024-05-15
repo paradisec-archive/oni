@@ -99,6 +99,7 @@
         </div>
       </div>
       <div id="map" class="flex-1 h-[calc(100vh-200px)]" v-once></div>
+      <p class="text-sm">This map is not designed or suitable for Native Title research.</p>
     </el-col>
   </el-row>
   <el-dialog v-model="errorDialogVisible" width="40%" center>
@@ -651,10 +652,6 @@ export default {
               hits.appendChild(newDiv);
             }
             tooltipView.appendChild(hits);
-            tooltipView.appendChild(totalDiv.cloneNode(true));
-            if (total?.value > this.pageSize) {
-              tooltipView.appendChild(moreResultsDiv.cloneNode(true));
-            }
             this.tooltip.setContent(tooltipView.outerHTML);
             this.tooltip.setLatLng(e.latlng);
             this.tooltip.addTo(this.tooltipLayers);
@@ -721,11 +718,11 @@ export default {
       if (innerHTMLMemberOf) {
         innerHTML += `
             <div :align="'middle'" v-if="" class="">
-            <p class="font-normal text-gray-700">
+            <span class="font-normal text-gray-700">
                 Member of:&nbsp;
-            <div class="flex flex-wrap">
+            <span class="inline-flex flex-wrap">
                 ${innerHTMLMemberOf}
-            </div>
+            </span>
              </p>`;
       }
       innerHTML += `

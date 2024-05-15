@@ -19,8 +19,7 @@ const configuration = merge(common, {
       '/api/**': {
         target: 'http://[::1]:8080',
         ws: true,
-        changeOrigin: true,
-        pathRewrite: { '^/api': '' } // This instead of nginx proxy
+        changeOrigin: true
       }
     }
   }
