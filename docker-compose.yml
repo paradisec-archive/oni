@@ -27,10 +27,20 @@ services:
       - postgres_data:/postgresql
     ports:
       - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d oni" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   api:
     restart: always
     image: rrkive/oni:2.0.0
+    depends_on:
+      db:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
     hostname: api
     tty: true
     environment:
@@ -45,11 +55,10 @@ services:
       SEARCH_HOST: "opensearch"
     volumes:
       - ./configuration.json:/srv/configuration.json
-      - ./wait-for-it.sh:/wait-for-it.sh
       - /opt/storage/oni:/opt/storage/oni
     ports:
       - "8080:8080"
-    command: ["/wait-for-it.sh", "db:5432", "-t", "20", "opensearch:9200", "-t", "20", "--", "npm","run", "prod"]
+    command: [ "npm", "run", "prod" ]
 
   opensearch:
     restart: always
@@ -68,3 +77,8 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5

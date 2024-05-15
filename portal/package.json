@@ -15,7 +15,7 @@
     "Portal"
   ],
   "author": "Moises Sacal",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "dependencies": {
     "@element-plus/icons-vue": "2.0.10",
     "@fortawesome/fontawesome-svg-core": "^6.1.2",
