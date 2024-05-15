@@ -388,14 +388,14 @@
   "api": {
     "bootstrap": false,
     "log": {
-      "logFolder": "/home/mark/corpus-tools-ausnc-md/opt/storage/oni/logs"
+      "logFolder": "/opt/storage/oni/logs"
     },
     "host": "http://localhost:8080",
     "ocfl": {
-      "ocflPath": "/home/mark/corpus-tools-ausnc-md/opt/storage/oni/ocfl",
-      "ocflScratch": "/home/mark/corpus-tools-ausnc-md/opt/storage/oni/scratch-ocfl",
-      "ocflTestPath": "/home/mark/corpus-tools-ausnc-md/opt/storage/oni/test/ocfl",
-      "ocflTestScratch": "/home/mark/corpus-tools-ausnc-md/opt/storage/oni/test/scratch-ocfl",
+      "ocflPath": "/opt/storage/oni/ocfl",
+      "ocflScratch": "/opt/storage/oni/scratch-ocfl",
+      "ocflTestPath": "/opt/storage/oni/test/ocfl",
+      "ocflTestScratch": "/opt/storage/oni/test/scratch-ocfl",
       "catalogFilename": "ro-crate-metadata.json",
       "hashAlgorithm": "md5",
       "create": {
