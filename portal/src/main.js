@@ -18,7 +18,8 @@ import 'element-plus/dist/index.css'
 import {MankuIcon} from "manku-icon-lib";
 import log from "loglevel";
 import prefix from "loglevel-plugin-prefix";
-import VuePapaParse from 'vue-papa-parse'
+import VuePapaParse from 'vue-papa-parse';
+import { VueHeadMixin, createHead } from '@unhead/vue';
 
 const level = process.env.NODE_ENV === "development" ? "debug" : "warn";
 log.setLevel(level);
@@ -33,6 +34,9 @@ import VueGtag from "vue-gtag";
 
 (async () => {
   const app = createApp(App);
+  const head = createHead();
+  app.mixin(VueHeadMixin);
+  app.use(head);
   app.use(store);
   app.use(router);
   app.use(ElementPlus);

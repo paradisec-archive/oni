@@ -2,34 +2,30 @@
   <div class="px-10 pt-10 pb-7 bg-white z-10">
     <el-row :align="'middle'" class="mb-2 text-3xl font-medium dark:text-white">
       <h5>
-        <member-of-link :memberOf="metadata?._memberOf"/>
+        <member-of-link :memberOf="metadata?._memberOf" />
         {{ first(this.name)?.['@value'] }}
       </h5>
     </el-row>
-    <hr class="divider divider-gray pt-2"/>
+    <hr class="divider divider-gray pt-2" />
   </div>
   <el-row :justify="'center'" v-if="this.metadata" class="m-5 pt2 px-10 pb-7">
     <el-col :xs="24" :sm="24" :md="14" :lg="16" :xl="16">
-      <MetaTopCard :tops="this.tops" :className="'px-5 py-2'"/>
+      <MetaTopCard :tops="this.tops" :className="'px-5 py-2'" />
       <el-row class="px-5">
         <el-col v-for="meta of this.meta">
-          <meta-field :meta="meta" :routePath="'collection'" :crateId="this.$route.query._crateId"/>
+          <meta-field :meta="meta" :routePath="'collection'" :crateId="this.$route.query._crateId" />
         </el-col>
       </el-row>
       <el-row v-if="collectionSubCollections">
         <el-col>
-          <collection-members :title="'Sub Collections'"
-                              :id="$route.query.id"
-                              :conformsTo="conformsToCollection"
-                              :routePath="'collection'"/>
+          <collection-members :title="'Sub Collections'" :id="$route.query.id" :conformsTo="conformsToCollection"
+            :routePath="'collection'" />
         </el-col>
       </el-row>
       <el-row>
         <el-col v-if="collectionMembers">
-          <collection-members :title="'Objects in Collection'"
-                              :id="$route.query.id"
-                              :conformsTo="conformsToObject"
-                              :routePath="'object'"/>
+          <collection-members :title="'Objects in Collection'" :id="$route.query.id" :conformsTo="conformsToObject"
+            :routePath="'object'" />
         </el-col>
       </el-row>
     </el-col>
@@ -38,33 +34,32 @@
         <el-col>
           <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
             <h5 class="text-2xl font-medium">Access</h5>
-            <hr class="divider divider-gray pt-2"/>
+            <hr class="divider divider-gray pt-2" />
             <h4 class="text-1xl font-medium">
               Content in this collection is licensed as:
             </h4>
             <PropertySummaryCard
-                :aggregations="{ 'license.name.@value': { 'terms': { 'field': 'license.name.@value.keyword', 'size': '1000' } } }"
-                :fields="[{'name':'license.@id', 'display': 'Licenses'}]" :name="'license.@id'"
-                :fieldName="'license'" :external="true" :id="this.$route.query.id" :root="this.metadata._root"/>
+              :aggregations="{ 'license.name.@value': { 'terms': { 'field': 'license.name.@value.keyword', 'size': '1000' } } }"
+              :fields="[{ 'name': 'license.@id', 'display': 'Licenses' }]" :name="'license.@id'" :fieldName="'license'"
+              :external="true" :id="this.$route.query.id" :root="this.metadata._root" />
           </el-card>
         </el-col>
       </el-row>
       <el-row :gutter="20" class="pb-5" v-if="metadata?._memberOf && metadata?._memberOf.length > 0">
         <el-col>
-          <MemberOfCard :routePath="'collection'" :_memberOf="metadata?._memberOf"/>
+          <MemberOfCard :routePath="'collection'" :_memberOf="metadata?._memberOf" />
         </el-col>
       </el-row>
       <el-row :gutter="20" class="pb-5">
         <el-col>
           <el-card :body-style="{ padding: '0px' }" class="grid mx-10 p-5">
             <h5 class="text-2xl font-medium">Content</h5>
-            <hr class="divider divider-gray pt-2"/>
+            <hr class="divider divider-gray pt-2" />
             <SummariesCard :aggregations="aggregations" :fields="fields || []" :name="'summaries'"
-                           :id="this.$route.query.id" :root="this.metadata._root"/>
+              :id="this.$route.query.id" :root="this.metadata._root" />
             <SummariesCard :aggregations="aggregations"
-                           :fields="[{ 'name': 'license.name.@value', 'display': 'Data licenses for access' }]"
-                           :name="'licenses'"
-                           :id="this.$route.query.id" :root="this.metadata._root"/>
+              :fields="[{ 'name': 'license.name.@value', 'display': 'Data licenses for access' }]" :name="'licenses'"
+              :id="this.$route.query.id" :root="this.metadata._root" />
           </el-card>
         </el-col>
       </el-row>
@@ -72,18 +67,14 @@
         <el-col>
           <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
             <h5 class="text-2xl font-medium">Retrieve Metadata</h5>
-            <hr class="divider divider-gray pt-2"/>
-            <RetrieveDataMetadata :id="this.$route.query.id"/>
+            <hr class="divider divider-gray pt-2" />
+            <RetrieveDataMetadata :id="this.$route.query.id" />
             <template v-if="metadata._metadataLicense?.id">
-              <hr class="divider divider-gray mt-4 pb-2"/>
+              <hr class="divider divider-gray mt-4 pb-2" />
               <h4 class="text-1xl font-medium">
                 Metadata licensed as:
-                <el-link underline="underline"
-                         :underline="true"
-                         type="primary"
-                         :href="metadata._metadataLicense?.id"
-                         target="_blank"
-                         class="mx-1">
+                <el-link underline="underline" :underline="true" type="primary" :href="metadata._metadataLicense?.id"
+                  target="_blank" class="mx-1">
                   {{ metadata._metadataLicense?.name || metadata._metadataLicense?.id }}
                 </el-link>
               </h4>
@@ -95,9 +86,9 @@
         <el-col>
           <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
             <h5 class="text-2xl font-medium ">{{ relationship.display }}</h5>
-            <hr class="divider divider-gray pt-2"/>
+            <hr class="divider divider-gray pt-2" />
             <SimpleRelationshipCard :id="this.$route.query.id" :objectType="relationship.type"
-                                    :objectName="relationship.name"/>
+              :objectName="relationship.name" />
           </el-card>
         </el-col>
       </el-row>
@@ -105,8 +96,8 @@
   </el-row>
 </template>
 <script>
-import {first, isUndefined, isEmpty, reject, sortBy} from "lodash";
-import {defineAsyncComponent} from 'vue';
+import { first, isUndefined, isEmpty, reject, sortBy } from "lodash";
+import { defineAsyncComponent } from 'vue';
 import MetaField from "./MetaField.component.vue";
 import LicenseCard from "./cards/LicenseCard.component.vue"
 import MemberOfCard from './cards/MemberOfCard.component.vue';
@@ -118,7 +109,7 @@ import MemberOfLink from './widgets/MemberOfLink.component.vue';
 import MetaTopCard from './cards/MetaTopCard.component.vue';
 import SummariesCard from './cards/SummariesCard.component.vue';
 import PropertySummaryCard from './cards/PropertySummaryCard.component.vue'
-import {putLocalStorage} from '@/storage';
+import { putLocalStorage } from '@/storage';
 
 export default {
   components: {
@@ -129,7 +120,7 @@ export default {
     SimpleRelationshipCard,
     MetaField,
     CollectionMembers: defineAsyncComponent(() =>
-        import("@/components/CollectionMembers.component.vue")
+      import("@/components/CollectionMembers.component.vue")
     ),
     LicenseCard,
     MemberOfCard,
@@ -138,17 +129,55 @@ export default {
     MemberOfLink
   },
   props: [],
+
+  head() {
+    let metaArr = []
+    for (let meta of this.metaTags || []) {
+      if (Array.isArray(meta.value)) {
+        for (let item of meta.value) {
+          if (item.name) {
+            for (let name of item.name) {
+              let obj = {
+                name: meta.name,
+                content: name["@value"].trim() || name
+              };
+              metaArr.push(obj);
+            }
+          } else {
+            let obj = {
+              name: meta.name,
+              content: item["@value"] || item
+            };
+            metaArr.push(obj);
+          }
+        }
+      } else {
+        let obj = {
+          name: meta.name,
+          content: meta.value
+        };
+        metaArr.push(obj);
+      }
+    }
+    return {
+      meta: metaArr
+    }
+
+  },
+
   data() {
     return {
       id: null,
       config: this.$store.state.configuration.ui.collection,
       fields: this.$store.state.configuration.ui.main.fields,
       helpers: this.$store.state.configuration.ui.helpers || [],
+      configTag: this.$store.state.configuration.ui.head || {},
       metadata: {},
       name: '',
       license: [],
       tops: [],
       meta: [],
+      metaTags: [],
       buckets: [],
       conformsToCollection: this.$store.state.configuration.ui.conformsTo?.collection,
       conformsToObject: this.$store.state.configuration.ui.conformsTo?.object,
@@ -165,15 +194,16 @@ export default {
       const crateId = encodeURIComponent(this.$route.query._crateId);
       //encodeURIComponent may return "undefined" string
       if (isUndefined(id) || id === "undefined" || isUndefined(crateId) || crateId === "undefined") {
-        await this.$router.push({path: '/404'});
+        await this.$router.push({ path: '/404' });
       } else {
         const metadata = await this.$elasticService.single({
           id: id,
           _crateId: crateId
         });
         this.metadata = metadata?._source;
-        //console.log('DEBUG COLLECTION');
-        //console.log(this.metadata);
+        console.log('DEBUG COLLECTION');
+        console.log(this.metadata);
+        // process.exit();
         if (!isEmpty(this.metadata)) {
           await this.populate();
           this.collectionSubCollections = await this.filter({
@@ -184,11 +214,11 @@ export default {
             '_memberOf.@id': [this.$route.query.id],
             'conformsTo.@id': [this.conformsToObject]
           }, true);
-          const summaries = await this.filter({'_collectionStack.@id': [this.$route.query.id]});
+          const summaries = await this.filter({ '_collectionStack.@id': [this.$route.query.id] });
           this.aggregations = summaries.aggregations;
-          putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
+          putLocalStorage({ key: 'lastRoute', data: this.$route.fullPath });
         } else {
-          await this.$router.push({path: '/404'});
+          await this.$router.push({ path: '/404' });
         }
       }
     } catch (e) {
@@ -196,8 +226,9 @@ export default {
     }
   },
   updated() {
-    putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
+    putLocalStorage({ key: 'lastRoute', data: this.$route.fullPath });
   },
+
   methods: {
     first,
     isEmpty,
@@ -205,8 +236,33 @@ export default {
       this.populateName(this.config.name);
       this.populateTop(this.config.top);
       this.populateMeta(this.config.meta);
+      this.populateMetaTags(this.configTag?.meta);
       this.populateLicense();
       await this.populateBuckets()
+    },
+    populateMetaTags(config = []) {
+      for (let field of config) {
+        let helper = this.helpers.find(h => h.id === field.name);
+        if (!helper) {
+          helper = {
+            "id": field.content,
+            "display": field.name,
+            "url": "",
+            "definition": "TODO: Add definition"
+          }
+        }
+
+        let value;
+        if (this.metadata[field.content]) {
+          value = this.metadata[field.content];
+        } 
+        this.metaTags.push({
+          name: field.name,
+          value: value,
+          help: helper
+        })
+      }
+      //see populateTop
     },
     populateName(config) {
       this.name = this.metadata[config.name];
@@ -227,7 +283,7 @@ export default {
         if (this.metadata[field.name]) {
           value = this.metadata[field.name]
         } else {
-          value = [{'@value': 'Not Defined'}];
+          value = [{ '@value': 'Not Defined' }];
         }
         this.tops.push({
           name: field.display,
@@ -249,7 +305,7 @@ export default {
             "definition": "TODO: Add definition"
           }
         }
-        this.meta.push({name: filter, data: this.metadata[filter], help: helper});
+        this.meta.push({ name: filter, data: this.metadata[filter], help: helper });
       }
       this.meta = sortBy(this.meta, 'name');
     },
@@ -258,19 +314,20 @@ export default {
     },
     async populateBuckets() {
       const items = await this.$elasticService.multi({
-        filters: {'_memberOf.@id': [this.$route.query.id]}, sort: 'relevance', order: 'desc'
+        filters: { '_memberOf.@id': [this.$route.query.id] }, sort: 'relevance', order: 'desc'
       });
       const aggregations = items?.aggregations;
       this.buckets = []
       for (let field of this.fields) {
         if (aggregations[field.name]) {
-          this.buckets.push({field: field.display, buckets: aggregations[field.name]?.buckets});
+          this.buckets.push({ field: field.display, buckets: aggregations[field.name]?.buckets });
         }
       }
     },
+
     //TODO: refactor this integrate to multi
     async filter(filters, scroll) {
-      const items = await this.$elasticService.multi({scroll, filters, sort: 'relevance', order: 'desc'});
+      const items = await this.$elasticService.multi({ scroll, filters, sort: 'relevance', order: 'desc' });
       if (items?.hits?.hits.length > 0) {
         return {
           data: items?.hits?.hits,
