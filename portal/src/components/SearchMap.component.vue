@@ -92,7 +92,13 @@
             </el-col>
             <el-col :span="2" class="m-2" :xs="4" :sm="5" :md="5" :lg="2" :xl="4">
               <el-button size="large" @click="showList()">
-                <span><font-awesome-icon icon="fa-solid fa-list"/>&nbsp;List view</span>
+                               <span>
+                  <font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;List search
+                <el-tooltip content="Viewing the results as map. Note that current search and filter options will be reset."
+                            placement="bottom-end" effect="light">
+                  <font-awesome-icon icon="fa fa-circle-question"/>
+                </el-tooltip>
+                </span>
               </el-button>
             </el-col>
           </el-row>

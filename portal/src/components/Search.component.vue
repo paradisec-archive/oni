@@ -96,9 +96,15 @@
               <span id="total_results"
                     class="my-1 mr-2" v-show="this.totals['value']">Total: <span>{{ this.totals['value'] }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
             </el-col>
-            <el-col :span="2" class="m-2" :xs="4" :sm="5" :md="5" :lg="2" :xl="4">
+            <el-col :span="4" class="m-2" :xs="4" :sm="5" :md="5" :lg="2" :xl="4">
               <el-button size="large" @click="showMap()">
-                <span><font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;Map view</span>
+                <span>
+                  <font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;Map search
+                <el-tooltip content="Viewing the results as list. Note that current search and filter options will be reset."
+                            placement="bottom-end" effect="light">
+                  <font-awesome-icon icon="fa fa-circle-question"/>
+                </el-tooltip>
+                </span>
               </el-button>
             </el-col>
           </el-row>
