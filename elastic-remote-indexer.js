@@ -41,8 +41,8 @@ const fetch = require("node-fetch");
     assert(Array.isArray(skipCollections), `${skipConfiguration} not an array of strings, please fix.`);
   }
   // Create an Indexer and index collections
-
-  const indexer = new Indexer({configuration, client});
+  const stop = undefined; //When debugging change stop to limit the indexing to a type integer
+  const indexer = new Indexer({configuration, client, stop});
   await indexer.getOauthToken();
   await indexer.findOcflObjects({memberOf: null, conformsTo: indexer.conformsToCollection, skip: skipCollections});
 })();
