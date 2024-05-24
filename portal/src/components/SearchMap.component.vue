@@ -90,7 +90,7 @@
               </span>
               <span v-if="errorText">error: {{ errorText }}</span>
             </el-col>
-            <el-col :span="2" class="m-2" :xs="4" :sm="5" :md="5" :lg="2" :xl="4">
+            <el-col :span="4" class="m-2" :xs="4" :sm="5" :md="5" :lg="2" :xl="4">
               <el-button size="large" @click="showList()">
                                <span>
                   <font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;List search
