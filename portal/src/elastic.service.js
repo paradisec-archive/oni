@@ -396,9 +396,10 @@ export default class ElasticService {
       filters,
       operation
     });
-    //Its a hack for now!
-    if (!boolQuery.bool.filter) boolQuery.bool.filter = {}
-    if(boolQuery.bool.filter.terms) {
+    if (!boolQuery.bool.filter) boolQuery.bool.filter = {};
+    if (boolQuery.bool.filter && boolQuery.bool.filter.length) { //if array
+        boolQuery.bool.must = boolQuery.bool.filter;
+    } else if (boolQuery.bool.filter.terms) {
       boolQuery.bool.must = {terms: boolQuery.bool.filter.terms};
     }
     boolQuery.bool.filter = {geo_bounding_box: geoBoundingBox};
@@ -408,7 +409,7 @@ export default class ElasticService {
     body['track_total_hits'] = true;
     //console.log("body", JSON.stringify(body));
     //console.log(body);
-    //console.log(JSON.stringify(body));
+    console.log(JSON.stringify(body));
     let response = await httpService.post({route, body});
     if (response.status !== 200) {
       //httpService.checkAuthorised({status: response.status});

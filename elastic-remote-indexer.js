@@ -1,15 +1,27 @@
 // const {Client} = require('@elastic/elasticsearch');
-const { Client } = require('@opensearch-project/opensearch');
+const {Client} = require('@opensearch-project/opensearch');
 const {Indexer} = require('./lib/Indexer-remote');
 const configuration = require('./configuration.json');
 const ocfl = require("@ocfl/ocfl-fs");
 const fs = require("fs-extra");
 const assert = require("assert");
 const fetch = require("node-fetch");
+let stop = undefined;
 
 (async () => {
-  console.log('Configuring elastic');
+  try {
+    //When debugging change stop to limit the indexing to a type integer
+    const args = process.argv;
+    if (args[2]) {
+      stop = parseInt(args[2]);
+      console.log('Indexer will stop at: ', stop);
+    }
+  } catch (e) {
+    console.log('Usage: node elastic-remote-indexer.js <STOP_AT_X>');
+    console.log('Wrong arguments, indexer will not stop');
+  }
   // Init elastic client
+  console.log('Configuring elastic');
   const client = new Client({
     node: 'http://localhost:9200', //This is different from Oni since we are talking to it directly
   });
@@ -41,7 +53,6 @@ const fetch = require("node-fetch");
     assert(Array.isArray(skipCollections), `${skipConfiguration} not an array of strings, please fix.`);
   }
   // Create an Indexer and index collections
-  const stop = undefined; //When debugging change stop to limit the indexing to a type integer
   const indexer = new Indexer({configuration, client, stop});
   await indexer.getOauthToken();
   await indexer.findOcflObjects({memberOf: null, conformsTo: indexer.conformsToCollection, skip: skipCollections});
