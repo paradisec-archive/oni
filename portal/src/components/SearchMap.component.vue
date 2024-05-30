@@ -61,8 +61,8 @@
       <div class="pr-0">
         <div class="top-20 z-10 bg-white pb-3">
           <el-row :align="'middle'" class="mt-4 pb-2 border-0 border-b-[2px] border-solid border-red-700 text-2xl">
-            <el-col :span="20" class="m-2" :xs="18" :sm="17" :md="17" :lg="20" :xl="18">
-              <el-button-group class="mr-1">
+            <el-col :xs="24" :sm="24" :md="18" :lg="18" :xl="16">
+              <el-button-group class="">
                 <el-button type="warning" v-show="changedFilters" @click="updateRoutes({updateFilters: true})">Apply
                   Filters
                 </el-button>
@@ -90,18 +90,27 @@
               </span>
               <span v-if="errorText">error: {{ errorText }}</span>
             </el-col>
-            <el-col :span="4" class="m-2" :xs="4" :sm="5" :md="5" :lg="2" :xl="4">
+            <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
               <el-button size="large" @click="showList()">
                                <span>
                   <font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;List search
-                <el-tooltip content="Viewing the results as map. Note that current search and filter options will be reset."
-                            placement="bottom-end" effect="light">
+                <el-tooltip
+                    content="Viewing the results as map. Note that current search and filter options will be reset."
+                    placement="bottom-end" effect="light">
                   <font-awesome-icon icon="fa fa-circle-question"/>
                 </el-tooltip>
                 </span>
               </el-button>
             </el-col>
+            <el-col>
+              <p class="text-sm">
+                <font-awesome-icon icon="fa fa-triangle-exclamation"/>
+                Filter and Search results will only show results on the current map view, move or resize the map
+                to view other results.
+              </p>
+            </el-col>
           </el-row>
+
         </div>
       </div>
       <div id="map" class="flex-1 h-[calc(100vh-200px)]" v-once></div>

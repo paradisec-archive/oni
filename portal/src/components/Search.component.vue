@@ -71,7 +71,7 @@
       <div class="pr-0">
         <div class="top-20 z-10 bg-white pb-3">
           <el-row :align="'middle'" class="mt-4 pb-2 border-0 border-b-[2px] border-solid border-red-700 text-2xl">
-            <el-col :span="20" class="m-2" :xs="18" :sm="17" :md="17" :lg="20" :xl="18">
+            <el-col :xs="24" :sm="24" :md="18" :lg="18" :xl="16">
               <el-button-group class="mr-1">
                 <el-button type="warning" v-show="changedFilters" @click="updateRoutes({updateFilters: true})">Apply
                   Filters
@@ -96,7 +96,7 @@
               <span id="total_results"
                     class="my-1 mr-2" v-show="this.totals['value']">Total: <span>{{ this.totals['value'] }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
             </el-col>
-            <el-col :span="4" class="m-2" :xs="4" :sm="5" :md="5" :lg="2" :xl="4">
+            <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
               <el-button size="large" @click="showMap()">
                 <span>
                   <font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;Map search
