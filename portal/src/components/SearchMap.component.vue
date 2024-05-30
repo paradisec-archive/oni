@@ -95,7 +95,7 @@
                                <span>
                   <font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;List search
                 <el-tooltip
-                    content="Viewing the results as map. Note that current search and filter options will be reset."
+                    content="View the results as a list. Note that current search and filter options will be reset."
                     placement="bottom-end" effect="light">
                   <font-awesome-icon icon="fa fa-circle-question"/>
                 </el-tooltip>

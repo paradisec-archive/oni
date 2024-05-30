@@ -92,14 +92,14 @@
       ],
       "defaultOrder": {"value": "desc", "label": "Descending"},
       "searchDetails": [
-        {"field": "language", "label": "Language", "name": "language.name.@value"}
+        {"field": "inLanguage", "label": "Language", "name": "inLanguage.name.@value"}
       ]
     },
     "main": {
       "fields": [
         {
           "display": "Language",
-          "name": "language.name.@value"
+          "name": "inLanguage.name.@value"
         },
         {
           "display": "Linguistic Genre",
@@ -296,6 +296,11 @@
       "key": "XXX",
       "secret": "XXX"
     },
+    "origins": [{
+      "host": "https://catalog.paradisec.org.au",
+      "key": "XXX",
+      "secret": "XXX"
+    }],
     "bootstrap": false,
     "log": {
       "logFolder": "/opt/storage/oni/logs"
@@ -491,8 +496,8 @@
         {
           "display": "Language",
           "order": 4,
-          "name": "language.name.@value",
-          "field": "language.name.@value.keyword"
+          "name": "inLanguage.name.@value",
+          "field": "inLanguage.name.@value.keyword"
         },
         {
           "display": "Modality",

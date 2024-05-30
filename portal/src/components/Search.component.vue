@@ -100,7 +100,7 @@
               <el-button size="large" @click="showMap()">
                 <span>
                   <font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;Map search
-                <el-tooltip content="Viewing the results as list. Note that current search and filter options will be reset."
+                <el-tooltip content="View the results as a map. Note that current search and filter options will be reset."
                             placement="bottom-end" effect="light">
                   <font-awesome-icon icon="fa fa-circle-question"/>
                 </el-tooltip>
