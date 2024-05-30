@@ -41,7 +41,7 @@
           <div class="flex flex-wrap">
             <a v-for="mO of _memberOf"
                class="text-sm m-2 text-gray-700 dark:text-gray-300 underline"
-               :href="'/collection?id=' + mO?.['@id'] + '&_crateId=' + encodeURIComponent(mO?.['@id'])">
+               :href="'/collection?id=' + encodeURIComponent(mO?.['@id']) + '&_crateId=' + encodeURIComponent(mO?.['@id'])">
               {{ first(mO?.name)?.['@value'] || mO?.['@id'] }}
             </a>
           </div>
