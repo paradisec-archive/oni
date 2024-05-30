@@ -76,7 +76,7 @@
         <el-row v-if="types && types.includes('RepositoryCollection')">
           <span v-if="!isEmpty(subCollections)">Collections: {{ subCollections?.total }},&nbsp;</span>
           <span v-if="total > 0">Objects: {{ total }}</span>
-          <span v-if="typeFile">,&nbsp;Files: {{ typeFile?.['doc_count'] }}</span>
+          <span v-if="typeFile"><span v-if="total > 0">,&nbsp;</span>Files: {{ typeFile?.['doc_count'] }}</span>
         </el-row>
         <el-row :align="'middle'" v-if="highlight">
           <ul>
