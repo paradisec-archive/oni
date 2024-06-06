@@ -1,6 +1,6 @@
 {
   "name": "oni-ui-vue",
-  "version": "1.7.0",
+  "version": "2.0.0",
   "description": "A Generic Oni Discovery UI",
   "main": "babel.config.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "Portal"
   ],
   "author": "Moises Sacal",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "dependencies": {
     "@element-plus/icons-vue": "2.0.10",
     "@fortawesome/fontawesome-svg-core": "^6.1.2",
@@ -23,7 +23,8 @@
     "@fortawesome/free-regular-svg-icons": "^6.1.2",
     "@fortawesome/free-solid-svg-icons": "^6.1.2",
     "@fortawesome/vue-fontawesome": "^3.0.1",
-    "@jbtje/vue3pdf": "^2.0.0",
+    "@jbtje/vue3pdf": "^2.1.0",
+    "@opensearch-project/opensearch": "^2.5.0",
     "@tailwindcss/line-clamp": "^0.4.0",
     "@unhead/vue": "^1.9.9",
     "convert-size": "^1.2.1",
@@ -33,6 +34,7 @@
     "element-plus": "^2.2.2",
     "ipynb2html": "^0.3.0",
     "js-snip": "^1.1.0",
+    "latlon-geohash": "^2.0.0",
     "leaflet": "^1.9.4",
     "leaflet-editable": "^1.2.0",
     "leaflet-gesture-handling": "^1.2.2",

@@ -1,8 +1,11 @@
 <template>
-  <template v-if="name === '_location'">
+  <template v-if="name === '_contentLocation'">
+    {{field}}
     <LeafletMap class="h-72 flex grow min-w-[200px] mr-4"
                 :modelValue="fieldMap"
-                :transformer="transformer"></LeafletMap>
+                :transformer="transformer"
+                :enableDrawing="false"></LeafletMap>
+    <p class="text-sm">This map is not designed or suitable for Native Title research.</p>
   </template>
   <template v-else>
     <template v-if="isURL">
@@ -44,7 +47,7 @@ export default {
   },
   mounted() {
     if (this.field) {
-      if (this.name === '_location') {
+      if (this.name === '_contentLocation' || this.name === '_spatialCoverage') {
         this.fieldMap = {'@type': ['Geometry'], asWKT: [this.field]};
       } else {
         this.isURL = this.testURL(this.field)

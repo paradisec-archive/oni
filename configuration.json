@@ -121,18 +121,14 @@
         "label": "Descending"
       },
       "searchDetails": [
-        {
-          "field": "language",
-          "label": "Language",
-          "name": "language.name.@value"
-        }
+        {"field": "inLanguage", "label": "Language", "name": "inLanguage.name.@value"}
       ]
     },
     "main": {
       "fields": [
         {
           "display": "Language",
-          "name": "language.name.@value"
+          "name": "inLanguage.name.@value"
         },
         {
           "display": "Linguistic Genre",
@@ -386,11 +382,21 @@
     }
   },
   "api": {
+    "structural": {
+      "host": "https://catalog.paradisec.org.au",
+      "key": "XXX",
+      "secret": "XXX"
+    },
+    "origins": [{
+      "host": "https://catalog.paradisec.org.au",
+      "key": "XXX",
+      "secret": "XXX"
+    }],
     "bootstrap": false,
     "log": {
       "logFolder": "/opt/storage/oni/logs"
     },
-    "host": "http://localhost:8080",
+    "host": "http://localhost:8080/api",
     "ocfl": {
       "ocflPath": "/opt/storage/oni/ocfl",
       "ocflScratch": "/opt/storage/oni/scratch-ocfl",
@@ -520,7 +526,7 @@
     },
     "elastic": {
       "bootstrap": false,
-      "node": "http://elasticsearch:9200",
+      "node": "http://opensearch:9200",
       "maxScroll": 5000,
       "scrollTimeout": "10m",
       "log": "debug",
@@ -533,7 +539,7 @@
         },
         "max_result_window": 100000,
         "highlight": {
-          "max_analyzed_offset": 1000000
+          "max_analyzer_offset": 1000000
         }
       },
       "fields": {
@@ -604,14 +610,14 @@
         {
           "display": "Language",
           "order": 4,
-          "name": "language.name.@value",
-          "field": "language.name.@value.keyword"
+          "name": "inLanguage.name.@value",
+          "field": "inLanguage.name.@value.keyword"
         },
         {
-          "display": "Modality",
+          "display": "Communication Mode",
           "order": 5,
-          "name": "modality.name.@value",
-          "field": "modality.name.@value.keyword",
+          "name": "communicationMode.name.@value",
+          "field": "communicationMode.name.@value.keyword",
           "help": "The mode(s) (spoken, written, signed, etc.) used in the interaction represented by this resource.",
           "icons": true
         },
@@ -658,7 +664,10 @@
       "mappings": {
         "date_detection": false,
         "properties": {
-          "_location": {
+          "_contentLocation": {
+            "type": "geo_shape"
+          },
+          "_centroid": {
             "type": "geo_shape"
           },
           "@id": {

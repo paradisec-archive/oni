@@ -10,7 +10,7 @@
                     class="grow justify-items-center items-center m-4"
                     @advanced-search="enableAdvancedSearch" :enableAdvancedSearch="advancedSearch"
                     @updateSearchInput="onInputChange"
-                    @basicSearch="updateRoutes"/>
+                    @basicSearch="updateRoutes" :searchPath="'search'"/>
       </div>
       <div class="flex-1 w-full min-w-full bg-white mt-4 mb-4 border-b-2">
         <div class="py-3 px-2">
@@ -69,59 +69,72 @@
                          @do-advanced-search="updateRoutes" :resetAdvancedSearch="resetAdvancedSearch"/>
       </div>
       <div class="pr-0">
-        <div class="top-20 z-10 bg-white pb-5">
+        <div class="top-20 z-10 bg-white pb-3">
           <el-row :align="'middle'" class="mt-4 pb-2 border-0 border-b-[2px] border-solid border-red-700 text-2xl">
-            <el-button-group class="mr-1">
-              <el-button type="warning" v-show="changedFilters" @click="updateRoutes({updateFilters: true})">Apply
-                Filters
-              </el-button>
-            </el-button-group>
-            <span class="my-1 mr-1" v-show="!changedFilters" v-if="!isEmpty(this.filters)">Filtering by:</span>
-            <el-button-group v-show="!changedFilters"
-                             class="my-1 mr-2" v-for="(filter, filterKey) of this.filters" :key="filterKey"
-                             v-model="this.filters">
-              <el-button plain>{{ clean(filterKey) }}</el-button>
-              <el-button v-if="filter && filter.length > 0" v-for="f of filter" :key="f" color="#626aef" plain
-                         @click="this.updateFilters({clear: {f, filterKey }})" class="text-2xl">
-                {{ clean(f) }}
-                <el-icon class="el-icon--right">
-                  <CloseBold/>
-                </el-icon>
-              </el-button>
-            </el-button-group>
-            <el-button-group class="mr-1">
-              <el-button v-show="!isEmpty(this.filters)" @click="clearFilters()">Clear Filters</el-button>
-            </el-button-group>
-            <span id="total_results"
-                  class="my-1 mr-2" v-show="this.totals['value']">Total: <span>{{ this.totals['value'] }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
-          </el-row>
-          <el-row class="pt-2">
-            <el-col :span="24" class="flex space-x-4">
-              <el-button-group class="my-1">
-                <el-button type="default" v-on:click="this.resetSearch">RESET SEARCH</el-button>
+            <el-col :xs="24" :sm="24" :md="18" :lg="18" :xl="16">
+              <el-button-group class="mr-1">
+                <el-button type="warning" v-show="changedFilters" @click="updateRoutes({updateFilters: true})">Apply
+                  Filters
+                </el-button>
               </el-button-group>
-              <el-select v-model="selectedSorting" @change="sortResults" class="my-1">
-                <template #prefix>Sort by:</template>
-                <el-option
-                    v-for="item in sorting"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                />
-              </el-select>
-              <el-select v-model="selectedOrder" @change="orderResults" class="my-1">
-                <template #prefix>Order by:</template>
-                <el-option
-                    v-for="item in ordering"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                />
-              </el-select>
+              <span class="my-1 mr-1" v-show="!changedFilters" v-if="!isEmpty(this.filters)">Filtering by:</span>
+              <el-button-group v-show="!changedFilters"
+                               class="my-1 mr-2" v-for="(filter, filterKey) of this.filters" :key="filterKey"
+                               v-model="this.filters">
+                <el-button plain>{{ clean(filterKey) }}</el-button>
+                <el-button v-if="filter && filter.length > 0" v-for="f of filter" :key="f" color="#626aef" plain
+                           @click="this.updateFilters({clear: {f, filterKey }})" class="text-2xl">
+                  {{ clean(f) }}
+                  <el-icon class="el-icon--right">
+                    <CloseBold/>
+                  </el-icon>
+                </el-button>
+              </el-button-group>
+              <el-button-group class="mr-1">
+                <el-button v-show="!isEmpty(this.filters)" @click="clearFilters()">Clear Filters</el-button>
+              </el-button-group>
+              <span id="total_results"
+                    class="my-1 mr-2" v-show="this.totals['value']">Total: <span>{{ this.totals['value'] }} Index entries (Collections, Objects, Files and Notebooks)</span></span>
+            </el-col>
+            <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+              <el-button size="large" @click="showMap()">
+                <span>
+                  <font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;Map search
+                <el-tooltip content="View the results as a map. Note that current search and filter options will be reset."
+                            placement="bottom-end" effect="light">
+                  <font-awesome-icon icon="fa fa-circle-question"/>
+                </el-tooltip>
+                </span>
+              </el-button>
             </el-col>
           </el-row>
         </div>
-        <div class="py-0 w-full">
+        <el-row class="pt-2">
+          <el-col :span="24" class="flex space-x-4 pb-2">
+            <el-button-group class="my-1">
+              <el-button type="default" v-on:click="this.resetSearch">RESET SEARCH</el-button>
+            </el-button-group>
+            <el-select v-model="selectedSorting" @change="sortResults" class="my-1">
+              <template #prefix>Sort by:</template>
+              <el-option
+                  v-for="item in sorting"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+              />
+            </el-select>
+            <el-select v-model="selectedOrder" @change="orderResults" class="my-1">
+              <template #prefix>Order by:</template>
+              <el-option
+                  v-for="item in ordering"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+              />
+            </el-select>
+          </el-col>
+        </el-row>
+        <div class="py-0 w-full pb-2">
           <el-pagination class="items-center w-full"
                          background layout="prev, pager, next"
                          :total="totals['value']"
@@ -206,6 +219,8 @@ import SearchDetailElement from './SearchDetailElement.component.vue';
 import SearchAggs from './SearchAggs.component.vue';
 import {putLocalStorage, getLocalStorage, removeLocalStorage} from '@/storage';
 import SearchAdvanced from "./SearchAdvanced.component.vue";
+import SearchMap from "./SearchMap.component.vue";
+
 import {v4 as uuid} from 'uuid';
 
 export default {
@@ -216,7 +231,8 @@ export default {
     SearchAdvanced,
     SearchDetailElement,
     CloseBold,
-    SearchAggs
+    SearchAggs,
+    SearchMap
   },
   data() {
     return {
@@ -248,11 +264,20 @@ export default {
       sorting: this.$store.state.configuration.ui.search?.sorting || [
         {value: 'relevance', label: 'Relevance'}
       ],
-      searchSorting: this.$store.state.configuration.ui.search?.searchSorting || {"value": "relevance", "label": "Relevance"},
+      searchSorting: this.$store.state.configuration.ui.search?.searchSorting || {
+        "value": "relevance",
+        "label": "Relevance"
+      },
       selectedSorting: null,
-      startSorting: this.$store.state.configuration.ui.search?.startSorting || {"value": "_isTopLevel.@value.keyword", "label": "Collections"},
-      defaultSorting: this.$store.state.configuration.ui.search?.defaultSorting || {value: 'relevance', label: 'Relevance'},
-      ordering: this.$store.state.configuration.ui.search?.ordering  || [
+      startSorting: this.$store.state.configuration.ui.search?.startSorting || {
+        "value": "_isTopLevel.@value.keyword",
+        "label": "Collections"
+      },
+      defaultSorting: this.$store.state.configuration.ui.search?.defaultSorting || {
+        value: 'relevance',
+        label: 'Relevance'
+      },
+      ordering: this.$store.state.configuration.ui.search?.ordering || [
         {value: 'asc', label: 'Ascending'},
         {value: 'desc', label: 'Descending'}
       ],
@@ -694,6 +719,9 @@ export default {
       console.log('is this.filters empty?');
       console.log(isEmpty(this.filters))
       // this.filters = filters;
+    },
+    showMap() {
+      this.$router.push({path: '/map'});
     }
   }
 };

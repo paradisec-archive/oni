@@ -19,7 +19,7 @@
             </div>
             <div class="flex justify-center" v-else-if="type === 'audio'">
               <audio controls preload="none">
-                <source :src="data" :type="encoding?.['@value'] || ''">
+                <source :src="data" :type="encodingFormat?.['@value'] || ''">
                 Your browser does not support the audio element.
               </audio>
             </div>
@@ -137,7 +137,7 @@ export default {
       this.path = this.id;
       this.route = `/object/open?id=${encodeURIComponent(this.crateId)}`;
       if (this.path != '') {
-        this.route += `&path=${this.path}`;
+        this.route += `&path=${encodeURIComponent(this.path)}`;
       }
       // Try to display only text and pdfs by default if there is an encodingFormat
       if (this.encodingFormat && this.encodingFormat.match('text/|pdf')) {
@@ -196,7 +196,7 @@ export default {
           await this.loadTxt();
           this.loading = false;
         }
-      } else if (this.encodingFormat && (this.encodingFormat?.startsWith('text/'))) {
+      } else if (this.encodingFormat && (this.encodingFormat?.startsWith('text/') || this.encodingFormat.endsWith('xml'))) {
         await this.loadTxt();
         this.loading = false;
       } else {

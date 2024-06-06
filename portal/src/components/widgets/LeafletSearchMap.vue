@@ -22,7 +22,6 @@ const props = defineProps({
   modelValue: { type: Object },
   //controls: { type: [String, Array], default: ['point', 'line', 'box', 'circle', 'polygon'] },
   transformer: { type: Function },
-  enableDrawing: {type: Boolean, default: true},
   current: {}
 });
 
@@ -174,59 +173,58 @@ function initControls(map, featuresLayer) {
     actionLink = null;
   }
 
-  if(props.enableDrawing) {
-    L.Control.DrawControl = L.Control.extend({
-      options: {position: 'topleft'},
-      onAdd(map) {
-        var container = L.DomUtil.create('div', 'leaflet-control-draw leaflet-bar leaflet-control');
-        L.DomEvent.on(container, 'mousedown', L.DomEvent.stopPropagation);
-        for (const shape of enabledShapes.value) {
-          const fname = shape.drawFn;
-          const link = L.DomUtil.create('a', 'leaflet-control-draw-' + shape.name, container);
-          link.href = '#';
-          link.title = 'Create a new ' + shape.name;
-          L.DomEvent.on(link, 'click', ((e) => {
-            L.DomEvent.stop(e);
-            if (actionLink === link) {
-              map.editTools.stopDrawing();
-              stopAction();
-            } else {
-              map.editTools[fname](null, {kind: shape.name});
-              startAction(link, shape.tooltip);
-            }
-          }), this);
-        }
-        return container;
-      }
-    });
-    L.control.drawControl = function (opts) {
-      return new L.Control.DrawControl(opts);
-    };
-    L.control.drawControl().addTo(map);
-
-    L.Control.EditControl = L.Control.extend({
-      options: {position: 'topleft'},
-      onAdd(map) {
-        const container = L.DomUtil.create('div', 'leaflet-control-edit leaflet-bar leaflet-control');
-        L.DomEvent.on(container, 'mousedown', L.DomEvent.stopPropagation);
-        const link = L.DomUtil.create('a', 'leaflet-control-edit-delete', container);
+  L.Control.DrawControl = L.Control.extend({
+    options: { position: 'topleft' },
+    onAdd(map) {
+      var container = L.DomUtil.create('div', 'leaflet-control-draw leaflet-bar leaflet-control');
+      L.DomEvent.on(container, 'mousedown', L.DomEvent.stopPropagation);
+      for (const shape of enabledShapes.value) {
+        const fname = shape.drawFn;
+        const link = L.DomUtil.create('a', 'leaflet-control-draw-' + shape.name, container);
         link.href = '#';
-        link.title = 'Delete a point or shape';
+        link.title = 'Create a new ' + shape.name;
         L.DomEvent.on(link, 'click', ((e) => {
           L.DomEvent.stop(e);
           if (actionLink === link) {
+            map.editTools.stopDrawing();
             stopAction();
           } else {
-            map.editTools.stopDrawing();
-            selectedShape?.disableEdit();
-            startAction(link, 'Click on a point or shape to delete. Press Esc to finish.');
+            map.editTools[fname](null, { kind: shape.name });
+            startAction(link, shape.tooltip);
           }
-        }));
-        return container;
+        }), this);
       }
-    });
-    (new L.Control.EditControl()).addTo(map);
-  }
+      return container;
+    }
+  });
+  L.control.drawControl = function (opts) {
+    return new L.Control.DrawControl(opts);
+  };
+  L.control.drawControl().addTo(map);
+
+  L.Control.EditControl = L.Control.extend({
+    options: { position: 'topleft' },
+    onAdd(map) {
+      const container = L.DomUtil.create('div', 'leaflet-control-edit leaflet-bar leaflet-control');
+      L.DomEvent.on(container, 'mousedown', L.DomEvent.stopPropagation);
+      const link = L.DomUtil.create('a', 'leaflet-control-edit-delete', container);
+      link.href = '#';
+      link.title = 'Delete a point or shape';
+      L.DomEvent.on(link, 'click', ((e) => {
+        L.DomEvent.stop(e);
+        if (actionLink === link) {
+          stopAction();
+        } else {
+          map.editTools.stopDrawing();
+          selectedShape?.disableEdit();
+          startAction(link, 'Click on a point or shape to delete. Press Esc to finish.');
+        }
+      }));
+      return container;
+    }
+  });
+  (new L.Control.EditControl()).addTo(map);
+
   // press esc key to cancel all ongoing action
   map.on('keydown', function (e) {
     console.log('keydown');

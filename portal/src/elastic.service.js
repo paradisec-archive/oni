@@ -35,7 +35,7 @@ export default class ElasticService {
         }];
       } else if (sortField) {
         const sortByKeyword = {}
-        sortByKeyword[sortField] = { order: order };
+        sortByKeyword[sortField] = {order: order};
         sorting = [sortByKeyword];
       } else {
         sorting = [{
@@ -127,7 +127,7 @@ export default class ElasticService {
     }
 
     // const query = this.boolQuery({ fields: this.fields, filters:[] });
-    console.log(JSON.stringify(body.query));
+    //console.log(JSON.stringify(body.query));
     // body.highlight = this.highlights(this.highlightFields);
     // body.query.bool.must.push(query);
 
@@ -137,7 +137,7 @@ export default class ElasticService {
       throw new Error(response.statusText);
     } else {
       const results = await response.json();
-      console.log(first(results?.hits?.hits));
+      //console.log(first(results?.hits?.hits));
       return first(results?.hits?.hits);
     }
   }
@@ -167,11 +167,11 @@ export default class ElasticService {
       let phraseQuery = esb.multiMatchQuery(multiFields, searchQuery).type('best_fields');
       boolQueryObj = switchFilter(operation, boolQueryObj, phraseQuery, filterTerms);
     } else if (isEmpty(searchQuery) && filterTerms.length <= 0) {
-      boolQueryObj = esb.matchAllQuery();
+      boolQueryObj = esb.boolQuery().must(esb.matchAllQuery());
     }
     const esbQuery = esb.requestBodySearch().query(boolQueryObj)
     const query = esbQuery.toJSON().query;
-    // console.log(JSON.stringify({query: query}))
+    //console.log(JSON.stringify({query: query}))
     return query;
   }
 
@@ -290,27 +290,29 @@ export default class ElasticService {
     boolQuery.minimumShouldMatch(0);
     const esbQuery = esb.requestBodySearch().query(boolQuery)
     const query = esbQuery.toJSON().query;
-    console.log(JSON.stringify({query: query}))
+    //console.log(JSON.stringify({query: query}))
     return query;
   }
 
   termsQuery(filters) {
     let filterTerms = [];
-    //console.log(JSON.stringify(filters));
-    for (let bucket of Object.keys(filters)) {
-      if (filters[bucket].length > 0 || (filters[bucket]?.v && filters[bucket].v.length > 0)) {
-        //TODO: send the type of field in the filters
-        let field = '';
-        let type;
-        if (!filters[bucket]?.t) {
-          field = bucket.concat('.keyword');
-        } else {
-          type = filters[bucket]?.t;
-          field = bucket.concat('.' + type);
+    if (!isEmpty(filters)) {
+      //console.log(JSON.stringify(filters));
+      for (let bucket of Object.keys(filters)) {
+        if (filters[bucket].length > 0 || (filters[bucket]?.v && filters[bucket].v.length > 0)) {
+          //TODO: send the type of field in the filters
+          let field = '';
+          let type;
+          if (!filters[bucket]?.t) {
+            field = bucket.concat('.keyword');
+          } else {
+            type = filters[bucket]?.t;
+            field = bucket.concat('.' + type);
+          }
+          let values = filters[bucket]?.v || filters[bucket];
+          //console.log(values)
+          filterTerms.push(esb.termsQuery(field, values));
         }
-        let values = filters[bucket]?.v || filters[bucket];
-        //console.log(values)
-        filterTerms.push(esb.termsQuery(field, values));
       }
     }
     return filterTerms;
@@ -344,6 +346,80 @@ export default class ElasticService {
     });
     return qS;
   }
+
+  async map({init = true, boundingBox, precision = 5, multi, searchFields, filters, operation, pageSize, searchFrom}) {
+    const httpService = new HTTPService({router: this.router, loginPath: '/login'});
+    let route = this.searchRoute + this.indexRoute;
+    let sorting;
+    let body = {}
+    const fields = ['_centroid'];
+    // const geoAggs = esb.geoHashGridAggregation('viewport', fields[0]);
+    const geoAggs = esb.geoHashGridAggregation('_geohash', '_centroid')
+      .precision(precision);
+    let topRight = {}
+    let bottomLeft = {}
+    let geoQuery = {};
+    if (init) {
+      topRight = esb.geoPoint()
+        .lat(90)
+        .lon(180);
+      bottomLeft = esb.geoPoint()
+        .lat(-90)
+        .lon(-180);
+      geoQuery = esb.geoBoundingBoxQuery().field('_centroid')
+        .topRight(topRight)
+        .bottomLeft(bottomLeft);
+    } else {
+      let tR = boundingBox.topRight;
+      tR = fixMalformedCoordinates(tR);
+      topRight = esb.geoPoint()
+        .lat(tR.lat)
+        .lon(tR.lon);
+      let bL = boundingBox.bottomLeft;
+      bL = fixMalformedCoordinates(bL);
+      bottomLeft = esb.geoPoint()
+        .lat(bL.lat)
+        .lon(bL.lon)
+      geoQuery = esb.geoBoundingBoxQuery().field('_centroid')
+        .topRight(topRight)
+        .bottomLeft(bottomLeft)
+        .validationMethod("COERCE")
+    }
+    const aggs = geoAggs.toJSON();
+
+    body.aggs = {...aggs, ...this.aggs};
+    const geoQueryJson = geoQuery.toJSON();
+    const geoBoundingBox = geoQueryJson.geo_bounding_box;
+    const boolQuery = this.boolQuery({
+      searchQuery: multi,
+      fields: searchFields,
+      filters,
+      operation
+    });
+    if (!boolQuery.bool.filter) boolQuery.bool.filter = {};
+    if (boolQuery.bool.filter && boolQuery.bool.filter.length) { //if array
+        boolQuery.bool.must = boolQuery.bool.filter;
+    } else if (boolQuery.bool.filter.terms) {
+      boolQuery.bool.must = {terms: boolQuery.bool.filter.terms};
+    }
+    boolQuery.bool.filter = {geo_bounding_box: geoBoundingBox};
+    body.query = boolQuery;
+    body['size'] = pageSize;
+    body['from'] = searchFrom;
+    body['track_total_hits'] = true;
+    //console.log("body", JSON.stringify(body));
+    //console.log(body);
+    console.log(JSON.stringify(body));
+    let response = await httpService.post({route, body});
+    if (response.status !== 200) {
+      //httpService.checkAuthorised({status: response.status});
+      throw new Error(response.statusText);
+    } else {
+      const results = await response.json();
+      //console.log(results);
+      return results;
+    }
+  }
 }
 
 function switchFilter(operation, boolQueryObj, phraseQuery, filterTerms) {
@@ -361,4 +437,17 @@ function switchFilter(operation, boolQueryObj, phraseQuery, filterTerms) {
       boolQueryObj = esb.boolQuery().should(phraseQuery).filter(filterTerms);
   }
   return boolQueryObj;
+}
+
+// https://opensearch.org/docs/latest/field-types/supported-field-types/geo-point/
+// Valid values for latitude are [-90, 90]. Valid values for longitude are [-180, 180].
+// TODO: Test send ignore_malformed=true
+function fixMalformedCoordinates(coord) {
+  if (coord.lon) {
+    coord.lon = ((coord.lon + 180) % 360) - 180;
+  }
+  if (coord.lat) {
+    coord.lat = ((coord.lat + 90) % 360) - 90;
+  }
+  return coord;
 }

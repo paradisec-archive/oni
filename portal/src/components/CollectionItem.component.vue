@@ -5,7 +5,7 @@
         first(this.field?.['name'])?.['@value'] || this.field?.['@id']
       }}</a>
   </template>
-  <template v-if="value">{{ this.field?.['@value'] }}</template>
+  <template v-else-if="value">{{ this.field?.['@value'] }}</template>
   <template v-else>
     <p>
       <el-link type="primary" :href="this.link">{{ first(this.field?.['name'])?.['@value'] || this.field?.['@id'] }}

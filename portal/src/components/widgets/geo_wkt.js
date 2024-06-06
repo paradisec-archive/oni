@@ -1,32 +1,46 @@
-
 const reRoot = /^(<.+>\s+)?(\w+)\s*(\(.+\))$/s;
 const reBrackets = /a/;
 
 /**
  * Read a WKT formatted string and return a leaflet layer object
- * @param {Object} L 
- * @param {string} wkt 
+ * @param {Object} L
+ * @param {string} wkt
  */
-function read(L, wkt) {
+function read(L, wkt, number) {
   const m = wkt.trim().match(reRoot);
   const [, srs, type = '', data] = m ?? [];
   if (!type || !data) return;
   const points = parsePoints(data);
   switch (type.toUpperCase()) {
     case 'POINT':
-      return L.marker(points[0], { kind: 'point' });
+      if (number > 1) {
+        return L.marker(points[0], {
+          icon: new L.NumberedDivIcon({number})
+        });
+      } else {
+        return L.marker(points[0], {
+          icon: new L.LocationDivIcon()
+        });
+      }
+
     case 'LINESTRING':
-      return L.polyline(points, { kind: 'line' });
+      return L.polyline(points, {kind: 'line'});
     case 'POLYGON':
       const box = polygonToBox(points);
       if (box) {
-        return L.rectangle(box, { kind: 'box' });
+        return L.rectangle(box, {kind: 'box'});
       } else {
-        return L.polygon(points, { kind: 'polygon' });
+        return L.polygon(points, {kind: 'polygon'});
       }
     case 'CIRCLE':
-      const [[latlng], radius] = points;
-      return L.circle(latlng, { kind: 'circle', radius });
+      let [[latlng], radius] = points;
+      if (!radius) radius = 2;
+      if (radius) radius = radius / 2.5;//half it for now
+      if (number > 1) {
+        return L.circle(latlng, {kind: 'circle', radius, weight: 1});
+      } else {
+        return L.circle(latlng, {kind: 'circle', radius, weight: 1});
+      }
     default:
       break;
   }
@@ -55,7 +69,7 @@ function parsePoints(text, latlng) {
           if (point.length > 1) {
             var lat, lng;
             if (latlng) [lat, lng] = point;
-            else[lng, lat] = point;
+            else [lng, lat] = point;
             if (lng && lat) current.push([+lat, +lng]);
           } else {
             current.push(+point[0]);
@@ -80,7 +94,7 @@ function parsePoints(text, latlng) {
 
 /**
  * Check if a polygon is a rectangle and return the bottom left and top right corner coordinates
- * @param {Array} polygons 
+ * @param {Array} polygons
  * @return {L.LatLngTuple[]}
  */
 function polygonToBox(polygons) {
@@ -121,8 +135,7 @@ function writer(L) {
       }
     }],
     [L.Polygon, l => {
-      const points = l.getLatLngs().map(p => (p.push(p[0]), p)).
-        map(p => '(' + p.map(c => `${c.lng} ${c.lat}`).join(', ') + ')').join(', ');
+      const points = l.getLatLngs().map(p => (p.push(p[0]), p)).map(p => '(' + p.map(c => `${c.lng} ${c.lat}`).join(', ') + ')').join(', ');
       return `POLYGON (${points})`;
     }],
     [L.Polyline, l => {
@@ -135,7 +148,7 @@ function writer(L) {
       return `CIRCLE ((${p.lng} ${p.lat}), ${r})`;
     }]
   ];
-  return function(layer) {
+  return function (layer) {
     for (const [c, fn] of writers) {
       if (layer instanceof c) {
         return fn(layer);
