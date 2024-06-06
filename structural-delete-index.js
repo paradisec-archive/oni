@@ -26,7 +26,9 @@ function askForConfirmation() {
           'Authorization': `Bearer ${adminToken}`,
         },
       };
-      const deleteIndex = await fetch(`${apiHost}/admin/index/structural`, {method: 'DELETE', ...options});
+      const url = `${apiHost}/admin/index/structural`;
+      const deleteIndex = await fetch(url, {method: 'DELETE', ...options});
+      console.log(`Deleting Index: ${url}`);
       if (deleteIndex.status === 404) {
         console.log('Index not found, nothing to delete');
       } else {

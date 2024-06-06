@@ -9,10 +9,12 @@ const fetch = require('node-fetch');
       'Authorization': `Bearer ${adminToken}`,
     },
   };
-  const structuralIndex = await fetch(`${apiHost}/admin/index/structural`, {method: 'POST', ...options});
+  const url = `${apiHost}/admin/index/structural`;
+  const structuralIndex = await fetch(url, {method: 'POST', ...options});
   if (structuralIndex.status === 404) {
-    console.log('Cannot index');
+    console.log(`Cannot index into ${url}`);
   } else {
+    console.log(`Indexing into ${url}`);
     const res = await structuralIndex.json();
     console.log(res);
   }

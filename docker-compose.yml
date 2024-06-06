@@ -35,7 +35,7 @@ services:
 
   api:
     restart: always
-    image: rrkive/oni:1.7.0
+    image: rrkive/oni:2.0.0
     depends_on:
       db:
         condition: service_healthy

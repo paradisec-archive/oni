@@ -305,7 +305,7 @@
     "log": {
       "logFolder": "/opt/storage/oni/logs"
     },
-    "host": "http://localhost:8080",
+    "host": "http://localhost:8080/api",
     "ocfl": {
       "ocflPath": "/opt/storage/oni/ocfl",
       "ocflScratch": "/opt/storage/oni/scratch-ocfl",
@@ -433,7 +433,7 @@
     },
     "elastic": {
       "bootstrap": false,
-      "node": "http://elasticsearch:9200",
+      "node": "http://opensearch:9200",
       "maxScroll": 5000,
       "scrollTimeout": "10m",
       "log": "debug",
@@ -500,10 +500,10 @@
           "field": "inLanguage.name.@value.keyword"
         },
         {
-          "display": "Modality",
+          "display": "Communication Mode",
           "order": 5,
-          "name": "modality.name.@value",
-          "field": "modality.name.@value.keyword",
+          "name": "communicationMode.name.@value",
+          "field": "communicationMode.name.@value.keyword",
           "help": "The mode(s) (spoken, written, signed, etc.) used in the interaction represented by this resource.",
           "icons": true
         },
