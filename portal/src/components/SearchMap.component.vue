@@ -93,7 +93,7 @@
             <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
               <el-button size="large" @click="showList()">
                                <span>
-                  <font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;List search
+                  <font-awesome-icon icon="fa-solid fa-list"/>&nbsp;List search
                 <el-tooltip
                     content="View the results as a list. Note that current search and filter options will be reset."
                     placement="bottom-end" effect="light">
