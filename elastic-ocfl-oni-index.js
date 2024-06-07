@@ -1,5 +1,5 @@
 //const {Client} = require('@elastic/elasticsearch');
-const { Client } = require('@opensearch-project/opensearch');
+const {Client} = require('@opensearch-project/opensearch');
 const {Indexer} = require('./lib/Indexer');
 const configuration = require('./configuration.json');
 const ocfl = require("@ocfl/ocfl-fs");
@@ -35,25 +35,35 @@ const assert = require("assert");
       mappings: elastic['mappings']
     }
   });
+  const elasticIndex = elastic['indexConfiguration']
   // Put Settings
-  // await client.indices.putSettings({
-  //   index: elastic['index'],
-  //   body: elastic['indexConfiguration']
-  // })
-  //Cluster settings
-  const settings = {
-    "persistent": {
-      "search.max_open_scroll_context": elastic?.maxScroll || 5000,
-      // "xpack.monitoring.collection.enabled": false
-    },
-    "transient": {
-      "search.max_open_scroll_context": elastic?.maxScroll || 5000
+  await client.indices.putSettings({
+    index: elastic['index'],
+    body: {
+      mapping: elasticIndex?.mapping,
+      max_result_window: elasticIndex?.max_result_window || 100000
     }
-  }
-  await client.cluster.putSettings({body: settings});
+  });
+  const indexConfig = await client.indices.getSettings();
+  console.log('Index Settings:');
+  console.log(JSON.stringify(indexConfig, null, 2));
+
+  await client.cluster.putSettings({
+    body: {
+      persistent: {
+        "search.max_open_scroll_context": elastic?.maxScroll || 5000,
+        // "xpack.monitoring.collection.enabled": false
+      },
+      transient: {
+        "search.max_open_scroll_context": elastic?.maxScroll || 5000
+      }
+    }
+  });
   const config = await client.cluster.getSettings();
-  console.log(JSON.stringify(config));
+  console.log('Cluster Settings:');
+  console.log(JSON.stringify(config, null, 2));
   // Connect to an ocfl-repo
+
   const ocflConf = configuration.api.ocfl;
   const repository = ocfl.storage({
     root: ocflConf.ocflPath,
@@ -75,4 +85,5 @@ const assert = require("assert");
   // Create an Indexer and index collections
   const indexer = new Indexer({configuration, repository, client});
   await indexer.findOcflObjects({memberOf: null, conformsTo: indexer.conformsToCollection, skip: skipCollections});
+
 })();

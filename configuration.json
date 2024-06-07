@@ -522,7 +522,7 @@
       }
     },
     "identifier": {
-      "main": "ATAP"
+      "main": "Oni"
     },
     "elastic": {
       "bootstrap": false,
@@ -534,7 +534,7 @@
       "indexConfiguration": {
         "mapping": {
           "total_fields": {
-            "limit": 1000
+            "limit": 10000
           }
         },
         "max_result_window": 100000,

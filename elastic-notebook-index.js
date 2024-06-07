@@ -1,4 +1,5 @@
-const {Client} = require('@elastic/elasticsearch');
+//const {Client} = require('@elastic/elasticsearch');
+const {Client} = require('@opensearch-project/opensearch');
 const configuration = require('./configuration.json');
 const notebooksConfig = require('./notebooks.configuration.json');
 const {Octokit} = require("octokit")
