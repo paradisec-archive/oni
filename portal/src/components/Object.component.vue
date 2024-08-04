@@ -2,20 +2,20 @@
   <div class="px-10 pt-10 pb-7 z-10 bg-white">
     <el-row :align="'middle'" class="mb-2 text-3xl font-medium dark:text-white">
       <h5>
-        <member-of-link :memberOf="metadata?._memberOf"/>
+        <member-of-link :memberOf="metadata?._memberOf" />
         {{ first(this.name)?.['@value'] }}
       </h5>
     </el-row>
-    <hr class="divider divider-gray pt-2"/>
+    <hr class="divider divider-gray pt-2" />
   </div>
   <el-row :justify="'center'" v-if="this.metadata" class="m-5 px-10" v-loading="loading">
     <el-col :xs="24" :sm="24" :md="24" :lg="16" :xl="16">
-      <AccessHelper v-if="access" :access="access" :license="license"/>
+      <AccessHelper v-if="access" :access="access" :license="license" />
       <div class="px-5 pb-5">
-        <MetaTopCard :tops="this.tops" :className="'py-5'"/>
+        <MetaTopCard :tops="this.tops" :className="'py-5'" />
         <el-row class="">
           <el-col v-for="meta of this.meta">
-            <meta-field :meta="meta" :routePath="'object'" :crateId="this.crateId"/>
+            <meta-field :meta="meta" :routePath="'object'" :crateId="this.crateId" />
           </el-col>
         </el-row>
       </div>
@@ -25,30 +25,35 @@
         <el-col v-if="this.license?.['@id']">
           <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
             <h5 class="text-2xl font-medium">Access</h5>
-            <hr class="divider divider-gray pt-2"/>
-            <license-card v-if="this.license?.['@id']" :license="license"/>
+            <hr class="divider divider-gray pt-2" />
+            <license-card v-if="this.license?.['@id']" :license="license" />
           </el-card>
         </el-col>
       </el-row>
       <el-row :gutter="20" class="pb-5">
         <el-col v-if="metadata?._memberOf">
-          <MemberOfCard :routePath="'collection'" :_memberOf="metadata?._memberOf"/>
+          <MemberOfCard :routePath="'collection'" :_memberOf="metadata?._memberOf" />
         </el-col>
       </el-row>
       <el-row v-if="membersFiltered?.data && membersFiltered?.data.length">
         <el-col>
           <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
             <h5 class="text-2xl font-medium ">Other Objects in this Collection</h5>
-            <hr class="divider divider-gray pt-2"/>
+            <hr class="divider divider-gray pt-2" />
             <ul>
               <li v-for="d of membersFiltered.data">
-                <collection-item :field="d._source" :routePath="'object'"/>
+                <collection-item :field="d._source" :routePath="'object'" />
               </li>
               <li v-if="membersFiltered">
                 <el-link type="primary" :href="`/search?f=${moreObjects()}`">more...</el-link>
               </li>
             </ul>
           </el-card>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20" class="py-5">
+        <el-col>
+          <TakedownCard />
         </el-col>
       </el-row>
     </el-col>
@@ -59,9 +64,8 @@
         <div class="grid-content p-2 m-2">
           <h2 class="text-2xl tracking-tight dark:text-white">
             Files: {{ parts.length }}
-            <AggregationAsIcon v-for="part of uniqueParts"
-                               :item="part"
-                               :field="{'name': 'File', 'display': 'File' }" :id="id"/>
+            <AggregationAsIcon v-for="part of uniqueParts" :item="part" :field="{ 'name': 'File', 'display': 'File' }"
+              :id="id" />
           </h2>
         </div>
         <div></div>
@@ -73,11 +77,10 @@
           <li v-for="(part, index) of parts">
             <a :id="'part-' + encodeURIComponent(part?.['@id'])"></a>
             <object-part :part="part" :title="first(part?.name)?.['@value'] || part?.['@id']"
-                         :active="isPartActive(part?.['@id'], index)" :id="encodeURIComponent(part?.['@id'])"
-                         :encodingFormat="first(part?.['encodingFormat'])?.['@value']" :crateId="this.crateId"
-                         :rootId="this.rootId"
-                         :parentName="first(this.name)?.['@value']" :parentId="this.$route.query.id" :license="license"
-                         :access="access"/>
+              :active="isPartActive(part?.['@id'], index)" :id="encodeURIComponent(part?.['@id'])"
+              :encodingFormat="first(part?.['encodingFormat'])?.['@value']" :crateId="this.crateId"
+              :rootId="this.rootId" :parentName="first(this.name)?.['@value']" :parentId="this.$route.query.id"
+              :license="license" :access="access" />
           </li>
         </ul>
       </el-col>
@@ -85,18 +88,19 @@
   </template>
 </template>
 <script>
-import {first, isUndefined, reject, isEmpty, sortBy, isEqual} from "lodash";
-import {initSnip, toggleSnip} from "../tools";
+import { first, isUndefined, reject, isEmpty, sortBy, isEqual } from "lodash";
+import { initSnip, toggleSnip } from "../tools";
 import MetaField from "./MetaField.component.vue";
-import {defineAsyncComponent} from 'vue';
+import { defineAsyncComponent } from 'vue';
 import LicenseCard from './cards/LicenseCard.component.vue';
 import MemberOfCard from './cards/MemberOfCard.component.vue';
 import AccessHelper from './AccessHelper.component.vue';
 import MemberOfLink from './widgets/MemberOfLink.component.vue';
 import MetaTopCard from './cards/MetaTopCard.component.vue';
-import {putLocalStorage} from '@/storage';
+import { putLocalStorage } from '@/storage';
 import CollectionItem from "./CollectionItem.component.vue";
 import AggregationAsIcon from "./widgets/AggregationAsIcon.component.vue";
+import TakedownCard from "./cards/TakedownCard.component.vue"
 
 export default {
   components: {
@@ -107,10 +111,11 @@ export default {
     AccessHelper,
     MemberOfLink,
     ObjectPart: defineAsyncComponent(() =>
-        import('./ObjectPart.component.vue')
+      import('./ObjectPart.component.vue')
     ),
     CollectionItem,
-    AggregationAsIcon
+    AggregationAsIcon,
+    TakedownCard
   },
   props: [],
   data() {
@@ -135,7 +140,8 @@ export default {
       activePart: null,
       loading: false,
       membersFiltered: {},
-      conformsToObject: this.$store.state.configuration.ui.conformsTo?.object
+      conformsToObject: this.$store.state.configuration.ui.conformsTo?.object,
+      fullPath: window.location.href
     }
   },
   async updated() {
@@ -143,16 +149,16 @@ export default {
     if (fileId) {
       setTimeout(function () {
         const fileElement = document.getElementById('part-' + encodeURIComponent(fileId));
-        fileElement.scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
+        fileElement.scrollIntoView({ behavior: "smooth", block: "start", inline: "start" });
       }, 200);
     }
-    if(this.crateId) {
+    if (this.crateId) {
       this.membersFiltered = await this.filter({
         '_memberOf.@id': [this.crateId],
         'conformsTo.@id': [this.conformsToObject]
       }, false);
     }
-    putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
+    putLocalStorage({ key: 'lastRoute', data: this.$route.fullPath });
   },
   async mounted() {
     try {
@@ -164,7 +170,7 @@ export default {
       //encodeURIComponent may return "undefined" string
       if (id && id !== 'undefined') {
         if (isUndefined(this.crateId) || this.crateId === 'undefined') {
-          await this.$router.push({path: '/404'});
+          await this.$router.push({ path: '/404' });
           this.loading = false;
         } else {
           metadata = await this.$elasticService.single({
@@ -173,12 +179,12 @@ export default {
           });
         }
       } else if (_id && _id !== 'undefined') {
-        metadata = await this.$elasticService.single({_id});
+        metadata = await this.$elasticService.single({ _id });
       }
       this.metadata = metadata?._source;
       await this.populate();
-      initSnip({selector: '#license', button: '#readMoreLicense'});
-      putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
+      initSnip({ selector: '#license', button: '#readMoreLicense' });
+      putLocalStorage({ key: 'lastRoute', data: this.$route.fullPath });
     } catch (e) {
       console.error(e)
     }
@@ -212,9 +218,9 @@ export default {
         if (this.metadata[field.name]) {
           value = this.metadata[field.name]
         } else {
-          value = [{'@value': 'Not Defined'}];
+          value = [{ '@value': 'Not Defined' }];
         }
-        this.tops.push({name: field.display, value: value});
+        this.tops.push({ name: field.display, value: value });
       }
     },
     populateMeta(config) {
@@ -230,7 +236,7 @@ export default {
             "definition": "TODO: Add definition"
           }
         }
-        this.meta.push({name: filter, data: this.metadata[filter], help: helper});
+        this.meta.push({ name: filter, data: this.metadata[filter], help: helper });
       }
       this.meta = sortBy(this.meta, 'name');
     },
@@ -244,7 +250,7 @@ export default {
     },
     populateParts() {
       this.parts = this.metadata.hasPart;
-      if(this.parts?.length) {
+      if (this.parts?.length) {
         let uniqueParts = this.parts.map((p) => first(p.encodingFormat)?.['@value']);
         this.uniqueParts = [...new Set(uniqueParts)];
       }
@@ -261,10 +267,11 @@ export default {
       }
       return false;
     },
+
     //TODO: refactor this integrate to multi
     async filter(filters, scroll) {
       try {
-        const items = await this.$elasticService.multi({scroll, filters, sort: 'relevance', order: 'desc'});
+        const items = await this.$elasticService.multi({ scroll, filters, sort: 'relevance', order: 'desc' });
         if (items?.hits?.hits.length > 0) {
           return {
             data: items?.hits?.hits,
