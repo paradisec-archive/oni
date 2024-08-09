@@ -28,6 +28,9 @@
     "googleForm": {
       "takedown": "https://docs.google.com/forms/d/e/1FAIpQLSc3wWGYLgkEtba65mL46BUhMAPWiHt5EHrQ2rWiI4nJqPjpDg/viewform?usp=pp_url&entry.812577446="
     },
+    "binderhubRegistry": {
+      "registryJson": "https://raw.githubusercontent.com/Language-Research-Technology/BinderHub-registry/main/BinderHub-registry.json?token=GHSAT0AAAAAACPYR7TR43YYJFNGRRQV2QIAZVQJ72A"
+    },
     "terms": {
       "text": "Example terms of service",
       "href": "/terms",

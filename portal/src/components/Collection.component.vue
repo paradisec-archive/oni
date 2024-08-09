@@ -97,6 +97,11 @@
           <TakedownCard />
         </el-col>
       </el-row>
+      <el-row :gutter="20" class="py-5">
+        <el-col>
+          <BinderHubCard />
+        </el-col>
+      </el-row>
     </el-col>
   </el-row>
 </template>
@@ -115,7 +120,8 @@ import MetaTopCard from './cards/MetaTopCard.component.vue';
 import SummariesCard from './cards/SummariesCard.component.vue';
 import PropertySummaryCard from './cards/PropertySummaryCard.component.vue'
 import { putLocalStorage } from '@/storage';
-import TakedownCard from "./cards/TakedownCard.component.vue"
+import TakedownCard from "./cards/TakedownCard.component.vue";
+import BinderHubCard from "./cards/BinderHubCard.component.vue"
 
 export default {
   components: {
@@ -133,7 +139,8 @@ export default {
     ContentCard,
     FieldHelperCard,
     MemberOfLink,
-    TakedownCard
+    TakedownCard,
+    BinderHubCard
   },
   props: [],
 
@@ -187,6 +194,7 @@ export default {
       metaTags: [],
       buckets: [],
       takedownForm: this.$store.state.configuration.ui.googleForm?.takedown,
+      registry: this.$store.state.configuration.ui.binderhubRegistry?.registryJson,
       conformsToCollection: this.$store.state.configuration.ui.conformsTo?.collection,
       conformsToObject: this.$store.state.configuration.ui.conformsTo?.object,
       findObjectByRelationship: this.$store.state.configuration.ui.collection.relationships,
