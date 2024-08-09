@@ -8,6 +8,7 @@ const {ROCrate} = require('ro-crate');
 
 (async () => {
     const client = await initElasticClient();
+
     const repository = {}
     const indexer = new Indexer({configuration, repository, client});
 
@@ -61,9 +62,23 @@ const {ROCrate} = require('ro-crate');
 )();
 
 async function initElasticClient() {
+  const elastic = configuration['api']['elastic'];
   // Init elastic client
   const client = new Client({
     node: 'http://localhost:9200', //This is different from Oni since we are talking to it directly
   });
+  // Configure mappings
+  console.log('Index Configuration');
+  console.log(JSON.stringify( elastic['indexConfiguration']));
+  await client.indices.putSettings({
+    index: elastic['index'],
+    body: {
+      max_result_window: elastic.indexConfiguration['max_result_window'],
+      mapping: elastic.indexConfiguration['mapping']
+    }
+  });
+  const settings = await client.indices.getSettings({index: elastic['index']})
+  console.log('Index Settings');
+  console.log(JSON.stringify(settings));
   return client;
 }
