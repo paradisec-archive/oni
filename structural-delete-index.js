@@ -19,14 +19,15 @@ function askForConfirmation() {
   const confirmed = await askForConfirmation();
   try {
     if (confirmed) {
-      const apiHost = configuration.api.host;
+      const host = configuration.api.host || 'localhost:8080';
+      const protocol = configuration.api.protocol || 'http';
       const adminToken = configuration.api.tokens.admin;
       const options = {
         headers: {
           'Authorization': `Bearer ${adminToken}`,
         },
       };
-      const url = `${apiHost}/admin/index/structural`;
+      const url = `${protocol}://${host}/api/admin/index/structural`;
       const deleteIndex = await fetch(url, {method: 'DELETE', ...options});
       console.log(`Deleting Index: ${url}`);
       if (deleteIndex.status === 404) {
