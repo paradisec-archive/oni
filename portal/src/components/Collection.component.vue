@@ -92,6 +92,11 @@
           </el-card>
         </el-col>
       </el-row>
+      <el-row :gutter="20" class="py-5">
+        <el-col>
+          <TakedownCard />
+        </el-col>
+      </el-row>
     </el-col>
   </el-row>
 </template>
@@ -110,6 +115,7 @@ import MetaTopCard from './cards/MetaTopCard.component.vue';
 import SummariesCard from './cards/SummariesCard.component.vue';
 import PropertySummaryCard from './cards/PropertySummaryCard.component.vue'
 import { putLocalStorage } from '@/storage';
+import TakedownCard from "./cards/TakedownCard.component.vue"
 
 export default {
   components: {
@@ -126,7 +132,8 @@ export default {
     MemberOfCard,
     ContentCard,
     FieldHelperCard,
-    MemberOfLink
+    MemberOfLink,
+    TakedownCard
   },
   props: [],
 
@@ -179,6 +186,7 @@ export default {
       meta: [],
       metaTags: [],
       buckets: [],
+      takedownForm: this.$store.state.configuration.ui.googleForm?.takedown,
       conformsToCollection: this.$store.state.configuration.ui.conformsTo?.collection,
       conformsToObject: this.$store.state.configuration.ui.conformsTo?.object,
       findObjectByRelationship: this.$store.state.configuration.ui.collection.relationships,
@@ -255,7 +263,7 @@ export default {
         let value;
         if (this.metadata[field.content]) {
           value = this.metadata[field.content];
-        } 
+        }
         this.metaTags.push({
           name: field.name,
           value: value,
@@ -323,6 +331,11 @@ export default {
           this.buckets.push({ field: field.display, buckets: aggregations[field.name]?.buckets });
         }
       }
+    },
+    takedownLink() {
+      let currentUrl = encodeURIComponent(window.location.href);
+      const form = this.takedownForm;
+      return `${form}${currentUrl}`
     },
 
     //TODO: refactor this integrate to multi

@@ -99,7 +99,7 @@
             <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
               <el-button size="large" @click="showMap()">
                 <span>
-                  <font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;Map search
+                  <font-awesome-icon icon="fa-solid fa-map-location"/>&nbsp;Map View
                 <el-tooltip content="View the results as a map. Note that current search and filter options will be reset."
                             placement="bottom-end" effect="light">
                   <font-awesome-icon icon="fa fa-circle-question"/>

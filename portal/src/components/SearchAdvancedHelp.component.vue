@@ -22,7 +22,7 @@
         class="literal backdrop-blur">OR</code>
       and <code class="literal backdrop-blur">NOT</code> are supported in Advanced Search. These can either be added in
       the dropdown menu between fields when <i>Add New Line</i> is selected, or included within the search text field,
-      using parentheses whenever multiple operators occur together.
+      using parentheses around the full query, e.g. <code class="literal backdrop-blur">(koala AND kangaroo)</code>.
     </p>
   </el-row>
   <el-row>
@@ -33,7 +33,7 @@
   </el-row>
   <el-row>
     <p>
-      <code class="literal backdrop-blur">((rainbow AND lorikeet) OR (pink AND cockatoo)) NOT galah</code>
+      <code class="literal backdrop-blur">(((rainbow AND lorikeet) OR (pink AND cockatoo)) NOT galah)</code>
     </p>
   </el-row>
   <el-row>
@@ -64,14 +64,6 @@
             a
             space will also be returned in a phrasal search.
           </td>
-        </tr>
-        <tr class="bg-gray-50">
-          <td><code>^</code></td>
-          <td>Boost operator that makes one term more relevant than another, e.g. <code class="literal backdrop-blur">quick^2
-        fox</code> to increase the relevance of 'quick' or <code class="literal backdrop-blur">quick^0.5 fox</code> to
-            reduce it. The default boost value is 1, but can be any positive floating point number. Boosts between 0 and
-            1
-            reduce relevance.</td>
         </tr>
         <tr>
           <td><code>~</code></td>

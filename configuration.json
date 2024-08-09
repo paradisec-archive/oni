@@ -25,6 +25,9 @@
         "target": "_blank"
       }
     ],
+    "googleForm": {
+      "takedown": "https://docs.google.com/forms/d/e/1FAIpQLSc3wWGYLgkEtba65mL46BUhMAPWiHt5EHrQ2rWiI4nJqPjpDg/viewform?usp=pp_url&entry.812577446="
+    },
     "terms": {
       "text": "Example terms of service",
       "href": "/terms",
