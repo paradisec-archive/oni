@@ -53,6 +53,12 @@
       </el-row>
       <el-row :gutter="20" class="py-5">
         <el-col>
+          <BinderHubCard :gitOrg="metadata['gitOrg']" :gitName="metadata['gitName']" :gitBranch="metadata['gitBranch']"
+            :filepath="metadata['filepath']" />
+        </el-col>
+      </el-row>
+      <el-row :gutter="20" class="py-5">
+        <el-col>
           <TakedownCard />
         </el-col>
       </el-row>
@@ -101,6 +107,7 @@ import { putLocalStorage } from '@/storage';
 import CollectionItem from "./CollectionItem.component.vue";
 import AggregationAsIcon from "./widgets/AggregationAsIcon.component.vue";
 import TakedownCard from "./cards/TakedownCard.component.vue"
+import BinderHubCard from "./cards/BinderHubCard.component.vue"
 
 export default {
   components: {
@@ -115,7 +122,8 @@ export default {
     ),
     CollectionItem,
     AggregationAsIcon,
-    TakedownCard
+    TakedownCard,
+    BinderHubCard
   },
   props: [],
   data() {

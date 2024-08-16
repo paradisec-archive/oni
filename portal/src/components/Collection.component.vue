@@ -194,7 +194,6 @@ export default {
       metaTags: [],
       buckets: [],
       takedownForm: this.$store.state.configuration.ui.googleForm?.takedown,
-      registry: this.$store.state.configuration.ui.binderhubRegistry?.registryJson,
       conformsToCollection: this.$store.state.configuration.ui.conformsTo?.collection,
       conformsToObject: this.$store.state.configuration.ui.conformsTo?.object,
       findObjectByRelationship: this.$store.state.configuration.ui.collection.relationships,
