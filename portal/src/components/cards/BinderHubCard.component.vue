@@ -3,22 +3,25 @@
     <h5 class="text-2xl font-medium">BinderHub Filter</h5>
     <hr class="divider divider-gray pt-2" />
     <div v-for="(item, index) in binderhubs" :key="index" class="item">
-      <el-row>
-        <el-col :span="15">
+      <el-row justify="space-between" align="middle">
+        <el-col :span="13">
           <br>
           <el-tooltip :content="item.description" placement="left">
             <el-text>{{ item.name }}</el-text>
           </el-tooltip>
         </el-col>
-        <el-col :span="1">
+        <el-col :span="9.5">
           <br>
           <a :href="generateUrl(item.url)" target="_blank" rel="noopener noreferrer">
             <manku-icon name="binderLink" height="25" fill="blue" />
-            <!-- <el-text>{{ gitName }}</el-text>
-            <el-text>{{ gitOrg }}</el-text>
-            <el-text>{{ gitBranch }}</el-text>
-            <el-text>{{ filepath }}</el-text> -->
           </a>
+        </el-col>
+        <el-col :span="1" fixed="right">
+          <br>
+          <el-tooltip :content="authenticationTooltip(item.authentication)" placement="right">
+            <font-awesome-icon :icon="authenticationIcon(item.authentication)" size="lg"
+              :style="authenticationStyle(item.authentication)" />
+          </el-tooltip>
         </el-col>
       </el-row>
     </div>
@@ -36,6 +39,9 @@ export default {
     this.registryBinderhubs();
     this.notebookLink();
     this.generateUrl();
+    this.authenticationTooltip();
+    this.authenticationIcon();
+    this.authenticationStyle()
   },
   data() {
     return {
@@ -62,13 +68,33 @@ export default {
       this.binderhubs = binderhubData.binderhubs;
     },
     notebookLink() {
-      let notebookPath = `${first(this.gitOrg)?.['@value']}/${first(this.gitName)?.['@value']}/${first(this.gitBranch)?.['@value']}?filepath=${first(this.filepath)?.['@id']}`;
-      console.log(typeof notebookPath)
+      let notebookPath = `v2/gh/${first(this.gitOrg)?.['@value']}/${first(this.gitName)?.['@value']}/${first(this.gitBranch)?.['@value']}?filepath=${first(this.filepath)?.['@id']}`;
       return notebookPath
     },
     generateUrl(baseUrl) {
       return `${baseUrl}/${this.notebookLink()}`;
     },
+    authenticationTooltip(element) {
+      if (element) {
+        return 'Access: Authentication required.';
+      } else {
+        return 'Access: Authentication not required.';
+      }
+    },
+    authenticationIcon(element) {
+      if (element) {
+        return 'fa-solid fa-circle-exclamation';
+      } else {
+        return 'fa-solid fa-circle-check';
+      }
+    },
+    authenticationStyle(element) {
+      if (element) {
+        return 'color: #FFD43B;';
+      } else {
+        return 'color: #51c09f';
+      }
+    }
   },
 };
 </script>

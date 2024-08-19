@@ -97,11 +97,6 @@
           <TakedownCard />
         </el-col>
       </el-row>
-      <el-row :gutter="20" class="py-5">
-        <el-col>
-          <BinderHubCard />
-        </el-col>
-      </el-row>
     </el-col>
   </el-row>
 </template>
@@ -121,7 +116,6 @@ import SummariesCard from './cards/SummariesCard.component.vue';
 import PropertySummaryCard from './cards/PropertySummaryCard.component.vue'
 import { putLocalStorage } from '@/storage';
 import TakedownCard from "./cards/TakedownCard.component.vue";
-import BinderHubCard from "./cards/BinderHubCard.component.vue"
 
 export default {
   components: {
@@ -139,8 +133,7 @@ export default {
     ContentCard,
     FieldHelperCard,
     MemberOfLink,
-    TakedownCard,
-    BinderHubCard
+    TakedownCard
   },
   props: [],
 
