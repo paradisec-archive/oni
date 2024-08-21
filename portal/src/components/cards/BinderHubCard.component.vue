@@ -19,8 +19,8 @@
         <el-col :span="1" fixed="right">
           <br>
           <el-tooltip :content="authenticationTooltip(item.authentication)" placement="right">
-            <font-awesome-icon :icon="authenticationIcon(item.authentication)" size="lg"
-              :style="authenticationStyle(item.authentication)" />
+            <font-awesome-icon :icon="trafficIcon(item.authentication)" size="lg"
+              :style="trafficStyle(item.authentication)" />
           </el-tooltip>
         </el-col>
       </el-row>
@@ -40,8 +40,9 @@ export default {
     this.notebookLink();
     this.generateUrl();
     this.authenticationTooltip();
-    this.authenticationIcon();
-    this.authenticationStyle()
+    // this.memoryTooltip();
+    this.trafficIcon();
+    this.trafficStyle()
   },
   data() {
     return {
@@ -81,14 +82,21 @@ export default {
         return 'Access: Authentication not required.';
       }
     },
-    authenticationIcon(element) {
+    // memoryTooltip(current, required) {
+    //   if (current < required) {
+    //     return `Insufficient memory: Only ${current} of ${required}GB provided.`;
+    //   } else {
+    //     return `Sufficient memory: ${current} of ${required}GB provided.`; //can add to template: + memoryTooltip(item.resources.memory.limit, 100)
+    //   }
+    // },
+    trafficIcon(element) {
       if (element) {
         return 'fa-solid fa-circle-exclamation';
       } else {
         return 'fa-solid fa-circle-check';
       }
     },
-    authenticationStyle(element) {
+    trafficStyle(element) {
       if (element) {
         return 'color: #FFD43B;';
       } else {

@@ -57,7 +57,7 @@
             :filepath="metadata['filepath']" />
         </el-col>
       </el-row>
-      <el-row :gutter="20" class="py-5">
+      <el-row :gutter="20" class="pb-5">
         <el-col>
           <TakedownCard />
         </el-col>
