@@ -38,3 +38,7 @@ Current guide applies to Mac and Linux:
 - Create a production version of the portal
 - Create production containers
 - Do not use npm link. For that we need to stamp out libraries and remove unused ones
+
+### BinderHub Registry Setup
+
+In configuration.json, `githubToken` requires an API key for BinderHubCard.component.vue to access the Binderhub Registry. Do not save your token.

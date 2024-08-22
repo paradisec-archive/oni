@@ -1,6 +1,6 @@
 <template>
   <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5" v-if="this.registryJson && this.gitName">
-    <h5 class="text-2xl font-medium">BinderHub Filter</h5>
+    <h5 class="text-2xl font-medium">Try this Notebook</h5>
     <hr class="divider divider-gray pt-2" />
     <div v-for="(item, index) in binderhubs" :key="index" class="item">
       <el-row justify="space-between" align="middle">
@@ -30,7 +30,6 @@
 
 <script>
 
-import binderhubconfiguration from '@/binderhubconfiguration.json';
 import { first } from "lodash";
 
 export default {
@@ -47,20 +46,20 @@ export default {
   data() {
     return {
       binderhubs: [],
-      registryJson: this.$store.state.configuration.ui.binderhubRegistry?.registryJson
+      registryJson: this.$store.state.configuration.ui.binderhubRegistry?.registryJson,
+      githubToken: this.$store.state.configuration.ui.binderhubRegistry?.githubToken
     };
   },
 
   methods: {
     async registryBinderhubs() {
-      const githubToken = binderhubconfiguration.githubToken;
-      if (!githubToken) {
+      if (!this.githubToken) {
         console.error('GitHub token is missing.');
         return;
       }
       const response = await fetch(this.registryJson, {
         headers: {
-          'Authorization': `token ${githubToken}`,
+          'Authorization': `token ${this.githubToken}`,
           'Accept': 'application/vnd.github.raw+json'
         }
       });
