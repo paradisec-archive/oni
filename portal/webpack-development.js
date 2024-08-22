@@ -17,9 +17,15 @@ const configuration = merge(common, {
           throw new Error('webpack-dev-server is not defined');
       }
 
+      const allowedOrigins = ['https://api.github.com'];
       middlewares.unshift((req, res, next) => {
           if (req.method === 'OPTIONS') {
-              res.header('Access-Control-Allow-Origin', '*'); // Replace with specific origin if needed
+            const origin = req.headers.origin;
+            if (allowedOrigins.includes(origin)) {
+              res.header('Access-Control-Allow-Origin', origin);
+            } else {
+              res.header('Access-Control-Allow-Origin', '');
+            }
               res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
               res.header('Access-Control-Allow-Headers', 'X-Requested-With, content-type, Authorization');
               res.sendStatus(204); // No Content

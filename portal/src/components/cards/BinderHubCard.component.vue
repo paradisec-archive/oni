@@ -1,5 +1,5 @@
 <template>
-  <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
+  <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5" v-if="this.registryJson && this.gitName">
     <h5 class="text-2xl font-medium">BinderHub Filter</h5>
     <hr class="divider divider-gray pt-2" />
     <div v-for="(item, index) in binderhubs" :key="index" class="item">
@@ -47,6 +47,7 @@ export default {
   data() {
     return {
       binderhubs: [],
+      registryJson: this.$store.state.configuration.ui.binderhubRegistry?.registryJson
     };
   },
 
@@ -57,9 +58,7 @@ export default {
         console.error('GitHub token is missing.');
         return;
       }
-      let registryJson =
-        "https://api.github.com/repos/Language-Research-Technology/BinderHub-registry/contents/BinderHub-registry.json";
-      const response = await fetch(registryJson, {
+      const response = await fetch(this.registryJson, {
         headers: {
           'Authorization': `token ${githubToken}`,
           'Accept': 'application/vnd.github.raw+json'
