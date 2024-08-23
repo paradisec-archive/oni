@@ -3,10 +3,7 @@
     <template v-for="(f, index) of objects" :key="index">
       <ul>
         <li class="font-semibold" v-if="f">
-          <el-link class="ml-2"
-                   :underline="true"
-                   type="primary"
-                   :href="'/object?_id=' + f._id">
+          <el-link class="ml-2" :underline="true" type="primary" :href="'/object?_id=' + f._id">
             {{ first(f._source.name)?.['@value'] || f._id }}
           </el-link>
         </li>
@@ -14,7 +11,7 @@
     </template>
   </template>
   <template v-else>
-    <p>No {{ objectName }} associated with this item/collection</p>
+    <p>No {{ objectName }} associated with this item/collection.</p>
   </template>
 </template>
 <script>

@@ -92,7 +92,7 @@
           </el-card>
         </el-col>
       </el-row>
-      <el-row :gutter="20" class="py-5">
+      <el-row :gutter="20" class="pb-5">
         <el-col>
           <TakedownCard />
         </el-col>
@@ -115,7 +115,7 @@ import MetaTopCard from './cards/MetaTopCard.component.vue';
 import SummariesCard from './cards/SummariesCard.component.vue';
 import PropertySummaryCard from './cards/PropertySummaryCard.component.vue'
 import { putLocalStorage } from '@/storage';
-import TakedownCard from "./cards/TakedownCard.component.vue"
+import TakedownCard from "./cards/TakedownCard.component.vue";
 
 export default {
   components: {

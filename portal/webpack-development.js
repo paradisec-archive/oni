@@ -7,6 +7,13 @@ const configuration = merge(common, {
   mode: "development",
   devtool: "eval-source-map",
   devServer: {
+    setupMiddlewares: (middlewares, devServer) => {
+      if (!devServer) {
+          throw new Error('webpack-dev-server is not defined');
+      }
+
+      return middlewares;
+  },
     static: {
       directory: path.join(__dirname, "dist"),
     },
