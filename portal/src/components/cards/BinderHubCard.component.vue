@@ -1,26 +1,31 @@
 <template>
-  <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5" v-if="this.registryJson && this.gitName">
+  <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5" v-if="this.registryJson">
     <h5 class="text-2xl font-medium">Try this Notebook</h5>
-    <hr class="divider divider-gray pt-2" />
-    <div v-for="(item, index) in binderhubs" :key="index" class="item">
-      <el-row justify="space-between" align="middle">
+    <hr class="divider divider-gray pt-2"/>
+    <div v-if="binderhubsErrors">
+      <el-alert type="error" :closable="false">
+        {{ binderhubsErrors }}
+      </el-alert>
+    </div>
+    <div v-for="(item, index) in binderhubs" :key="index" class="item" >
+      <el-row justify="space-between" align="middle" v-if="!item?.testOnly">
         <el-col :span="13">
           <br>
           <el-tooltip :content="item.description" placement="left">
-            <el-text>{{ item.name }}</el-text>
+            {{ item?.name }}
           </el-tooltip>
         </el-col>
         <el-col :span="9.5">
           <br>
           <a :href="generateUrl(item.url)" target="_blank" rel="noopener noreferrer">
-            <manku-icon name="binderLink" height="25" fill="blue" />
+            <manku-icon name="binderLink" height="25" fill="blue"/>
           </a>
         </el-col>
         <el-col :span="1" fixed="right">
           <br>
           <el-tooltip :content="authenticationTooltip(item.authentication)" placement="right">
             <font-awesome-icon :icon="trafficIcon(item.authentication)" size="lg"
-              :style="trafficStyle(item.authentication)" />
+                               :style="trafficStyle(item.authentication)"/>
           </el-tooltip>
         </el-col>
       </el-row>
@@ -30,48 +35,53 @@
 
 <script>
 
-import { first } from "lodash";
+import {first} from "lodash";
 
 export default {
   props: ['gitOrg', 'gitName', 'gitBranch', 'filepath'],
   mounted() {
-    this.registryBinderhubs();
-    this.notebookLink();
-    this.generateUrl();
-    this.authenticationTooltip();
-    // this.memoryTooltip();
-    this.trafficIcon();
-    this.trafficStyle()
+    if (this.gitName) {
+      this.registryBinderhubs();
+    }
+  },
+  updated() {
+    if (this.gitName) {
+      this.registryBinderhubs();
+    }
   },
   data() {
     return {
       binderhubs: [],
       registryJson: this.$store.state.configuration.ui.binderhubRegistry?.registryJson,
-      githubToken: this.$store.state.configuration.ui.binderhubRegistry?.githubToken
+      binderhubsErrors: undefined
     };
   },
-
   methods: {
     async registryBinderhubs() {
-      if (!this.githubToken) {
-        console.error('GitHub token is missing.');
-        return;
-      }
-      const response = await fetch(this.registryJson, {
-        headers: {
-          'Authorization': `token ${this.githubToken}`,
-          'Accept': 'application/vnd.github.raw+json'
+      this.binderhubsErrors = undefined;
+      try {
+        const response = await fetch(this.registryJson, {
+          headers: {
+            'Accept': 'application/vnd.github.raw+json'
+          }
+        });
+        if (response.status === 200) {
+          let binderhubData = await response.json();
+          this.binderhubs = binderhubData.binderhubs || [];
+          this.trafficIcon();
+          this.trafficStyle()
+        } else {
+          this.binderhubsErrors = "There was an error generating notebook links from GitHub, please contact your administrator.";
+          console.error(await response.text());
         }
-      });
-      let binderhubData = await response.json();
-      this.binderhubs = binderhubData.binderhubs;
-    },
-    notebookLink() {
-      let notebookPath = `v2/gh/${first(this.gitOrg)?.['@value']}/${first(this.gitName)?.['@value']}/${first(this.gitBranch)?.['@value']}?filepath=${first(this.filepath)?.['@id']}`;
-      return notebookPath
+      } catch (e) {
+        console.error(e);
+        this.binderhubsErrors = "There was an error generating notebook links from GitHub, please contact your administrator.";
+      }
     },
     generateUrl(baseUrl) {
-      return `${baseUrl}/${this.notebookLink()}`;
+      let notebookPath = `v2/gh/${first(this.gitOrg)?.['@value']}/${first(this.gitName)?.['@value']}/${first(this.gitBranch)?.['@value']}?filepath=${first(this.filepath)?.['@id']}`;
+      return `${baseUrl}/${notebookPath}`;
     },
     authenticationTooltip(element) {
       if (element) {
