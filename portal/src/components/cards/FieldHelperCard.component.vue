@@ -38,11 +38,10 @@ export default {
       loading: false,
       definition: '',
       url: '',
-      baseVocab: this.$store.state.configuration.ui?.baseVocab || ""
-    }
+      baseVocab: this.$store.state.configuration.ui?.baseVocab || '',
+    };
   },
-  mounted() {
-  },
+  mounted() {},
   methods: {
     async searchMetaField() {
       this.loading = true;
@@ -65,7 +64,7 @@ export default {
         }
       }
       this.loading = false;
-    }
-  }
-}
+    },
+  },
+};
 </script>
