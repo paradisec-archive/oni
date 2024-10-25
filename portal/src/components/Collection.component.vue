@@ -67,14 +67,14 @@
           <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
             <h5 class="text-2xl font-medium">Retrieve Metadata</h5>
             <hr class="divider divider-gray pt-2" />
-            <RetrieveDataMetadata :id="this.$route.query.id" />
-            <template v-if="metadata._metadataLicense?.id">
+            <RetrieveDataMetadata :id="this.$route.query.crateId" />
+            <template v-if="metadata.metadataLicense?.id">
               <hr class="divider divider-gray mt-4 pb-2" />
               <h4 class="text-1xl font-medium">
                 Metadata licensed as:
-                <el-link underline="underline" :underline="true" type="primary" :href="metadata._metadataLicense?.id"
+                <el-link underline="underline" :underline="true" type="primary" :href="metadata.metadataLicense.id"
                   target="_blank" class="mx-1">
-                  {{ metadata._metadataLicense?.name || metadata._metadataLicense?.id }}
+                  {{ metadata.metadataLicense.name || metadata.metadataLicense.id }}
                 </el-link>
               </h4>
             </template>
