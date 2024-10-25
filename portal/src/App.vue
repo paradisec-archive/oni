@@ -14,15 +14,16 @@ export default {
   },
   methods: {
     async setup() {
-      let isAuthed = await this.$http.get({route: "/authenticated"});
-      if (isAuthed.status === 200) {
-        let {token} = getLocalStorage({key: tokenSessionKey});
-        let user = JSON.parse(atob(token.split(".")[1]));
-        this.$store.commit("setUserData", user);
-      } else {
-        this.$store.commit("isLoggedIn", false);
-        putLocalStorage({key: 'isLoggedIn', data: false});
-      }
+      // NOTE: Temp disable auth
+      // const isAuthed = await this.$http.get({route: "/authenticated"});
+      // if (isAuthed.status === 200) {
+      //   const {token} = getLocalStorage({key: tokenSessionKey});
+      //   const user = JSON.parse(atob(token.split(".")[1]));
+      //   this.$store.commit("setUserData", user);
+      // } else {
+      //   this.$store.commit("isLoggedIn", false);
+      //   putLocalStorage({key: 'isLoggedIn', data: false});
+      // }
     },
   },
 };
