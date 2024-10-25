@@ -89,7 +89,6 @@ function update(shapes) {
 // }
 let map;
 onMounted(async () => {
-  console.log('map mounted');
   // wait so that leaflet div has a size because otherwise the tiles won't load
   await new Promise((r) => setTimeout(r, 100));
   //setTimeout(initMap, 100);
@@ -125,12 +124,9 @@ function initMap() {
     props.modelValue,
     (val) => {
       //todo: compare new values to existing values, only update when there is difference
-      console.log('shapes updated');
 
       featuresLayer.clearLayers();
-      console.log('🪚 🔵');
       if (!val) return;
-      console.log('🪚 🟩');
       const shape = transform.value.fromEntity();
       if (shape) {
         try {
@@ -140,7 +136,6 @@ function initMap() {
           console.log(shape);
         }
       }
-      console.log(featuresLayer.getLayers());
       const bounds = featuresLayer.getBounds();
       if (bounds.isValid()) map.flyToBounds(bounds, {maxZoom: 7});
     },
