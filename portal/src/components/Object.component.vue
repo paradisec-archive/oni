@@ -2,20 +2,20 @@
   <div class="px-10 pt-10 pb-7 z-10 bg-white">
     <el-row :align="'middle'" class="mb-2 text-3xl font-medium dark:text-white">
       <h5>
-        <member-of-link :memberOf="metadata?._memberOf"/>
-        {{ first(this.name)?.['@value'] }}
+        <member-of-link :memberOf="metadata.memberOf"/>
+        {{ this.name }}
       </h5>
     </el-row>
     <hr class="divider divider-gray pt-2"/>
   </div>
-  <el-row :justify="'center'" v-if="this.metadata" class="m-5 px-10" v-loading="loading">
+  <el-row :justify="'center'" v-if="metadata" class="m-5 px-10" v-loading="loading">
     <el-col :xs="24" :sm="24" :md="24" :lg="16" :xl="16">
       <AccessHelper v-if="access" :access="access" :license="license"/>
       <div class="px-5 pb-5">
-        <MetaTopCard :tops="this.tops" :className="'py-5'"/>
+        <MetaTopCard :tops="tops" :className="'py-5'"/>
         <el-row class="">
           <el-col v-for="meta of this.meta">
-            <meta-field :meta="meta" :routePath="'object'" :crateId="this.crateId"/>
+            <meta-field :meta="meta" />
           </el-col>
         </el-row>
       </div>
@@ -31,36 +31,36 @@
         </el-col>
       </el-row>
       <el-row :gutter="20" class="pb-5">
-        <el-col v-if="metadata?._memberOf">
-          <MemberOfCard :routePath="'collection'" :_memberOf="metadata?._memberOf"/>
+        <el-col v-if="metadata.memberOf">
+          <MemberOfCard :routePath="'collection'" :memberOf="metadata.memberOf"/>
         </el-col>
       </el-row>
-      <el-row v-if="membersFiltered?.data && membersFiltered?.data.length">
-        <el-col>
-          <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5">
-            <h5 class="text-2xl font-medium ">Other Objects in this Collection</h5>
-            <hr class="divider divider-gray pt-2"/>
-            <ul>
-              <li v-for="d of membersFiltered.data">
-                <collection-item :field="d._source" :routePath="'object'"/>
-              </li>
-              <li v-if="membersFiltered">
-                <el-link type="primary" :href="`/search?f=${moreObjects()}`">more...</el-link>
-              </li>
-            </ul>
-          </el-card>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20" class="pb-5">
-        <el-col>
-          <BinderHubCard v-if="metadata['gitName']"
-                         :gitOrg="metadata['gitOrg']"
-                         :gitName="metadata['gitName']"
-                         :gitBranch="metadata['gitBranch']"
-                         :filepath="metadata['filepath']"
-          />
-        </el-col>
-      </el-row>
+  <!--     <el-row v-if="membersFiltered?.data && membersFiltered?.data.length"> -->
+  <!--       <el-col> -->
+  <!--         <el-card :body-style="{ padding: '0px' }" class="mx-10 p-5"> -->
+  <!--           <h5 class="text-2xl font-medium ">Other Objects in this Collection</h5> -->
+  <!--           <hr class="divider divider-gray pt-2"/> -->
+  <!--           <ul> -->
+  <!--             <li v-for="d of membersFiltered.data"> -->
+  <!--               <collection-item :field="d._source" :routePath="'object'"/> -->
+  <!--             </li> -->
+  <!--             <li v-if="membersFiltered"> -->
+  <!--               <el-link type="primary" :href="`/search?f=${moreObjects()}`">more...</el-link> -->
+  <!--             </li> -->
+  <!--           </ul> -->
+  <!--         </el-card> -->
+  <!--       </el-col> -->
+  <!--     </el-row> -->
+  <!--     <el-row :gutter="20" class="pb-5"> -->
+  <!--       <el-col> -->
+  <!--         <BinderHubCard v-if="metadata['gitName']" -->
+  <!--                        :gitOrg="metadata['gitOrg']" -->
+  <!--                        :gitName="metadata['gitName']" -->
+  <!--                        :gitBranch="metadata['gitBranch']" -->
+  <!--                        :filepath="metadata['filepath']" -->
+  <!--         /> -->
+  <!--       </el-col> -->
+  <!--     </el-row> -->
       <el-row :gutter="20" class="pb-5">
         <el-col>
           <TakedownCard/>
@@ -74,8 +74,8 @@
         <div class="grid-content p-2 m-2">
           <h2 class="text-2xl tracking-tight dark:text-white">
             Files: {{ parts.length }}
-            <AggregationAsIcon v-for="part of uniqueParts" :item="part" :field="{ 'name': 'File', 'display': 'File' }"
-                               :id="id"/>
+            <!-- <AggregationAsIcon v-for="part of uniqueParts" :item="part" :field="{ 'name': 'File', 'display': 'File' }" -->
+                               <!-- :id="id"/> -->
           </h2>
         </div>
         <div></div>
@@ -85,12 +85,12 @@
       <el-col>
         <ul>
           <li v-for="(part, index) of parts">
-            <a :id="'part-' + encodeURIComponent(part?.['@id'])"></a>
-            <object-part :part="part" :title="first(part?.name)?.['@value'] || part?.['@id']"
-                         :active="isPartActive(part?.['@id'], index)" :id="encodeURIComponent(part?.['@id'])"
-                         :encodingFormat="first(part?.['encodingFormat'])?.['@value']" :crateId="this.crateId"
-                         :rootId="this.rootId" :parentName="first(this.name)?.['@value']"
-                         :parentId="this.$route.query.id"
+            <a :id="'part-' + encodeURIComponent(part['@id'])"></a>
+            <object-part :part="part" :title="part.name || part['@id']"
+                         :active="isPartActive(part['@id'], index)" :crateId="part['@id']"
+                         :encodingFormat="part['encodingFormat']"
+                         :rootId="rootId" :parentName="name"
+                         :parentId="crateId"
                          :license="license" :access="access"/>
           </li>
         </ul>
@@ -99,9 +99,9 @@
   </template>
 </template>
 <script>
-import {first, isUndefined, reject, isEmpty, sortBy, isEqual} from "lodash";
-import {initSnip, toggleSnip} from "../tools";
-import MetaField from "./MetaField.component.vue";
+import {first, isUndefined, reject, isEmpty, sortBy, isEqual} from 'lodash';
+import {initSnip, toggleSnip} from '../tools';
+import MetaField from './MetaField.component.vue';
 import {defineAsyncComponent} from 'vue';
 import LicenseCard from './cards/LicenseCard.component.vue';
 import MemberOfCard from './cards/MemberOfCard.component.vue';
@@ -109,10 +109,10 @@ import AccessHelper from './AccessHelper.component.vue';
 import MemberOfLink from './widgets/MemberOfLink.component.vue';
 import MetaTopCard from './cards/MetaTopCard.component.vue';
 import {putLocalStorage} from '@/storage';
-import CollectionItem from "./CollectionItem.component.vue";
-import AggregationAsIcon from "./widgets/AggregationAsIcon.component.vue";
-import TakedownCard from "./cards/TakedownCard.component.vue"
-import BinderHubCard from "./cards/BinderHubCard.component.vue"
+import CollectionItem from './CollectionItem.component.vue';
+import AggregationAsIcon from './widgets/AggregationAsIcon.component.vue';
+import TakedownCard from './cards/TakedownCard.component.vue';
+import BinderHubCard from './cards/BinderHubCard.component.vue';
 
 export default {
   components: {
@@ -122,13 +122,11 @@ export default {
     MetaField,
     AccessHelper,
     MemberOfLink,
-    ObjectPart: defineAsyncComponent(() =>
-        import('./ObjectPart.component.vue')
-    ),
+    ObjectPart: defineAsyncComponent(() => import('./ObjectPart.component.vue')),
     CollectionItem,
     AggregationAsIcon,
     TakedownCard,
-    BinderHubCard
+    BinderHubCard,
   },
   props: [],
   data() {
@@ -141,66 +139,75 @@ export default {
       name: '',
       tops: [],
       meta: [],
-      license: [],
+      license: null,
       licenseText: '',
       licenseSnipped: false,
       buckets: [],
       parts: [],
       uniqueParts: [],
-      crateId: '',
-      rootId: '',
+      crateId: null,
+      rootId: null,
       access: null,
       activePart: null,
       loading: false,
       membersFiltered: {},
       conformsToObject: this.$store.state.configuration.ui.conformsTo?.object,
-      fullPath: window.location.href
-    }
-  },
-  async updated() {
-    const fileId = this.$route.query.fileId;
-    if (fileId) {
-      setTimeout(function () {
-        const fileElement = document.getElementById('part-' + encodeURIComponent(fileId));
-        fileElement.scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
-      }, 200);
-    }
-    if (this.crateId) {
-      this.membersFiltered = await this.filter({
-        '_memberOf.@id': [this.crateId],
-        'conformsTo.@id': [this.conformsToObject]
-      }, false);
-    }
-    putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
+      fullPath: window.location.href,
+    };
   },
   async mounted() {
     try {
-      this.crateId = this.$route.query._crateId;
-      this.loading = true;
-      let metadata = null;
-      const id = encodeURIComponent(this.$route.query.id);
-      const _id = encodeURIComponent(this.$route.query._id);
-      //encodeURIComponent may return "undefined" string
-      if (id && id !== 'undefined') {
-        if (isUndefined(this.crateId) || this.crateId === 'undefined') {
-          await this.$router.push({path: '/404'});
-          this.loading = false;
-        } else {
-          metadata = await this.$elasticService.single({
-            id,
-            crateId: this.crateId
-          });
-        }
-      } else if (_id && _id !== 'undefined') {
-        metadata = await this.$elasticService.single({_id});
+      this.crateId = this.$route.query.crateId;
+      if (!this.crateId) {
+        await this.$router.push({path: '/404'});
+
+        return;
       }
-      this.metadata = metadata?._source;
+
+      this.loading = true;
+
+      const {error, metadata} = await this.$api.getCrate(this.crateId);
+      if (error) {
+        this.errorDialogText = error;
+        this.errorDialogVisible = true;
+
+        return;
+      }
+
+      if (!metadata) {
+        await this.$router.push({path: '/404'});
+        return;
+      }
+
+      this.metadata = metadata;
       await this.populate();
+
+      this.loading = false;
+
       initSnip({selector: '#license', button: '#readMoreLicense'});
       putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
     } catch (e) {
-      console.error(e)
+      console.error(e);
     }
+  },
+  async updated() {
+    // const fileId = this.$route.query.fileId;
+    // if (fileId) {
+    //   setTimeout(function () {
+    //     const fileElement = document.getElementById('part-' + encodeURIComponent(fileId));
+    //     fileElement.scrollIntoView({behavior: 'smooth', block: 'start', inline: 'start'});
+    //   }, 200);
+    // }
+    // if (this.crateId) {
+    //   this.membersFiltered = await this.filter(
+    //     {
+    //       '_memberOf.@id': [this.crateId],
+    //       'conformsTo.@id': [this.conformsToObject],
+    //     },
+    //     false,
+    //   );
+    // }
+    // putLocalStorage({key: 'lastRoute', data: this.$route.fullPath});
   },
   methods: {
     isEqual,
@@ -209,62 +216,58 @@ export default {
     toggleSnip,
     async populate() {
       try {
-        this.rootId = first(this.metadata['_root'])?.['@id'];
+        this.rootId = this.metadata.root;
         this.populateAccess();
+        this.populateLicense();
         this.populateName(this.config.name);
         this.populateTop(this.config.top);
         this.populateMeta(this.config.meta);
-        this.populateLicense();
         this.populateParts();
       } catch (e) {
         console.error(e);
       }
-      this.loading = false;
     },
     populateName(config) {
       this.name = this.metadata[config.name];
       this.nameDisplay = this.metadata[config.display];
     },
     populateTop(config) {
-      for (let field of config) {
-        let value;
-        if (this.metadata[field.name]) {
-          value = this.metadata[field.name]
-        } else {
-          value = [{'@value': 'Not Defined'}];
-        }
+      for (const field of config) {
+        const value = this.metadata[field.name] || {'@value': 'Not Defined'};
         this.tops.push({name: field.display, value: value});
       }
     },
     populateMeta(config) {
-      const keys = Object.keys(this.metadata);//.map(f => this.config.hide.find(f=> console.log(f)))
-      const filtered = reject(keys, o => config.hide.find(f => o === f));
-      for (let filter of filtered) {
-        let helper = this.helpers.find(h => h.id === filter);
+      const keys = Object.keys(this.metadata);
+      const filtered = reject(keys, (o) => config.hide.find((f) => o === f));
+      for (const filter of filtered) {
+        let helper = this.helpers.find((h) => h.id === filter);
         if (!helper) {
           helper = {
-            "id": filter,
-            "display": filter,
-            "url": "",
-            "definition": "TODO: Add definition"
-          }
+            id: filter,
+            display: filter,
+            url: '',
+            definition: 'TODO: Add definition',
+          };
         }
         this.meta.push({name: filter, data: this.metadata[filter], help: helper});
       }
       this.meta = sortBy(this.meta, 'name');
     },
     populateLicense() {
-      this.license = first(this.metadata?.license);
+      this.license = this.metadata.license;
       if (!this.license?.['@id']) {
-        console.log('show alert! no license no!no!')
-      } else {
-        this.licenseText = first(this.license?.description)?.['@value'];
+        console.log('show alert! no license no!no!');
+
+        return;
       }
+
+      this.licenseText = this.license.description;
     },
     populateParts() {
       this.parts = this.metadata.hasPart;
       if (this.parts?.length) {
-        let uniqueParts = this.parts.map((p) => first(p.encodingFormat)?.['@value']);
+        const uniqueParts = this.parts.map((p) => p.encodingFormat);
         this.uniqueParts = [...new Set(uniqueParts)];
       }
     },
@@ -275,9 +278,12 @@ export default {
       if (this.$route.query.fileId === id) {
         this.activePart = true;
         return true;
-      } else if (index === 0 && !this.activePart) {
+      }
+
+      if (index === 0 && !this.activePart) {
         return true;
       }
+
       return false;
     },
 
@@ -291,8 +297,8 @@ export default {
             aggregations: items?.aggregations,
             total: items.hits?.total.value,
             scrollId: items?._scroll_id,
-            route: null
-          }
+            route: null,
+          };
         }
       } catch (e) {
         console.error(e);
@@ -301,16 +307,16 @@ export default {
           aggregations: {},
           total: 0,
           scrollId: null,
-          route: null
-        }
+          route: null,
+        };
       }
     },
     moreObjects() {
       const filter = {
-        '_memberOf.@id': [encodeURIComponent(this.crateId)]
+        '_memberOf.@id': [encodeURIComponent(this.crateId)],
       };
       return encodeURIComponent(JSON.stringify(filter));
-    }
-  }
-}
+    },
+  },
+};
 </script>
